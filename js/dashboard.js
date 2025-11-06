@@ -1,5 +1,7 @@
-// URL del backend 
-const API_URL = "http://127.0.0.1:8000"; 
+// js/dashboard.js
+
+// URL del backend (debe ser la misma que en script.js)
+const API_URL = "http://127.0.0.1:8010"; 
 
 // Variable global para almacenar todas las transacciones
 let todasLasTransacciones = [];
@@ -27,14 +29,28 @@ async function getFinanzasReales() {
   try {
     // Hacemos las dos peticiones en paralelo
     const [resIngresos, resGastos] = await Promise.all([
-      fetch(`${API_URL}/ingresos/`, { headers }), //
-      fetch(`${API_URL}/gastos/`, { headers })   //
+      fetch(`${API_URL}/ingresos/`, { headers }), // Llama a la ruta de ingresos
+      fetch(`${API_URL}/gastos/`, { headers })   // Llama a la ruta de gastos
     ]);
 
     // Manejo de error de autenticación (token expirado o inválido)
     if (resIngresos.status === 401 || resGastos.status === 401) {
       throw new Error("Token expirado o inválido");
     }
+    
+    // Manejo de error 404 (si las rutas aún no existen en el backend)
+    if (resIngresos.status === 404 || resGastos.status === 404) {
+        console.warn("Una de las rutas (ingresos/gastos) no fue encontrada. Esperando implementación del backend.");
+        // Devuelve arrays vacíos para que la UI no se rompa
+        const dataIngresos = resIngresos.ok ? await resIngresos.json() : { data: [] };
+        const dataGastos = resGastos.ok ? await resGastos.json() : { data: [] };
+        
+        return [
+            ...(dataIngresos.data || []).map(item => ({ ...item, tipo: "Ingreso", categoria: item.concepto })),
+            ...(dataGastos.data || []).map(item => ({ ...item, tipo: "Gasto" }))
+        ];
+    }
+
     if (!resIngresos.ok || !resGastos.ok) {
       throw new Error("Error al cargar los datos del servidor");
     }
@@ -74,7 +90,7 @@ async function getFinanzasReales() {
 
 
 // =============================================================
-//      LÓGICA DEL DASHBOARD (Sin cambios, excepto una función)
+//      LÓGICA DEL DASHBOARD (Resto del código)
 // =============================================================
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -124,7 +140,7 @@ async function cargarTransacciones(userEmail) {
   transactionsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
 
   try {
-    // Usamos la función real
+    // 🔸 ¡CAMBIO AQUÍ! Usamos la función real
     todasLasTransacciones = await getFinanzasReales(); 
     
     // 5. Renderizar datos iniciales (todos)
@@ -177,7 +193,6 @@ function renderizarTabla(transacciones) {
   transacciones.forEach(tx => {
     const tr = document.createElement('tr');
     const tipoClase = tx.tipo.toLowerCase() === 'ingreso' ? 'ingreso' : 'gasto';
-    // Usamos 'monto' que es el nombre del campo en ambas tablas
     const montoFormateado = (tx.monto || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
     
     tr.innerHTML = `
@@ -213,4 +228,3 @@ function calcularYMostrarResumen(transacciones) {
   document.getElementById("totalGastos").textContent = formatoMoneda(totalGastos);
   document.getElementById("saldoActual").textContent = formatoMoneda(saldoActual);
 }
-
