@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Registro</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-login">
+  <div class="login-container reverse">
+    <div class="login-left">
+      <div class="brand">
+        <h2>Comienza a ahorrar con</h2>
+        <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
+      </div>
+    </div>
+
+    <div class="login-right">
+      <a href="index.html" class="back">←</a>
+      <h2>Regístrate</h2>
+      <form id="registerForm">
+        <label>Nombre</label>
+        <input type="text" placeholder="Nombre" required>
+        <label>Apellido</label>
+        <input type="text" placeholder="Apellido" required>
+        <label>Edad</label>
+        <input type="number" placeholder="Edad" required>
+        <label>Correo Electrónico</label>
+        <input type="email" placeholder="tucorreo@example.com" required>
+        <label>Contraseña</label>
+        <input type="password" placeholder="Contraseña" required>
+        <button type="submit" class="btn">Registrarme</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../js/script.js"></script>
+</body>
+</html>
