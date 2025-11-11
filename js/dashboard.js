@@ -1,230 +1,151 @@
-// js/dashboard.js
+/* ================= CONFIG ================= */
+let transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
 
-// URL del backend (debe ser la misma que en script.js)
-const API_URL = "http://127.0.0.1:8010"; 
+/* ====== ELEMENTOS ====== */
+const listaReciente = document.getElementById("listaReciente");
+const tablaBody = document.getElementById("transactionsBody");
+const totalIngresosTxt = document.getElementById("totalIngresos");
+const totalGastosTxt = document.getElementById("totalGastos");
+const saldoActualTxt = document.getElementById("saldoActual");
+const filtroSelect = document.getElementById("tipoFiltro");
 
-// Variable global para almacenar todas las transacciones
-let todasLasTransacciones = [];
+/* ====== FORMS ====== */
+const formIngreso = document.getElementById("formIngreso");
+const formGasto = document.getElementById("formGasto");
+const tabIngresos = document.getElementById("tabIngresos");
+const tabGastos = document.getElementById("tabGastos");
 
-// =============================================================
-//      SECCIÓN DE CONEXIÓN REAL AL BACKEND
-// =============================================================
-
-/**
- * Obtiene los datos reales de ingresos y gastos del backend.
- * Utiliza el token guardado en localStorage.
- */
-async function getFinanzasReales() {
-  const token = localStorage.getItem("authToken");
-  if (!token) {
-    // Si no hay token, no podemos pedir datos.
-    throw new Error("No autenticado");
-  }
-
-  const headers = {
-    "Authorization": `Bearer ${token}`, // Así lo espera el backend
-    "Content-Type": "application/json"
-  };
-
-  try {
-    // Hacemos las dos peticiones en paralelo
-    const [resIngresos, resGastos] = await Promise.all([
-      fetch(`${API_URL}/ingresos/`, { headers }), // Llama a la ruta de ingresos
-      fetch(`${API_URL}/gastos/`, { headers })   // Llama a la ruta de gastos
-    ]);
-
-    // Manejo de error de autenticación (token expirado o inválido)
-    if (resIngresos.status === 401 || resGastos.status === 401) {
-      throw new Error("Token expirado o inválido");
-    }
-    
-    // Manejo de error 404 (si las rutas aún no existen en el backend)
-    if (resIngresos.status === 404 || resGastos.status === 404) {
-        console.warn("Una de las rutas (ingresos/gastos) no fue encontrada. Esperando implementación del backend.");
-        // Devuelve arrays vacíos para que la UI no se rompa
-        const dataIngresos = resIngresos.ok ? await resIngresos.json() : { data: [] };
-        const dataGastos = resGastos.ok ? await resGastos.json() : { data: [] };
-        
-        return [
-            ...(dataIngresos.data || []).map(item => ({ ...item, tipo: "Ingreso", categoria: item.concepto })),
-            ...(dataGastos.data || []).map(item => ({ ...item, tipo: "Gasto" }))
-        ];
-    }
-
-    if (!resIngresos.ok || !resGastos.ok) {
-      throw new Error("Error al cargar los datos del servidor");
-    }
-
-    const dataIngresos = await resIngresos.json();
-    const dataGastos = await resGastos.json();
-
-    // Combinamos los resultados en un solo array
-    // 1. Mapeamos ingresos para que coincidan con la tabla
-    const ingresos = dataIngresos.data.map(item => ({
-      ...item,
-      tipo: "Ingreso",
-      categoria: item.concepto // El backend lo llama 'concepto'
-    }));
-    
-    // 2. Mapeamos gastos para que coincidan con la tabla
-    const gastos = dataGastos.data.map(item => ({
-      ...item,
-      tipo: "Gasto" 
-      // 'categoria' ya viene bien en gastos
-    }));
-
-    // 3. Retornamos el array combinado
-    return [...ingresos, ...gastos];
-
-  } catch (error) {
-    // Si el token falla, limpiamos la sesión y redirigimos
-    if (error.message.includes("autenticado") || error.message.includes("Token")) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("usuarioActivo");
-      window.location.href = "index.html";
-    }
-    // Propagamos el error para que la UI muestre "Error al cargar"
-    throw error;
-  }
-}
-
-
-// =============================================================
-//      LÓGICA DEL DASHBOARD (Resto del código)
-// =============================================================
-
-window.addEventListener("DOMContentLoaded", () => {
-  const welcomeMsg = document.getElementById("welcomeMsg");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  // 1. Verificar autenticación
-  const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
-
-  if (!usuarioActivo) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  // 2. Personalizar bienvenida
-  welcomeMsg.textContent = `Hola, ${usuarioActivo.nombre}`;
-
-  // 3. Configurar botón de logout
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("usuarioActivo");
-    localStorage.removeItem("authToken"); // ¡Importante limpiar el token!
-    
-    Swal.fire({
-      icon: 'success',
-      title: 'Sesión cerrada',
-      text: 'Has cerrado sesión exitosamente.',
-      confirmButtonColor: '#7984ff',
-      background: '#0f0f23',
-      color: '#fff'
-    });
-    setTimeout(() => (window.location.href = "index.html"), 1500);
-  });
-
-  // 4. Configurar el listener del filtro
-  document.getElementById("tipoFiltro").addEventListener("change", aplicarFiltros);
-
-  // 5. Cargar y renderizar transacciones iniciales
-  cargarTransacciones(usuarioActivo.email);
+/* ====== CAMBIO DE TABS ====== */
+tabIngresos.addEventListener("click", () => {
+  tabIngresos.classList.add("active");
+  tabGastos.classList.remove("active");
+  formIngreso.classList.remove("hidden");
+  formGasto.classList.add("hidden");
 });
 
-/**
- * Carga los datos y los muestra en la tabla
- */
-async function cargarTransacciones(userEmail) {
-  const transactionsBody = document.getElementById("transactionsBody");
-  const noDataMsg = document.getElementById("noDataMsg");
-  transactionsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
+tabGastos.addEventListener("click", () => {
+  tabGastos.classList.add("active");
+  tabIngresos.classList.remove("active");
+  formGasto.classList.remove("hidden");
+  formIngreso.classList.add("hidden");
+});
 
-  try {
-    // 🔸 ¡CAMBIO AQUÍ! Usamos la función real
-    todasLasTransacciones = await getFinanzasReales(); 
-    
-    // 5. Renderizar datos iniciales (todos)
-    aplicarFiltros();
-
-  } catch (error) {
-    console.error(error);
-    transactionsBody.innerHTML = '';
-    noDataMsg.textContent = "Error al cargar los datos. Revisa la conexión con el backend.";
-    noDataMsg.style.display = "block";
-    noDataMsg.style.color = "red";
-  }
+/* ====== TOAST ====== */
+function mensaje(msg="Guardado ✅") {
+  const t = document.createElement("div");
+  t.classList.add("toast");
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
 }
 
-/**
- * Función central que filtra los datos y actualiza la UI
- */
-function aplicarFiltros() {
-  const tipoFiltro = document.getElementById("tipoFiltro").value;
-
-  let transaccionesFiltradas = [];
-  if (tipoFiltro === "todos") {
-    transaccionesFiltradas = todasLasTransacciones;
-  } else {
-    transaccionesFiltradas = todasLasTransacciones.filter(tx => tx.tipo === tipoFiltro);
-  }
-  
-  renderizarTabla(transaccionesFiltradas);
-  calcularYMostrarResumen(transaccionesFiltradas);
+/* ====== GUARDAR LOCAL ====== */
+function guardar() {
+  localStorage.setItem("transacciones", JSON.stringify(transacciones));
+  localStorage.setItem("transaccionesGuardadas", JSON.stringify(transacciones));
+  window.dispatchEvent(new Event("storage")); // <- actualiza gráficas al instante
 }
 
-/**
- * Renderiza la tabla
- */
-function renderizarTabla(transacciones) {
-  const transactionsBody = document.getElementById("transactionsBody");
-  const noDataMsg = document.getElementById("noDataMsg");
-  transactionsBody.innerHTML = ''; 
+/* ====== AGREGAR INGRESO ====== */
+formIngreso.addEventListener("submit", e => {
+  e.preventDefault();
 
-  if (transacciones.length === 0) {
-    noDataMsg.style.display = "block";
-    return;
-  }
+  transacciones.push({
+    fecha: ingresoFecha.value,
+    tipo: "Ingreso",
+    monto: Number(ingresoMonto.value),
+    categoria: ingresoConcepto.value,
+    descripcion: ingresoNombre.value
+  });
 
-  noDataMsg.style.display = "none";
-  
-  // Ordenamos por fecha (más reciente primero)
-  transacciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  guardar();
+  actualizarPantalla();
+  mensaje("Ingreso registrado 💸");
+});
 
-  transacciones.forEach(tx => {
-    const tr = document.createElement('tr');
-    const tipoClase = tx.tipo.toLowerCase() === 'ingreso' ? 'ingreso' : 'gasto';
-    const montoFormateado = (tx.monto || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-    
-    tr.innerHTML = `
-      <td>${tx.fecha}</td>
-      <td class="${tipoClase}">${tx.tipo}</td>
-      <td class="${tipoClase}">${montoFormateado}</td>
-      <td>${tx.categoria}</td>
-      <td>${tx.descripcion || ''}</td> 
+/* ====== AGREGAR GASTO ====== */
+formGasto.addEventListener("submit", e => {
+  e.preventDefault();
+
+  transacciones.push({
+    fecha: gastoFecha.value,
+    tipo: "Gasto",
+    monto: Number(gastoMonto.value),
+    categoria: gastoConcepto.value,
+    descripcion: gastoNombre.value
+  });
+
+  guardar();
+  actualizarPantalla();
+  mensaje("Gasto registrado 📤");
+});
+
+/* ====== FILTRO ====== */
+filtroSelect.addEventListener("change", actualizarPantalla);
+
+/* ====== RESUMEN ====== */
+function actualizarResumen() {
+  const ingresos = transacciones.filter(t => t.tipo === "Ingreso").reduce((a,b)=>a+b.monto,0);
+  const gastos = transacciones.filter(t => t.tipo === "Gasto").reduce((a,b)=>a+b.monto,0);
+  const saldo = ingresos - gastos;
+
+  totalIngresosTxt.textContent = `$${ingresos}`;
+  totalGastosTxt.textContent = `$${gastos}`;
+  saldoActualTxt.textContent = `$${saldo}`;
+
+  saldoActualTxt.style.color = saldo > 0 ? "#77ff9e" : (saldo < 0 ? "#ff6b6b" : "white");
+}
+
+/* ====== TABLA ====== */
+function actualizarTabla() {
+  tablaBody.innerHTML = "";
+  const filtro = filtroSelect.value;
+  const lista = filtro === "todos" ? transacciones : transacciones.filter(t => t.tipo === filtro);
+
+  lista.forEach(t => {
+    tablaBody.innerHTML += `
+      <tr>
+        <td>${t.fecha}</td>
+        <td class="${t.tipo === "Ingreso" ? "ingreso" : "gasto"}">${t.tipo}</td>
+        <td>$${t.monto}</td>
+        <td>${t.categoria}</td>
+        <td>${t.descripcion}</td>
+      </tr>
     `;
-    transactionsBody.appendChild(tr);
   });
 }
 
-/**
- * Calcula y muestra los totales
- */
-function calcularYMostrarResumen(transacciones) {
-  let totalIngresos = 0;
-  let totalGastos = 0;
+/* ====== LISTA RECIENTE ====== */
+function actualizarListaReciente() {
+  listaReciente.innerHTML = "";
 
-  transacciones.forEach(tx => {
-    if (tx.tipo === "Ingreso") {
-      totalIngresos += tx.monto;
-    } else if (tx.tipo === "Gasto") {
-      totalGastos += tx.monto;
+  [...transacciones].slice(-6).reverse().forEach((t, i) => {
+    listaReciente.innerHTML += `
+      <div class="list-item">
+        <strong>${t.descripcion}</strong>
+        <p>${t.categoria} — ${t.fecha}</p>
+        <button class="btn-delete" data-i="${transacciones.length-1-i}">Eliminar</button>
+      </div>
+    `;
+  });
+
+  document.querySelectorAll(".btn-delete").forEach(btn =>{
+    btn.onclick = () => {
+      transacciones.splice(btn.dataset.i,1);
+      guardar();
+      actualizarPantalla();
+      mensaje("Registro eliminado 🗑️");
     }
   });
-
-  const saldoActual = totalIngresos - totalGastos;
-  const formatoMoneda = (monto) => (monto || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-
-  document.getElementById("totalIngresos").textContent = formatoMoneda(totalIngresos);
-  document.getElementById("totalGastos").textContent = formatoMoneda(totalGastos);
-  document.getElementById("saldoActual").textContent = formatoMoneda(saldoActual);
 }
+
+/* ====== REFRESCAR TODO ====== */
+function actualizarPantalla() {
+  actualizarResumen();
+  actualizarTabla();
+  actualizarListaReciente();
+}
+
+/* ====== INICIO ====== */
+actualizarPantalla();
+guardar();
