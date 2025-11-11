@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Dashboard</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2 class="logo neon-glow">FINTRACK</h2>
+    <nav>
+      <a href="#" id="btnPerfil">👤 Perfil</a>
+<a href="plan.html" class="active">💼 Plan</a>
+<a href="graficas.html">📈 Gráficas</a>
+    </nav>
+    <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="dashboard-main">
+
+    <!-- TARJETAS DE RESUMEN -->
+    <section class="resumen-cards animated-float">
+      <div class="stat-card">
+        <div class="stat-icon ingreso-icon">💰</div>
+        <div class="stat-info">
+          <span>Total Ingresos</span>
+          <strong id="totalIngresos">$0.00</strong>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon gasto-icon">📉</div>
+        <div class="stat-info">
+          <span>Total Gastos</span>
+          <strong id="totalGastos">$0.00</strong>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon saldo-icon">🏦</div>
+        <div class="stat-info">
+          <span>Saldo Actual</span>
+          <strong id="saldoActual">$0.00</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORMULARIO + REGISTRO -->
+    <section class="form-section animated-float">
+      <div class="form-card glass-box">
+        <div class="tabs">
+          <button id="tabIngresos" class="tab active">Ingresos</button>
+          <button id="tabGastos" class="tab">Gastos</button>
+        </div>
+
+        <form id="formIngreso" class="form-content">
+          <label>Concepto</label>
+          <select id="ingresoConcepto">
+            <option>Trabajo</option>
+            <option>Venta</option>
+            <option>Otro</option>
+          </select>
+
+          <label>Nombre</label>
+          <input id="ingresoNombre" type="text" placeholder="Empresa / Fuente">
+
+          <label>Monto</label>
+          <input id="ingresoMonto" type="number" placeholder="0.00">
+
+          <label>Fecha</label>
+          <input id="ingresoFecha" type="date">
+
+          <button type="submit" class="btn-main">Registrar ingreso</button>
+        </form>
+
+        <form id="formGasto" class="form-content hidden">
+          <label>Concepto</label>
+          <select id="gastoConcepto">
+            <option>Comida</option>
+            <option>Transporte</option>
+            <option>Diversión</option>
+          </select>
+
+          <label>Nombre</label>
+          <input id="gastoNombre" type="text" placeholder="Nombre del gasto">
+
+          <label>Monto</label>
+          <input id="gastoMonto" type="number" placeholder="0.00">
+
+          <label>Fecha</label>
+          <input id="gastoFecha" type="date">
+
+          <button type="submit" class="btn-main">Registrar gasto</button>
+        </form>
+      </div>
+
+      <!-- LISTA DERECHA -->
+      <div class="list-card glass-box">
+        <h3>Registro reciente</h3>
+        <div id="listaReciente" class="list-display"></div>
+      </div>
+    </section>
+
+    <!-- TABLA TRANSACCIONES -->
+    <h2 class="title neon-glow">Mis Transacciones</h2>
+
+    <div class="filter-container">
+      <label>Filtrar:</label>
+      <select id="tipoFiltro">
+        <option value="todos">Todos</option>
+        <option value="Ingreso">Ingresos</option>
+        <option value="Gasto">Gastos</option>
+      </select>
+    </div>
+
+    <div class="table-wrapper glass-box">
+      <table id="transactionsTable">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Monto</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody id="transactionsBody"></tbody>
+      </table>
+      <p id="noDataMsg" style="display:none;">No hay datos.</p>
+    </div>
+
+  </main>
+
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>
