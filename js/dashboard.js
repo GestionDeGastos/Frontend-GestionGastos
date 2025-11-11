@@ -1,7 +1,7 @@
 /* ================= CONFIG ================= */
 let transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
 
-/* ====== ELEMENTOS ====== */
+/* ====== ELEMENTOS DOM ====== */
 const listaReciente = document.getElementById("listaReciente");
 const tablaBody = document.getElementById("transactionsBody");
 const totalIngresosTxt = document.getElementById("totalIngresos");
@@ -9,28 +9,40 @@ const totalGastosTxt = document.getElementById("totalGastos");
 const saldoActualTxt = document.getElementById("saldoActual");
 const filtroSelect = document.getElementById("tipoFiltro");
 
-/* ====== FORMS ====== */
+/* ====== INPUTS INGRESO ====== */
+const ingresoConcepto = document.getElementById("ingresoConcepto");
+const ingresoNombre = document.getElementById("ingresoNombre");
+const ingresoMonto = document.getElementById("ingresoMonto");
+const ingresoFecha = document.getElementById("ingresoFecha");
+
+/* ====== INPUTS GASTO ====== */
+const gastoConcepto = document.getElementById("gastoConcepto");
+const gastoNombre = document.getElementById("gastoNombre");
+const gastoMonto = document.getElementById("gastoMonto");
+const gastoFecha = document.getElementById("gastoFecha");
+
+/* ====== FORMS Y TABS ====== */
 const formIngreso = document.getElementById("formIngreso");
 const formGasto = document.getElementById("formGasto");
 const tabIngresos = document.getElementById("tabIngresos");
 const tabGastos = document.getElementById("tabGastos");
 
 /* ====== CAMBIO DE TABS ====== */
-tabIngresos.addEventListener("click", () => {
+tabIngresos.onclick = () => {
   tabIngresos.classList.add("active");
   tabGastos.classList.remove("active");
   formIngreso.classList.remove("hidden");
   formGasto.classList.add("hidden");
-});
+};
 
-tabGastos.addEventListener("click", () => {
+tabGastos.onclick = () => {
   tabGastos.classList.add("active");
   tabIngresos.classList.remove("active");
   formGasto.classList.remove("hidden");
   formIngreso.classList.add("hidden");
-});
+};
 
-/* ====== TOAST ====== */
+/* ====== TOAST (MENSAJE) ====== */
 function mensaje(msg="Guardado ✅") {
   const t = document.createElement("div");
   t.classList.add("toast");
@@ -39,17 +51,16 @@ function mensaje(msg="Guardado ✅") {
   setTimeout(()=>t.remove(),2500);
 }
 
-/* ====== GUARDAR LOCAL ====== */
+/* ====== GUARDAR Y SINCRONIZAR ====== */
 function guardar() {
   localStorage.setItem("transacciones", JSON.stringify(transacciones));
   localStorage.setItem("transaccionesGuardadas", JSON.stringify(transacciones));
-  window.dispatchEvent(new Event("storage")); // <- actualiza gráficas al instante
+  window.dispatchEvent(new Event("storage")); // Actualiza gráficas
 }
 
 /* ====== AGREGAR INGRESO ====== */
-formIngreso.addEventListener("submit", e => {
+formIngreso.onsubmit = (e) => {
   e.preventDefault();
-
   transacciones.push({
     fecha: ingresoFecha.value,
     tipo: "Ingreso",
@@ -57,16 +68,14 @@ formIngreso.addEventListener("submit", e => {
     categoria: ingresoConcepto.value,
     descripcion: ingresoNombre.value
   });
-
   guardar();
   actualizarPantalla();
   mensaje("Ingreso registrado 💸");
-});
+};
 
 /* ====== AGREGAR GASTO ====== */
-formGasto.addEventListener("submit", e => {
+formGasto.onsubmit = (e) => {
   e.preventDefault();
-
   transacciones.push({
     fecha: gastoFecha.value,
     tipo: "Gasto",
@@ -74,16 +83,15 @@ formGasto.addEventListener("submit", e => {
     categoria: gastoConcepto.value,
     descripcion: gastoNombre.value
   });
-
   guardar();
   actualizarPantalla();
   mensaje("Gasto registrado 📤");
-});
+};
 
-/* ====== FILTRO ====== */
-filtroSelect.addEventListener("change", actualizarPantalla);
+/* ====== FILTRO TABLA ====== */
+filtroSelect.onchange = actualizarPantalla;
 
-/* ====== RESUMEN ====== */
+/* ====== RESUMEN SUPERIOR ====== */
 function actualizarResumen() {
   const ingresos = transacciones.filter(t => t.tipo === "Ingreso").reduce((a,b)=>a+b.monto,0);
   const gastos = transacciones.filter(t => t.tipo === "Gasto").reduce((a,b)=>a+b.monto,0);
@@ -110,23 +118,20 @@ function actualizarTabla() {
         <td>$${t.monto}</td>
         <td>${t.categoria}</td>
         <td>${t.descripcion}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
-/* ====== LISTA RECIENTE ====== */
+/* ====== LISTA RECIENTE (6 últimos) ====== */
 function actualizarListaReciente() {
   listaReciente.innerHTML = "";
-
   [...transacciones].slice(-6).reverse().forEach((t, i) => {
     listaReciente.innerHTML += `
       <div class="list-item">
         <strong>${t.descripcion}</strong>
         <p>${t.categoria} — ${t.fecha}</p>
         <button class="btn-delete" data-i="${transacciones.length-1-i}">Eliminar</button>
-      </div>
-    `;
+      </div>`;
   });
 
   document.querySelectorAll(".btn-delete").forEach(btn =>{
@@ -135,7 +140,7 @@ function actualizarListaReciente() {
       guardar();
       actualizarPantalla();
       mensaje("Registro eliminado 🗑️");
-    }
+    };
   });
 }
 
