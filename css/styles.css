@@ -326,3 +326,145 @@ input::placeholder {
   color: #fff;
   outline: none;
 }
+
+/* A partir de aqui agregue modificaciones al sprint2 */
+.grafica-container {
+  background: rgba(15, 15, 35, 0.75);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 30px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.chart-wrapper {
+  max-width: 400px;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+.dashboard-graficas {
+  display: flex;
+  flex-wrap: wrap; /* Para que en móviles se pongan uno sobre otro */
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.grafica-card {
+  flex: 1; /* Ocupa mitad de espacio */
+  min-width: 300px; /* Ancho mínimo antes de envolverse */
+  background: rgba(15, 15, 35, 0.75);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: 'Poppins', sans-serif;
+}
+
+.grafica-card h3 {
+  margin-top: 0;
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.9;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Wrapper para la dona (para mantenerla cuadrada) */
+.chart-wrapper {
+  max-width: 300px;
+  max-height: 300px;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Wrapper para las barras (deja que use más altura) */
+.chart-wrapper-barras {
+  max-height: 300px;
+  margin: 0 auto;
+}
+
+/* =================== ESTILOS MENU INICIO =================== */
+
+.menu-container {
+  width: 100%;
+  background: rgba(15, 15, 35, 0.75);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-container h2 {
+  margin-top: 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.menu-container p {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  margin-bottom: 30px;
+}
+
+.menu-options {
+  display: flex;
+  justify-content: center;
+  align-items: stretch; /* Hace que las tarjetas tengan la misma altura */
+  gap: 25px;
+  flex-wrap: wrap; /* Para responsividad */
+}
+
+/* Estilo para los botones como tarjetas */
+.btn-menu {
+  flex: 1;
+  min-width: 250px;
+  max-width: 300px;
+  padding: 25px;
+  text-decoration: none;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #7984ff, #a3acff);
+  color: #0f0f23; /* Texto oscuro para contraste */
+  font-weight: 700;
+  font-size: 1.3rem;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: none;
+  box-shadow: 0 4px 15px rgba(121, 132, 255, 0.3);
+}
+
+.btn-menu:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(121, 132, 255, 0.5);
+  /* Sobrescribimos el hover del .btn normal */
+  background: linear-gradient(145deg, #9ca4ff, #c0c6ff);
+}
+
+.btn-menu .menu-icon {
+  font-size: 2.5rem;
+}
+
+.btn-menu span {
+  font-size: 0.9rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Estilo para botones deshabilitados */
+.btn-menu.disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-menu.disabled:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: none;
+  box-shadow: none;
+}

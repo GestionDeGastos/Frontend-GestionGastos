@@ -1,118 +1,68 @@
 // js/dashboard.js
 
-// URL del backend (debe ser la misma que en script.js)
-const API_URL = "http://127.0.0.1:8010"; 
+// =============================================================
+//      DATOS DE PRUEBA (MOCK DATA)
+// =============================================================
+// 🔸 ¡CAMBIO! Agregamos datos de meses anteriores (Agosto, Septiembre)
+// para que el gráfico de tendencia funcione.
+const mockTransacciones = [
+  // --- Octubre 2025 ---
+  { id: 1, fecha: "2025-10-28", tipo: "Ingreso", monto: 15000, categoria: "Salario", descripcion: "Quincena" },
+  { id: 2, fecha: "2025-10-28", tipo: "Gasto", monto: 800, categoria: "Servicios", descripcion: "Pago de luz" },
+  { id: 3, fecha: "2025-10-27", tipo: "Gasto", monto: 450, categoria: "Comida", descripcion: "Supermercado" },
+  { id: 4, fecha: "2025-10-26", tipo: "Ingreso", monto: 1000, categoria: "Freelance", descripcion: "Proyecto logo" },
+  { id: 5, fecha: "2025-10-25", tipo: "Gasto", monto: 2500, categoria: "Renta", descripcion: "Pago mensual" },
+  { id: 6, fecha: "2025-10-24", tipo: "Gasto", monto: 300, categoria: "Transporte", descripcion: "Gasolina" },
+  { id: 7, fecha: "2025-10-23", tipo: "Gasto", monto: 1200, categoria: "Ocio", descripcion: "Cine y cena" },
 
-// Variable global para almacenar todas las transacciones
+  // --- Septiembre 2025 ---
+  { id: 8, fecha: "2025-09-30", tipo: "Ingreso", monto: 15000, categoria: "Salario", descripcion: "Quincena" },
+  { id: 9, fecha: "2025-09-28", tipo: "Gasto", monto: 800, categoria: "Servicios", descripcion: "Pago de luz" },
+  { id: 10, fecha: "2025-09-25", tipo: "Gasto", monto: 3000, categoria: "Renta", descripcion: "Pago mensual" },
+  { id: 11, fecha: "2025-09-20", tipo: "Gasto", monto: 1500, categoria: "Ocio", descripcion: "Concierto" },
+  { id: 12, fecha: "2025-09-15", tipo: "Gasto", monto: 600, categoria: "Comida", descripcion: "Supermercado" },
+
+  // --- Agosto 2025 ---
+  { id: 13, fecha: "2025-08-30", tipo: "Ingreso", monto: 15000, categoria: "Salario", descripcion: "Quincena" },
+  { id: 14, fecha: "2025-08-28", tipo: "Gasto", monto: 750, categoria: "Servicios", descripcion: "Pago de luz" },
+  { id: 15, fecha: "2025-08-25", tipo: "Gasto", monto: 3000, categoria: "Renta", descripcion: "Pago mensual" },
+  { id: 16, fecha: "2025-08-10", tipo: "Gasto", monto: 1000, categoria: "Transporte", descripcion: "Llantas" },
+];
+
+
+// =============================================================
+//      VARIABLES GLOBALES DE GRÁFICOS
+// =============================================================
 let todasLasTransacciones = [];
+let graficoDona = null;
+let graficoBarras = null;
 
-// =============================================================
-//      SECCIÓN DE CONEXIÓN REAL AL BACKEND
-// =============================================================
-
-/**
- * Obtiene los datos reales de ingresos y gastos del backend.
- * Utiliza el token guardado en localStorage.
- */
-async function getFinanzasReales() {
-  const token = localStorage.getItem("authToken");
-  if (!token) {
-    // Si no hay token, no podemos pedir datos.
-    throw new Error("No autenticado");
-  }
-
-  const headers = {
-    "Authorization": `Bearer ${token}`, // Así lo espera el backend
-    "Content-Type": "application/json"
-  };
-
-  try {
-    // Hacemos las dos peticiones en paralelo
-    const [resIngresos, resGastos] = await Promise.all([
-      fetch(`${API_URL}/ingresos/`, { headers }), // Llama a la ruta de ingresos
-      fetch(`${API_URL}/gastos/`, { headers })   // Llama a la ruta de gastos
-    ]);
-
-    // Manejo de error de autenticación (token expirado o inválido)
-    if (resIngresos.status === 401 || resGastos.status === 401) {
-      throw new Error("Token expirado o inválido");
-    }
-    
-    // Manejo de error 404 (si las rutas aún no existen en el backend)
-    if (resIngresos.status === 404 || resGastos.status === 404) {
-        console.warn("Una de las rutas (ingresos/gastos) no fue encontrada. Esperando implementación del backend.");
-        // Devuelve arrays vacíos para que la UI no se rompa
-        const dataIngresos = resIngresos.ok ? await resIngresos.json() : { data: [] };
-        const dataGastos = resGastos.ok ? await resGastos.json() : { data: [] };
-        
-        return [
-            ...(dataIngresos.data || []).map(item => ({ ...item, tipo: "Ingreso", categoria: item.concepto })),
-            ...(dataGastos.data || []).map(item => ({ ...item, tipo: "Gasto" }))
-        ];
-    }
-
-    if (!resIngresos.ok || !resGastos.ok) {
-      throw new Error("Error al cargar los datos del servidor");
-    }
-
-    const dataIngresos = await resIngresos.json();
-    const dataGastos = await resGastos.json();
-
-    // Combinamos los resultados en un solo array
-    // 1. Mapeamos ingresos para que coincidan con la tabla
-    const ingresos = dataIngresos.data.map(item => ({
-      ...item,
-      tipo: "Ingreso",
-      categoria: item.concepto // El backend lo llama 'concepto'
-    }));
-    
-    // 2. Mapeamos gastos para que coincidan con la tabla
-    const gastos = dataGastos.data.map(item => ({
-      ...item,
-      tipo: "Gasto" 
-      // 'categoria' ya viene bien en gastos
-    }));
-
-    // 3. Retornamos el array combinado
-    return [...ingresos, ...gastos];
-
-  } catch (error) {
-    // Si el token falla, limpiamos la sesión y redirigimos
-    if (error.message.includes("autenticado") || error.message.includes("Token")) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("usuarioActivo");
-      window.location.href = "index.html";
-    }
-    // Propagamos el error para que la UI muestre "Error al cargar"
-    throw error;
-  }
-}
+// Paleta de colores para la gráfica de dona
+const PALETA_COLORES_DONA = [
+  '#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', 
+  '#ffc94d', '#36a2eb', '#ff9f40', '#9966ff'
+];
 
 
 // =============================================================
-//      LÓGICA DEL DASHBOARD (Resto del código)
+//      LÓGICA DEL DASHBOARD (Sin API)
 // =============================================================
 
 window.addEventListener("DOMContentLoaded", () => {
   const welcomeMsg = document.getElementById("welcomeMsg");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  // 1. Verificar autenticación
   const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
-
   if (!usuarioActivo) {
-    window.location.href = "index.html";
+    window.location.href = "index.html"; 
     return;
   }
 
-  // 2. Personalizar bienvenida
   welcomeMsg.textContent = `Hola, ${usuarioActivo.nombre}`;
 
-  // 3. Configurar botón de logout
   logoutBtn.addEventListener("click", () => {
     localStorage.removeItem("usuarioActivo");
-    localStorage.removeItem("authToken"); // ¡Importante limpiar el token!
-    
+    localStorage.removeItem("authToken");
     Swal.fire({
       icon: 'success',
       title: 'Sesión cerrada',
@@ -124,35 +74,38 @@ window.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => (window.location.href = "index.html"), 1500);
   });
 
-  // 4. Configurar el listener del filtro
   document.getElementById("tipoFiltro").addEventListener("change", aplicarFiltros);
-
-  // 5. Cargar y renderizar transacciones iniciales
-  cargarTransacciones(usuarioActivo.email);
+  cargarTransacciones();
 });
 
 /**
- * Carga los datos y los muestra en la tabla
+ * Carga los datos (de mockTransacciones) y los muestra
  */
-async function cargarTransacciones(userEmail) {
+function cargarTransacciones() {
   const transactionsBody = document.getElementById("transactionsBody");
   const noDataMsg = document.getElementById("noDataMsg");
   transactionsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
 
-  try {
-    // 🔸 ¡CAMBIO AQUÍ! Usamos la función real
-    todasLasTransacciones = await getFinanzasReales(); 
-    
-    // 5. Renderizar datos iniciales (todos)
-    aplicarFiltros();
+  setTimeout(() => {
+    try {
+      todasLasTransacciones = mockTransacciones; 
+      
+      if (todasLasTransacciones.length === 0) {
+        transactionsBody.innerHTML = '';
+        noDataMsg.style.display = "block";
+        noDataMsg.textContent = "No hay transacciones registradas (datos de prueba).";
+      } else {
+        aplicarFiltros();
+      }
 
-  } catch (error) {
-    console.error(error);
-    transactionsBody.innerHTML = '';
-    noDataMsg.textContent = "Error al cargar los datos. Revisa la conexión con el backend.";
-    noDataMsg.style.display = "block";
-    noDataMsg.style.color = "red";
-  }
+    } catch (error) {
+      console.error(error);
+      transactionsBody.innerHTML = '';
+      noDataMsg.textContent = "Error al cargar los datos visuales.";
+      noDataMsg.style.display = "block";
+      noDataMsg.style.color = "red";
+    }
+  }, 800); // 800ms de espera simulada
 }
 
 /**
@@ -168,8 +121,18 @@ function aplicarFiltros() {
     transaccionesFiltradas = todasLasTransacciones.filter(tx => tx.tipo === tipoFiltro);
   }
   
+  // 1. Renderizar la tabla
   renderizarTabla(transaccionesFiltradas);
-  calcularYMostrarResumen(transaccionesFiltradas);
+  
+  // 2. Calcular tarjetas de resumen
+  // (Si filtramos, usamos 'todas' para el resumen, si no, las filtradas)
+  const transaccionesParaResumen = (tipoFiltro === "todos") ? todasLasTransacciones : transaccionesFiltradas;
+  calcularYMostrarResumen(transaccionesParaResumen);
+
+  // 3. 🔸 ¡NUEVO! Renderizar las gráficas con los datos filtrados
+  // (El filtro de tipo también afectará a las gráficas)
+  renderizarGraficaDona(transaccionesFiltradas);
+  renderizarGraficaTendencia(transaccionesFiltradas);
 }
 
 /**
@@ -182,18 +145,18 @@ function renderizarTabla(transacciones) {
 
   if (transacciones.length === 0) {
     noDataMsg.style.display = "block";
+    noDataMsg.textContent = "No hay transacciones para este filtro.";
     return;
   }
 
   noDataMsg.style.display = "none";
   
-  // Ordenamos por fecha (más reciente primero)
   transacciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   transacciones.forEach(tx => {
     const tr = document.createElement('tr');
     const tipoClase = tx.tipo.toLowerCase() === 'ingreso' ? 'ingreso' : 'gasto';
-    const montoFormateado = (tx.monto || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+    const montoFormateado = (tx.monto || 0).toLocaleString('es-MX', { style: 'currency', 'currency': 'MXN' });
     
     tr.innerHTML = `
       <td>${tx.fecha}</td>
@@ -222,9 +185,152 @@ function calcularYMostrarResumen(transacciones) {
   });
 
   const saldoActual = totalIngresos - totalGastos;
-  const formatoMoneda = (monto) => (monto || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+  const formatoMoneda = (monto) => (monto || 0).toLocaleString('es-MX', { style: 'currency', 'currency': 'MXN' });
 
   document.getElementById("totalIngresos").textContent = formatoMoneda(totalIngresos);
   document.getElementById("totalGastos").textContent = formatoMoneda(totalGastos);
   document.getElementById("saldoActual").textContent = formatoMoneda(saldoActual);
+}
+
+
+// =============================================================
+//      NUEVAS FUNCIONES DE GRÁFICOS
+// =============================================================
+
+/**
+ * 🔹 GRÁFICA 1: DESGLOSE DE GASTOS (DONA)
+ * Renderiza la gráfica de dona con el desglose de gastos por categoría.
+ */
+function renderizarGraficaDona(transacciones) {
+  const ctx = document.getElementById('graficaGastosDona')?.getContext('2d');
+  if (!ctx) return; 
+
+  if (graficoDona) {
+    graficoDona.destroy();
+  }
+  
+  // Procesar datos: Agrupar gastos por categoría
+  const gastosPorCategoria = transacciones
+    .filter(tx => tx.tipo === 'Gasto') // Solo gastos
+    .reduce((acc, tx) => {
+      if (!acc[tx.categoria]) {
+        acc[tx.categoria] = 0;
+      }
+      acc[tx.categoria] += tx.monto;
+      return acc;
+    }, {});
+
+  const labels = Object.keys(gastosPorCategoria);
+  const data = Object.values(gastosPorCategoria);
+
+  graficoDona = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Gastos',
+        data: data,
+        backgroundColor: PALETA_COLORES_DONA,
+        borderColor: '#0f0f23',
+        borderWidth: 2,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: '#fff', font: { family: 'Poppins' } }
+        },
+        tooltip: { callbacks: { label: crearTooltipMoneda } }
+      }
+    }
+  });
+}
+
+/**
+ * 🔹 GRÁFICA 2: TENDENCIA MENSUAL (BARRAS)
+ * Renderiza la gráfica de barras con ingresos vs gastos por mes.
+ */
+function renderizarGraficaTendencia(transacciones) {
+  const ctx = document.getElementById('graficaTendencia')?.getContext('2d');
+  if (!ctx) return;
+
+  if (graficoBarras) {
+    graficoBarras.destroy();
+  }
+
+  // Procesar datos: Agrupar por mes (Agosto=7, Sept=8, Oct=9)
+  const labels = ['Agosto', 'Septiembre', 'Octubre'];
+  const ingresosData = [0, 0, 0];
+  const gastosData = [0, 0, 0];
+
+  transacciones.forEach(tx => {
+    const mes = new Date(tx.fecha).getMonth(); // 7, 8, o 9
+    const index = mes - 7; // Convertir 7->0, 8->1, 9->2
+
+    if (index >= 0 && index < 3) {
+      if (tx.tipo === 'Ingreso') {
+        ingresosData[index] += tx.monto;
+      } else if (tx.tipo === 'Gasto') {
+        gastosData[index] += tx.monto;
+      }
+    }
+  });
+
+  graficoBarras = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Ingresos',
+          data: ingresosData,
+          backgroundColor: '#4dff91', // Color ingreso
+        },
+        {
+          label: 'Gastos',
+          data: gastosData,
+          backgroundColor: '#ff6b6b', // Color gasto
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#fff', font: { family: 'Poppins' } }
+        },
+        tooltip: { callbacks: { label: crearTooltipMoneda } }
+      },
+      scales: {
+        x: { 
+          ticks: { color: '#fff' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        },
+        y: { 
+          ticks: { color: '#fff' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Función de ayuda para formatear el tooltip de Chart.js
+ */
+function crearTooltipMoneda(context) {
+  let label = context.dataset.label || context.label || '';
+  if (label) {
+    label += ': ';
+  }
+  if (context.parsed.y !== null || context.parsed !== null) {
+    const valor = context.parsed.y || context.parsed;
+    label += valor.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+  }
+  return label;
 }

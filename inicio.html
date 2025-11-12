@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Inicio</title>
+  <link rel="stylesheet" href="../css/styles.css"> 
+</head>
+<body class="bg-dashboard"> <header class="dashboard-header">
+    <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
+    <div class="user-info">
+      <span id="welcomeMsg">Hola, ...</span>
+      <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    
+    <div class="menu-container">
+      <h2>Menú Principal</h2>
+      <p>Selecciona la sección a la que deseas ir.</p>
+      
+      <div class="menu-options">
+        <a href="#" class="btn btn-menu disabled">
+          <span class="menu-icon">👤</span>
+          Perfil
+          <span>(Próximamente)</span>
+        </a>
+        
+        <a href="dashboard.html" class="btn btn-menu">
+          <span class="menu-icon">📊</span>
+          Dashboard
+          <span>(Gestión de gastos)</span>
+        </a>
+        
+        <a href="#" class="btn btn-menu disabled">
+          <span class="menu-icon">🎯</span>
+          Plan
+          <span>(Próximamente)</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../js/inicio.js"></script> 
+</body>
+</html>

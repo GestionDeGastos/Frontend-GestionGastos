@@ -1,6 +1,6 @@
 // =================== CONFIGURACIÓN GENERAL ===================
-// 🔹 URL del backend
-const API_URL = "http://127.0.0.1:8010"; 
+// 🔹 URL del backend (La quitamos, ya no se usa)
+// const API_URL = "http://127.0.0.1:8010"; 
 
 function showAlert(icon, title, text) {
   Swal.fire({
@@ -14,106 +14,73 @@ function showAlert(icon, title, text) {
 }
 
 // =============================================================
-//      SECCIÓN DE CONEXIÓN REAL AL BACKEND
+//      SECCIÓN DE CONEXIÓN (AHORA SIMULADA)
 // =============================================================
 
 /**
- * Registra un nuevo usuario en el backend.
- * Conecta con: POST /usuarios/
+ * SIMULADO: Registra un nuevo usuario.
  */
 async function registerUser(data) {
-  const res = await fetch(`${API_URL}/usuarios/`, { 
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      nombre: data.nombre,
-      correo: data.email,
-      password: data.pass
-    })
-  });
-  
-  const responseData = await res.json();
-  
-  if (!res.ok) {
-    throw new Error(responseData.detail || "Error al registrar usuario");
-  }
-  return responseData;
+  console.log("SIMULADO: Registrando usuario", data);
+  // Simular un retraso
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // Simplemente resolvemos con éxito
+  return { success: true, message: "Usuario registrado (simulado)" };
 }
 
 /**
- * Inicia sesión de un usuario en el backend.
- * Conecta con: POST /auth/login
+ * SIMULADO: Inicia sesión de un usuario.
+ * Esto te permitirá entrar al dashboard.
  */
 async function loginUser(email, pass) {
-  try {
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ correo: email, password: pass }) 
-    });
+  console.log("SIMULADO: Iniciando sesión con", email);
 
-    const data = await res.json();
+  // Simular un pequeño retraso
+  await new Promise(resolve => setTimeout(resolve, 500));
 
-    if (!res.ok) {
-      throw new Error(data.detail || "Error al iniciar sesión");
-    }
-    
-    // Guardamos el token
-    localStorage.setItem("authToken", data.access_token);
-    
-    // Guardamos datos básicos del usuario
-    localStorage.setItem("usuarioActivo", JSON.stringify({ 
-      email: email, 
-      nombre: email.split('@')[0]
-    }));
-    
-    return data;
-
-  } catch (error) {
-    console.error("Error en login:", error.message);
-    throw error;
+  // Simulación de error simple (solo para que veas)
+  if (pass.length < 4) {
+    throw new Error("Contraseña muy corta (simulado)");
   }
+  
+  // Guardamos un token falso
+  localStorage.setItem("authToken", "fake-jwt-token-for-visual-testing");
+  
+  // Guardamos datos básicos del usuario
+  localStorage.setItem("usuarioActivo", JSON.stringify({ 
+    email: email, 
+    nombre: email.split('@')[0] // Un nombre de prueba basado en el email
+  }));
+  
+  return { access_token: "fake-jwt-token-for-visual-testing" };
 }
 
 /**
- * Verifica si el usuario tiene sesión activa
+ * SIMULADO: Verifica si el usuario tiene sesión activa
  */
 async function verificarSesion() {
   const token = localStorage.getItem("authToken");
 
   if (!token) {
-    window.location.href = "/login.html";
+    console.log("Simulado: No hay token, redirigiendo a login.");
+    // Redirigir al login (index.html en tu caso)
+    window.location.href = "/index.html"; 
     return false;
   }
 
-  try {
-    const res = await fetch(`${API_URL}/auth/me`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-
-    if (!res.ok) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("usuarioActivo");
-      window.location.href = "/login.html";
-      return false;
-    }
-
-    return true;
-
-  } catch (error) {
-    console.error("Error verificando sesión:", error);
-    window.location.href = "/login.html";
-    return false;
-  }
+  // Si hay un token (aunque sea falso), decimos que es válido.
+  console.log("Simulado: Sesión válida con token falso.");
+  return true;
 }
 
 /**
  * Cierra sesión del usuario
+ * (Esta función no cambia, es solo lógica de localStorage)
  */
 function logout() {
   localStorage.removeItem("authToken");
   localStorage.removeItem("usuarioActivo");
-  window.location.href = "/login.html";
+  window.location.href = "/index.html"; // O login.html, usa el correcto
 }
 
 // =============================================================
@@ -123,13 +90,16 @@ function logout() {
 document.addEventListener("DOMContentLoaded", () => {
   // Si estamos en el dashboard, verificar que tenga sesión
   if (window.location.pathname.includes("dashboard")) {
+    // 🔸 ¡CAMBIO AQUÍ! Llamamos a la versión simulada
     verificarSesion();
   }
 });
 
 // =============================================================
-//      FORMULARIOS (CONECTADOS AL BACKEND)
+//      FORMULARIOS (CONECTADOS A FUNCIONES SIMULADAS)
 // =============================================================
+// (Todo este bloque no cambia, ya que ahora llama
+// a las funciones simuladas 'registerUser' y 'loginUser')
 
 // 🔹 Registro
 document.getElementById("registerForm")?.addEventListener("submit", async e => {
@@ -148,8 +118,8 @@ document.getElementById("registerForm")?.addEventListener("submit", async e => {
   }
 
   try {
-    await registerUser(data);
-    showAlert("success", "Registro exitoso", "Tu cuenta ha sido creada");
+    await registerUser(data); // Llama a la función simulada
+    showAlert("success", "Registro exitoso", "Tu cuenta ha sido creada (Simulado)");
     setTimeout(() => {
       window.location.href = "index.html";
     }, 1500);
@@ -170,11 +140,13 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   }
 
   try {
-    const result = await loginUser(email, pass);
+    await loginUser(email, pass); // Llama a la función simulada
     showAlert("success", "Inicio exitoso", "Bienvenido");
     
     setTimeout(() => {
-      window.location.href = "dashboard.html"; 
+      // ⬇️ ¡CAMBIO AQUÍ! ⬇️
+      window.location.href = "inicio.html"; // Antes decía "dashboard.html"
+      // ⬆️ ¡CAMBIO AQUÍ! ⬆️
     }, 1500);
 
   } catch (err) {
@@ -182,7 +154,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   }
 });
 
-// 🔹 Recuperar (cuando esté lista en el backend)
+// 🔹 Recuperar (sigue siendo visual)
 document.getElementById("recuperarForm")?.addEventListener("submit", async e => {
   e.preventDefault();
   const email = e.target[0].value.trim();
