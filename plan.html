@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes de Ahorro - FINTRACK</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="../css/plan.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-dashboard">
+    
+    <header class="dashboard-header">
+        <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
+        <div class="user-info">
+          <span id="welcomeMsg">Hola, ...</span>
+          <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+        </div>
+    </header>
+    <main class="dashboard-container">
+        <div class="plan-tabs-container">
+            <div class="plan-tab active" data-tab="crear">
+                <i class="fas fa-plus-circle"></i>
+                <span>Crear Plan</span>
+            </div>
+            <div class="plan-tab" data-tab="ver">
+                <i class="fas fa-list-alt"></i>
+                <span>Ver Mis Planes</span>
+            </div>
+        </div>
+
+        <section id="seccion-crear" class="plan-seccion active">
+            <div class="form-container">
+                <h2>Crear tu Plan de Gastos y Ahorro</h2>
+                
+                <form id="form-crear-plan">
+                    <div class="form-group">
+                        <label for="nombre-plan">Nombre del Plan:</label>
+                        <input type="text" id="nombre-plan" name="nombre_plan" placeholder="Ej: Ahorro Vacaciones 2026" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ingreso-total">Ingreso Total Mensual:</label>
+                        <input type="number" id="ingreso-total" name="ingreso_total" placeholder="Ej: 15000" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha-inicio">Fecha de Inicio:</label>
+                        <input type="date" id="fecha-inicio" name="fecha_inicio" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha-fin">Fecha de Fin:</label>
+                        <input type="date" id="fecha-fin" name="fecha_fin" required>
+                    </div>
+
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="desea-ahorrar" name="desea_ahorrar">
+                        <label for="desea-ahorrar">¿Desea ahorrar?</label>
+                    </div>
+
+                    <div id="campos-ahorro" class="hidden">
+                        <div class="form-group">
+                            <label for="ahorro-valor">Monto o Porcentaje de Ahorro:</label>
+                            <div class="form-row">
+                                <input type="number" id="ahorro-valor" name="ahorro_valor" placeholder="Ej: 500 o 10" min="0">
+                                <select id="ahorro-tipo" name="ahorro_tipo">
+                                    <option value="monto">Monto Fijo ($)</option>
+                                    <option value="porcentaje">Porcentaje (%)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn-submit">Generar Plan</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="seccion-ver" class="plan-seccion">
+            <h2>Mis Planes Creados</h2>
+            <div id="lista-planes-container">
+                <p class="empty-state">Aún no has creado ningún plan.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="modal-plan-exito" class="modal-overlay hidden">
+        <div class="modal-contenido">
+            <span class="modal-cerrar" id="modal-cerrar-btn">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-check-circle"></i>
+                <h2>¡Plan Creado con Éxito!</h2>
+            </div>
+            <div class="modal-body">
+                <p>Este es un resumen de tu nuevo plan:</p>
+                <div id="modal-resumen-plan">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/plan.js"></script>
+</body>
+</html>

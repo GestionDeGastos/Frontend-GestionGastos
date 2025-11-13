@@ -25,11 +25,29 @@
         <h3>Total Gastos</h3>
         <p id="totalGastos" class="gasto">$0.00</p>
       </div>
-      <div class="resumen-card saldo">
+      <div class="resumen-card saldo">s
         <h3>Saldo Actual</h3>
         <p id="saldoActual">$0.00</p>
       </div>
     </section>
+
+    <div class="dashboard-graficas">
+
+  <section class="grafica-card">
+    <h3>Desglose de Gastos</h3>
+    <div class="chart-wrapper">
+      <canvas id="graficaGastosDona"></canvas>
+    </div>
+  </section>
+
+  <section class="grafica-card">
+    <h3>Tendencia Mensual</h3>
+    <div class="chart-wrapper-barras">
+      <canvas id="graficaTendencia"></canvas>
+    </div>
+  </section>
+
+  </div>
 
     <h2>Mis Transacciones</h2>
     
@@ -63,6 +81,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/dashboard.js"></script> 
 </body>
 </html>
