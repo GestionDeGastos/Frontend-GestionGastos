@@ -186,6 +186,9 @@ input::placeholder {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+
+  /*  Nueva separación del menú */
+  margin-left: 80px;  
 }
 
 .user-info {
@@ -341,7 +344,6 @@ input::placeholder {
   margin: 0 auto;
   font-family: 'Poppins', sans-serif;
 }
-
 
 .dashboard-graficas {
   display: flex;
@@ -608,7 +610,6 @@ input::placeholder {
   color: #ff6b6b;
 }
 
-
 /* =================== ESTILOS MODAL =================== */
 .modal-overlay {
   position: fixed;
@@ -770,7 +771,6 @@ input::placeholder {
   margin: 0 0 5px 0;
 }
 
-
 /* Tarjeta de estadísticas de la derecha */
 .analisis-stats-card {
   flex: 1.5; /* Un poco más ancha */
@@ -845,4 +845,777 @@ input::placeholder {
 }
 .table-container-mini tr:last-child td {
   border-bottom: none;
+}
+/* ========== MENÚ LATERAL (Hamburger Menu) ========== */
+
+.menu-toggle {
+  position: absolute;
+  left: 20px;
+  top: 22px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1100;
+}
+
+.menu-toggle div {
+  width: 28px;
+  height: 3px;
+  background: white;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+/* Menú lateral */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -260px;
+  width: 250px;
+  height: 100%;
+  background: rgba(15, 15, 35, 0.95);
+  backdrop-filter: blur(5px);
+  padding-top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-left: 30px;
+  border-right: 1px solid #7984ff;
+  transition: left 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.side-menu a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.side-menu a:hover {
+  color: #7984ff;
+}
+
+.side-menu .disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+/* Animación del botón al abrir */
+.menu-toggle.open div:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+.menu-toggle.open div:nth-child(2) {
+  opacity: 0;
+}
+.menu-toggle.open div:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+/* ========== PRO MENU ========== */
+
+.menu-toggle {
+  position: absolute;
+  left: 30px;
+  top: 25px;
+  width: 40px;
+  height: 32px;
+  cursor: pointer;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.menu-toggle span {
+  display: block;
+  height: 5px;
+  background: white;
+  border-radius: 5px;
+  transition: 0.3s ease;
+}
+
+/* Animación X */
+.menu-toggle.open span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px);
+}
+
+.menu-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Menú lateral PRO */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 260px;
+  height: 100%;
+  background: rgba(20, 20, 45, 0.97);
+  backdrop-filter: blur(8px);
+  padding-top: 100px;
+  padding-left: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  border-right: 2px solid #7984ff;
+  box-shadow: 6px 0 20px rgba(0,0,0,0.6);
+  transition: left 0.35s ease;
+  z-index: 1100;
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+.side-menu a {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.side-menu a:hover {
+  color: #9ca4ff;
+  transform: translateX(5px);
+}
+
+.side-menu .disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Fondo oscuro al abrir */
+.menu-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.menu-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Desplazar contenido hacia la derecha cuando el menú abre */
+.push-content {
+  transform: translateX(200px);
+  transition: 0.35s ease;
+}
+/* ==========================================================
+   MEJORAS DE DISEÑO SUAVE — SIN ROMPER TU MAQUETADO
+   ========================================================== */
+
+/* Fondo general bonito */
+body.bg-dashboard {
+    background: linear-gradient(135deg, #0c0f27, #141833, #0f112a);
+    background-attachment: fixed;
+}
+
+/* HEADER — separo mejor menú + FINTRACK */
+.menu-toggle {
+    margin-right: 20px;
+    transform: scale(1.1);
+}
+
+.dashboard-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 18px;    /* <-- separa la hamburguesa del FINTRACK */
+}
+
+/* FINTRACK logo más centrado y visible */
+.dashboard-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+}
+/* ==========================================================
+   MEJORAS DE DISEÑO SUAVE — SIN ROMPER TU MAQUETADO
+   ========================================================== */
+
+/* Fondo general bonito */
+body.bg-dashboard {
+    background: linear-gradient(135deg, #0c0f27, #141833, #0f112a);
+    background-attachment: fixed;
+}
+
+/* HEADER — separo mejor menú + FINTRACK */
+.menu-toggle {
+    margin-right: 20px;
+    transform: scale(1.1);
+}
+
+.dashboard-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 18px;    /* <-- separa la hamburguesa del FINTRACK */
+}
+
+/* FINTRACK logo más centrado y visible */
+.dashboard-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* =========================================
+   SECCIÓN: PLANES — SOLO MEJORAS VISUALES
+   ========================================= */
+
+.planes-header h2 {
+    font-size: 36px;
+    margin-top: 30px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Tarjeta más elegante sin mover estructura */
+.plan-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: 0.25s ease;
+}
+
+.plan-card:hover {
+    transform: translateY(-6px);
+    border-color: #738aff;
+}
+
+/* Barra de progreso mejorada */
+.progress-bar {
+    height: 10px !important;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.10);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width .4s ease;
+}
+
+/* Ahorro verde - Gasto rojo */
+.progress-bar-fill:not(.gasto) {
+    background: #45ff84;
+}
+
+.progress-bar-fill.gasto {
+    background: #ff6b6b;
+}
+
+/* Botón Detalles migliorado sin romper nada */
+.btn-plan-detalle {
+    background: #738aff;
+    border-radius: 12px;
+    padding: 10px 18px;
+    transition: .25s ease;
+}
+
+.btn-plan-detalle:hover {
+    background: #5f72ff;
+    transform: scale(1.05);
+}
+
+/* =========================================
+   MODAL — MÁS BONITO SIN CAMBIAR ESTRUCTURA
+   ========================================= */
+
+.modal-content {
+    background: rgba(0,0,0,0.60);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+}
+
+/* Inputs más pro */
+.modal-content input,
+.modal-content select {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    border-radius: 14px;
+}
+
+/* Botón del modal */
+.modal-content button {
+    background: #738aff !important;
+    border-radius: 14px;
+    transition: .25s ease;
+}
+
+.modal-content button:hover {
+    background: #5f72ff !important;
+    transform: scale(1.05);
+}
+/* ==========================================================
+   MODO ULTRAPRO — FINTRACK FINTECH THEME
+   ========================================================== */
+
+/* Fondo animado estilo fintech premium */
+body.bg-dashboard {
+    background: radial-gradient(at 20% 20%, #1a1f3c, #0b0e1f 70%);
+    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Luz suave animada */
+body.bg-dashboard::before {
+    content: "";
+    position: fixed;
+    width: 500px;
+    height: 500px;
+    background: rgba(94, 132, 255, 0.15);
+    filter: blur(140px);
+    border-radius: 50%;
+    top: -100px;
+    left: -80px;
+    z-index: -1;
+    animation: luz1 18s infinite alternate ease-in-out;
+}
+
+@keyframes luz1 {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(120px, 80px) scale(1.4); }
+}
+
+/* ==========================================================
+   HEADER PRO
+   ========================================================== */
+
+.dashboard-header {
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 18px 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+/* Icono menú pro */
+/* Ajuste tamaño del botón */
+.menu-toggle {
+    width: 28px;        /* antes 35-40 */
+    height: 23px;       /* antes más alto */
+    top: 18px;          /* lo baja o sube */
+    left: 15px;         /* separa del borde */
+}
+
+
+/* Ajuste tamaño del botón hamburguesa */
+.menu-toggle {
+    width: 28px;        /* antes 35-40 */
+    height: 23px;       /* antes más alto */
+    top: 18px;          /* lo baja o sube */
+    left: 15px;         /* separa del borde */
+}
+
+/* Barras internas */
+.menu-toggle span {
+    height: 3px;        /* barra más delgada */
+    border-radius: 2px;
+}
+
+/* Espaciado entre barras */
+.menu-toggle span:not(:last-child) {
+    margin-bottom: 4px;
+}
+
+
+
+/* Botón cerrar sesión */
+.btn-logout {
+    padding: 8px 18px !important;
+    border-radius: 10px;
+    font-weight: 500;
+    background: #ff6b6b !important;
+    transition: .2s ease;
+}
+
+.btn-logout:hover {
+    background: #ff4b4b !important;
+    transform: translateY(-2px);
+}
+
+/* ==========================================================
+   PLANES — TARJETAS ULTRAPRO
+   ========================================================== */
+
+/* Contenedor general */
+.planes-grid-container {
+    margin-top: 30px;
+    gap: 30px !important;
+}
+
+/* Tarjeta PRO */
+.plan-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    backdrop-filter: blur(12px);
+    border-radius: 22px;
+    padding: 28px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    transition: .35s ease;
+}
+
+.plan-card:hover {
+    transform: translateY(-10px);
+    border-color: #738aff;
+    box-shadow: 0 12px 30px rgba(115,138,255,0.25);
+}
+
+.plan-card h3 {
+    font-size: 22px;
+    margin-bottom: 5px;
+    letter-spacing: .4px;
+}
+
+.progreso-info {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* Barra de progreso PRO */
+.progress-bar {
+    height: 12px !important;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.10);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #45ff84, #3ffd6f);
+    transition: width .4s ease;
+}
+
+/* Gasto rojo */
+.progress-bar-fill.gasto {
+    background: linear-gradient(90deg, #ff6b6b, #ff4b4b);
+}
+
+/* Botón detalles PRO */
+.btn-plan-detalle {
+    padding: 12px 20px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #738aff, #9faaff);
+    transition: .25s ease;
+}
+
+.btn-plan-detalle:hover {
+    transform: scale(1.08);
+    background: linear-gradient(135deg, #5f72ff, #8692ff);
+}
+
+/* Icono basura */
+.btn-plan-delete {
+    transition: .2s ease;
+}
+
+.btn-plan-delete:hover {
+    transform: scale(1.25);
+    color: #ff6b6b;
+}
+
+/* ================================
+   mejoras
+   ================================ */
+
+select {
+    background: rgba(255, 255, 255, 0.08); /* Fondo suave oscuro */
+    border: 1px solid #7984ff;             /* Borde azul */
+    color: #ffffff;                        /* Texto blanco */
+    padding: 12px 16px;
+    width: 100%;
+    border-radius: 14px;
+    font-size: 1rem;
+    outline: none;
+    cursor: pointer;
+    transition: 0.25s ease;
+    appearance: none; /* Remueve estilo feo del navegador */
+}
+
+/* Icono de despliegue moderno */
+select::-ms-expand {
+    display: none;
+}
+
+/* Hover */
+select:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: #aabbff;
+}
+
+/* Focus (cuando se abre o selecciona) */
+select:focus {
+    border-color: #cfd6ff;
+    box-shadow: 0 0 12px #7984ff60;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* Opciones internas del menú */
+select option {
+    background: #ffffff !important; /* Fondo blanco */
+    color: #000000 !important;      /* TEXTO NEGRO — bien visible */
+    padding: 12px;
+    font-size: 1rem;
+}
+
+/* Hover de las opciones */
+select option:hover {
+    background: #e6ebff !important; /* Azul clarito */
+    color: #000 !important;
+}
+
+/* ======================
+   PERFIL BÁSICO
+   ====================== */
+
+.perfil-card {
+  margin: 80px auto;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 40px;
+  width: 350px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px #00000055;
+}
+
+.perfil-foto {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-image: url('https://i.imgur.com/EFYy8US.png'); /* icono genérico */
+  border: 3px solid #7984ff;
+}
+
+.perfil-card h2 {
+  color: #fff;
+  font-size: 1.4rem;
+}
+/* ============================
+    FONDO ANIMADO 
+============================ */
+body.bg-dashboard {
+    background: radial-gradient(circle at top left, #0f1630, #070b18 60%, #03050c);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Fondo animado sutil */
+body.bg-dashboard::before {
+    content: "";
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(60,80,255,0.15), transparent 70%);
+    animation: movimientoFondo 12s infinite linear;
+    pointer-events: none;
+}
+
+@keyframes movimientoFondo {
+    0% { transform: translate(-20%, -10%); }
+    50% { transform: translate(10%, 20%); }
+    100% { transform: translate(-20%, -10%); }
+}
+
+/* ============================
+   🎛 TARJETAS DEL RESUMEN
+============================ */
+.resumen-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 25px;
+    margin: 30px auto;
+    width: 95%;
+}
+
+.resumen-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 22px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: 0.35s;
+}
+
+.resumen-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+}
+
+.resumen-card h3 {
+    color: #d6ddff;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.resumen-card p {
+    font-size: 38px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* Colores PRO */
+.ingreso { color: #7aff9c; text-shadow: 0 0 10px #42ff74; }
+.gasto { color: #ff6b6b; text-shadow: 0 0 10px #ff4b4b; }
+.saldo { color: #8cb4ff; text-shadow: 0 0 15px #588dff; }
+
+/* ============================
+   TARJETAS DE GRÁFICAS
+============================ */
+.dashboard-graficas {
+    display: flex;
+    gap: 25px;
+    width: 95%;
+    margin: auto;
+}
+
+.grafica-card {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border-radius: 22px;
+    padding: 25px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: 0.35s;
+}
+
+.grafica-card:hover {
+    transform: translateY(-5px) scale(1.01);
+}
+
+/* Ajuste tamaño gráficas */
+.chart-wrapper,
+.chart-wrapper-barras {
+    width: 100%;
+    height: 350px;
+}
+
+/* ============================
+   TABLA MEJORADA 
+============================ */
+.table-container {
+    width: 95%;
+    margin: 40px auto;
+    background: rgba(255,255,255,0.04);
+    padding: 25px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+    font-size: 15px;
+}
+
+th {
+    background: rgba(255,255,255,0.10);
+    padding: 12px;
+    text-align: left;
+    font-size: 16px;
+}
+
+td {
+    padding: 12px;
+}
+
+tr:nth-child(even) {
+    background: rgba(255,255,255,0.06);
+}
+
+tr:hover {
+    background: rgba(255,255,255,0.15);
+    transition: 0.2s;
+}
+
+/* ============================
+   🎛 SELECT Y FILTROS
+============================ */
+.filter-container {
+    width: 95%;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-container select {
+    background: #11182c;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid #5a7aff;
+    outline: none;
+    transition: 0.2s;
+}
+
+.filter-container select:hover {
+    border-color: #8fa1ff;
+}
+
+/* Aseguramos texto negro en menú */
+select option {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* ============================
+    MENÚ LATERAL 
+============================ */
+.side-menu {
+    background: rgba(15, 20, 40, 0.92);
+    backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.side-menu a {
+    padding: 15px;
+    font-size: 20px;
+    color: #fff;
+    border-radius: 12px;
+    transition: 0.25s;
+}
+
+.side-menu a:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateX(8px);
 }

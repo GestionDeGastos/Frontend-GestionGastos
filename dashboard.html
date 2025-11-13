@@ -13,10 +13,29 @@
       <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
     </div>
   </header>
+<!-- BOTÓN MENÚ (Hamburger Mejorado) -->
+<div id="menuToggle" class="menu-toggle">
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<!-- MENÚ LATERAL -->
+<nav id="sideMenu" class="side-menu">
+  <a href="inicio.html">🏠 Inicio</a>
+  <a href="dashboard.html">📊 Dashboard</a>
+  <a href="planes.html">🎯 Planes</a>
+  <a href="perfil.html">👤 Perfil</a>
+</nav>
+
+
+<!-- OVERLAY OSCURO -->
+<div id="menuOverlay" class="menu-overlay"></div>
+
 
   <main class="dashboard-container">
     
-    <section class="resumen-container">
+     <section class="resumen-container">
       <div class="resumen-card">
         <h3>Total Ingresos</h3>
         <p id="totalIngresos" class="ingreso">$0.00</p>
@@ -25,7 +44,7 @@
         <h3>Total Gastos</h3>
         <p id="totalGastos" class="gasto">$0.00</p>
       </div>
-      <div class="resumen-card saldo">s
+      <div class="resumen-card saldo">
         <h3>Saldo Actual</h3>
         <p id="saldoActual">$0.00</p>
       </div>
@@ -84,4 +103,26 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/dashboard.js"></script> 
 </body>
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const menu = document.getElementById("sideMenu");
+  const overlay = document.getElementById("menuOverlay");
+  const mainContent = document.querySelector("main");
+
+  toggle.addEventListener("click", () => {
+    const isOpen = toggle.classList.toggle("open");
+    menu.classList.toggle("open");
+    overlay.classList.toggle("open");
+    mainContent.classList.toggle("push-content");
+  });
+
+  /* Cerrar al hacer clic en el fondo */
+  overlay.addEventListener("click", () => {
+    toggle.classList.remove("open");
+    menu.classList.remove("open");
+    overlay.classList.remove("open");
+    mainContent.classList.remove("push-content");
+  });
+</script>
+
 </html>

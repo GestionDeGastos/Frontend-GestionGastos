@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Perfil</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-dashboard">
+
+  <!-- BOTÓN DEL MENÚ (3 rayitas) -->
+  <div id="menuToggle" class="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- MENÚ LATERAL -->
+  <nav id="sideMenu" class="side-menu">
+    <a href="inicio.html">🏠 Inicio</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="planes.html">🎯 Planes</a>
+    <a href="perfil.html">👤 Perfil</a>
+  </nav>
+
+  <header class="dashboard-header">
+    <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
+    <div class="user-info">
+      <span id="welcomeMsg">Perfil</span>
+      <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <div class="perfil-card">
+      <div class="perfil-foto"></div>
+      <h2 id="perfilNombre">Cargando...</h2>
+    </div>
+
+  </main>
+
+  <script>
+    // Mostrar nombre desde localStorage
+    const usuario = JSON.parse(localStorage.getItem("usuarioActivo"));
+    document.getElementById("perfilNombre").textContent = usuario ? usuario.nombre : "Usuario";
+
+    // Logout básico
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("usuarioActivo");
+      window.location.href = "index.html";
+    });
+
+    // Abrir menú
+    document.getElementById("menuToggle").addEventListener("click", () => {
+      document.getElementById("sideMenu").classList.add("open");
+    });
+
+    // Cerrar menú
+    document.getElementById("closeMenu").addEventListener("click", () => {
+      document.getElementById("sideMenu").classList.remove("open");
+    });
+  </script>
+
+</body>
+</html>
