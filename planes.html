@@ -15,23 +15,24 @@
       <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
     </div>
   </header>
-<!-- BOTÓN MENÚ (Hamburger Mejorado) -->
-<div id="menuToggle" class="menu-toggle">
-  <span></span>
-  <span></span>
-  <span></span>
-</div>
 
-<!-- MENÚ LATEL-->
-<nav id="sideMenu" class="side-menu">
-  <a href="inicio.html">🏠 Inicio</a>
-  <a href="dashboard.html">📊 Dashboard</a>
-  <a href="planes.html">🎯 Planes</a>
-  <a href="perfil.html">👤 Perfil</a>
-</nav>
+  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
+  <div id="menuToggle" class="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
-<!-- OVERLAY OSCURO -->
-<div id="menuOverlay" class="menu-overlay"></div>
+  <!-- MENÚ LATERAL -->
+  <nav id="sideMenu" class="side-menu">
+    <a href="inicio.html">🏠 Inicio</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="planes.html">🎯 Planes</a>
+    <a href="perfil.html">👤 Perfil</a>
+  </nav>
+
+  <!-- OVERLAY OSCURO -->
+  <div id="menuOverlay" class="menu-overlay"></div>
 
   <main class="dashboard-container">
 
@@ -43,7 +44,7 @@
     </div>
 
     <div id="planesGrid" class="planes-grid-container">
-      </div>
+    </div>
 
     <div id="noPlanesMsg" style="display: none; text-align: center; padding: 40px; opacity: 0.7;">
       <h3>No tienes planes registrados.</h3>
@@ -65,20 +66,16 @@
             <input type="text" id="planNombre" placeholder="Ej: Ahorro Vacaciones" required>
           </div>
           <div class="form-group">
-            <label for="planTipo">Tipo de Plan</label>
-            <select id="planTipo" required>
-              <option value="">Selecciona un tipo...</option>
-              <option value="ahorro">Meta de Ahorro</option>
-              <option value="presupuesto">Presupuesto (Gasto)</option>
-            </select>
+            <label for="planMonto">Ingreso Total Mensual</label>
+            <input type="number" id="planMonto" placeholder="Ej: 5000" step="0.01" required>
           </div>
           <div class="form-group">
-            <label for="planMonto">Monto Objetivo</label>
-            <input type="number" id="planMonto" placeholder="Ej: 10000" required>
+            <label for="planAhorro">Ahorro Deseado (Opcional)</label>
+            <input type="number" id="planAhorro" placeholder="Ej: 1000" step="0.01">
           </div>
           <div class="form-group">
-            <label for="planFecha">Fecha Límite (Opcional)</label>
-            <input type="date" id="planFecha">
+            <label for="planDuracion">Duración (meses)</label>
+            <input type="number" id="planDuracion" placeholder="Ej: 12" min="1" max="360" required>
           </div>
           <button type="submit" class="btn">Guardar Plan</button>
         </form>
@@ -87,28 +84,26 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="../js/planes.js"></script>
+  <script type="module" src="../js/planes.js"></script>
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+    const mainContent = document.querySelector("main");
+
+    toggle.addEventListener("click", () => {
+      const isOpen = toggle.classList.toggle("open");
+      menu.classList.toggle("open");
+      overlay.classList.toggle("open");
+      mainContent.classList.toggle("push-content");
+    });
+
+    overlay.addEventListener("click", () => {
+      toggle.classList.remove("open");
+      menu.classList.remove("open");
+      overlay.classList.remove("open");
+      mainContent.classList.remove("push-content");
+    });
+  </script>
 </body>
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const menu = document.getElementById("sideMenu");
-  const overlay = document.getElementById("menuOverlay");
-  const mainContent = document.querySelector("main");
-
-  toggle.addEventListener("click", () => {
-    const isOpen = toggle.classList.toggle("open");
-    menu.classList.toggle("open");
-    overlay.classList.toggle("open");
-    mainContent.classList.toggle("push-content");
-  });
-
-  /* Cerrar al hacer clic en el fondo */
-  overlay.addEventListener("click", () => {
-    toggle.classList.remove("open");
-    menu.classList.remove("open");
-    overlay.classList.remove("open");
-    mainContent.classList.remove("push-content");
-  });
-</script>
-
 </html>

@@ -4,38 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FINTRACK - Dashboard</title>
-  <link rel="stylesheet" href="../css/styles.css"> 
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body class="bg-dashboard"> <header class="dashboard-header">
+<body class="bg-dashboard">
+  <header class="dashboard-header">
     <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
     <div class="user-info">
       <span id="welcomeMsg">Hola, ...</span>
       <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
     </div>
   </header>
-<!-- BOTÓN MENÚ (Hamburger Mejorado) -->
-<div id="menuToggle" class="menu-toggle">
-  <span></span>
-  <span></span>
-  <span></span>
-</div>
 
-<!-- MENÚ LATERAL -->
-<nav id="sideMenu" class="side-menu">
-  <a href="inicio.html">🏠 Inicio</a>
-  <a href="dashboard.html">📊 Dashboard</a>
-  <a href="planes.html">🎯 Planes</a>
-  <a href="perfil.html">👤 Perfil</a>
-</nav>
+  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
+  <div id="menuToggle" class="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
+  <!-- MENÚ LATERAL -->
+  <nav id="sideMenu" class="side-menu">
+    <a href="inicio.html">🏠 Inicio</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="planes.html">🎯 Planes</a>
+    <a href="perfil.html">👤 Perfil</a>
+  </nav>
 
-<!-- OVERLAY OSCURO -->
-<div id="menuOverlay" class="menu-overlay"></div>
-
+  <!-- OVERLAY OSCURO -->
+  <div id="menuOverlay" class="menu-overlay"></div>
 
   <main class="dashboard-container">
     
-     <section class="resumen-container">
+    <section class="resumen-container">
       <div class="resumen-card">
         <h3>Total Ingresos</h3>
         <p id="totalIngresos" class="ingreso">$0.00</p>
@@ -51,22 +51,20 @@
     </section>
 
     <div class="dashboard-graficas">
+      <section class="grafica-card">
+        <h3>Desglose de Gastos</h3>
+        <div class="chart-wrapper">
+          <canvas id="graficaGastosDona"></canvas>
+        </div>
+      </section>
 
-  <section class="grafica-card">
-    <h3>Desglose de Gastos</h3>
-    <div class="chart-wrapper">
-      <canvas id="graficaGastosDona"></canvas>
+      <section class="grafica-card">
+        <h3>Tendencia Mensual</h3>
+        <div class="chart-wrapper-barras">
+          <canvas id="graficaTendencia"></canvas>
+        </div>
+      </section>
     </div>
-  </section>
-
-  <section class="grafica-card">
-    <h3>Tendencia Mensual</h3>
-    <div class="chart-wrapper-barras">
-      <canvas id="graficaTendencia"></canvas>
-    </div>
-  </section>
-
-  </div>
 
     <h2>Mis Transacciones</h2>
     
@@ -77,7 +75,7 @@
         <option value="Ingreso">Ingresos</option>
         <option value="Gasto">Gastos</option>
       </select>
-      </div>
+    </div>
 
     <div class="table-container">
       <table id="transactionsTable">
@@ -91,7 +89,7 @@
           </tr>
         </thead>
         <tbody id="transactionsBody">
-          </tbody>
+        </tbody>
       </table>
       <div id="noDataMsg" style="display: none; text-align: center; padding: 20px;">
         No hay transacciones registradas.
@@ -101,28 +99,26 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="../js/dashboard.js"></script> 
+  <script type="module" src="../js/dashboard.js"></script>
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+    const mainContent = document.querySelector("main");
+
+    toggle.addEventListener("click", () => {
+      const isOpen = toggle.classList.toggle("open");
+      menu.classList.toggle("open");
+      overlay.classList.toggle("open");
+      mainContent.classList.toggle("push-content");
+    });
+
+    overlay.addEventListener("click", () => {
+      toggle.classList.remove("open");
+      menu.classList.remove("open");
+      overlay.classList.remove("open");
+      mainContent.classList.remove("push-content");
+    });
+  </script>
 </body>
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const menu = document.getElementById("sideMenu");
-  const overlay = document.getElementById("menuOverlay");
-  const mainContent = document.querySelector("main");
-
-  toggle.addEventListener("click", () => {
-    const isOpen = toggle.classList.toggle("open");
-    menu.classList.toggle("open");
-    overlay.classList.toggle("open");
-    mainContent.classList.toggle("push-content");
-  });
-
-  /* Cerrar al hacer clic en el fondo */
-  overlay.addEventListener("click", () => {
-    toggle.classList.remove("open");
-    menu.classList.remove("open");
-    overlay.classList.remove("open");
-    mainContent.classList.remove("push-content");
-  });
-</script>
-
 </html>

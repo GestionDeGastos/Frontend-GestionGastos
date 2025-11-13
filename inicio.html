@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FINTRACK - Inicio</title>
-  <link rel="stylesheet" href="../css/styles.css"> 
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body class="bg-dashboard"> <header class="dashboard-header">
+<body class="bg-dashboard">
+  <header class="dashboard-header">
     <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
     <div class="user-info">
       <span id="welcomeMsg">Hola, ...</span>
@@ -14,18 +15,35 @@
     </div>
   </header>
 
+  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
+  <div id="menuToggle" class="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- MENÚ LATERAL -->
+  <nav id="sideMenu" class="side-menu">
+    <a href="inicio.html">🏠 Inicio</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="planes.html">🎯 Planes</a>
+    <a href="perfil.html">👤 Perfil</a>
+  </nav>
+
+  <!-- OVERLAY OSCURO -->
+  <div id="menuOverlay" class="menu-overlay"></div>
+
   <main class="dashboard-container">
-    
     <div class="menu-container">
       <h2>Menú Principal</h2>
       <p>Selecciona la sección a la que deseas ir.</p>
       
       <div class="menu-options">
         <a href="perfil.html" class="btn btn-menu">
-  <span class="menu-icon">👤</span>
-  Perfil
-  <span style="opacity:0.6;">(Básico)</span>
-</a>
+          <span class="menu-icon">👤</span>
+          Perfil
+          <span style="opacity:0.6;">(Básico)</span>
+        </a>
         
         <a href="dashboard.html" class="btn btn-menu">
           <span class="menu-icon">📊</span>
@@ -40,10 +58,29 @@
         </a>
       </div>
     </div>
-
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="../js/inicio.js"></script> 
+  <script type="module" src="../js/inicio.js"></script>
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+    const mainContent = document.querySelector("main");
+
+    toggle.addEventListener("click", () => {
+      const isOpen = toggle.classList.toggle("open");
+      menu.classList.toggle("open");
+      overlay.classList.toggle("open");
+      mainContent.classList.toggle("push-content");
+    });
+
+    overlay.addEventListener("click", () => {
+      toggle.classList.remove("open");
+      menu.classList.remove("open");
+      overlay.classList.remove("open");
+      mainContent.classList.remove("push-content");
+    });
+  </script>
 </body>
 </html>

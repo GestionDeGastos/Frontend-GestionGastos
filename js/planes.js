@@ -1,223 +1,215 @@
-// js/planes.js
+// =================== IMPORTAR FUNCIONES DE API ===================
+import * as API from './api.js';
 
-// =============================================================
-//      DATOS DE PRUEBA (MOCK DATA)
-// =============================================================
-// Usaremos un array global para simular la base de datos.
-// En un mundo real, esto vendría de localStorage o de la API.
-let mockPlanes = [
-  { 
-    id: 1, 
-    nombre: "🏝️ Vacaciones Playa", 
-    tipo: "ahorro", 
-    monto: 10000,
-    montoActual: 7500 // Añadimos monto actual para el detalle
-  },
-  { 
-    id: 2, 
-    nombre: "🍔 Comida (Restaurantes)", 
-    tipo: "presupuesto", 
-    monto: 3000,
-    montoActual: 2100 
-  },
-  { 
-    id: 3, 
-    nombre: "💻 Nueva Laptop", 
-    tipo: "ahorro", 
-    monto: 25000,
-    montoActual: 25000
-  },
-];
+console.log("✅ planes.js cargado");
 
-
-// =============================================================
-//      LÓGICA DEL HEADER (Bienvenida y Logout)
-// =============================================================
-window.addEventListener("DOMContentLoaded", () => {
-  const welcomeMsg = document.getElementById("welcomeMsg");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
-  
-  if (!usuarioActivo) {
-    window.location.href = "index.html"; 
+function showAlert(icon, title, text) {
+  if (typeof Swal === 'undefined') {
+    alert(`${title}\n${text}`);
     return;
   }
 
-  welcomeMsg.textContent = `Hola, ${usuarioActivo.nombre}`;
-
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("usuarioActivo");
-    localStorage.removeItem("authToken");
-    
-    Swal.fire({
-      icon: 'success',
-      title: 'Sesión cerrada',
-      text: 'Has cerrado sesión exitosamente.',
-      confirmButtonColor: '#7984ff',
-      background: '#0f0f23',
-      color: '#fff'
-    });
-    
-    setTimeout(() => (window.location.href = "index.html"), 1500);
-  });
-
-  // =============================================================
-  //      LÓGICA DEL MODAL "CREAR PLAN"
-  // =============================================================
-  
-  const modal = document.getElementById("modalCrearPlan");
-  const btnAbrir = document.getElementById("btnAbrirModal");
-  const btnCerrar = document.getElementById("btnCerrarModal");
-  const formCrearPlan = document.getElementById("formCrearPlan");
-
-  btnAbrir.addEventListener("click", () => modal.style.display = "flex");
-  btnCerrar.addEventListener("click", () => modal.style.display = "none");
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.style.display = "none";
-  });
-
-  // =============================================================
-  //      LÓGICA DE PLANES 
-  // =============================================================
-
-  // Cargar y renderizar los planes al iniciar
-  // Simulamos carga de localStorage. Si no hay, usamos el mock.
-  const planesGuardados = localStorage.getItem("todosLosPlanes");
-  if (planesGuardados) {
-    mockPlanes = JSON.parse(planesGuardados);
-  }
-  renderizarPlanes();
-
-
-  // Manejar el envío del formulario (AHORA ES FUNCIONAL)
-  formCrearPlan.addEventListener("submit", (e) => {
-    e.preventDefault();
-    
-    // 1. Obtener datos
-    const nombre = document.getElementById("planNombre").value;
-    const tipo = document.getElementById("planTipo").value;
-    const monto = parseFloat(document.getElementById("planMonto").value);
-
-    // 2. Crear nuevo objeto plan
-    const nuevoPlan = {
-      id: Date.now(), // ID único basado en el tiempo
-      nombre: nombre,
-      tipo: tipo,
-      monto: monto,
-      montoActual: 0 // Un plan nuevo empieza en 0
-    };
-
-    // 3. Añadir al array
-    mockPlanes.push(nuevoPlan);
-    
-    // 4. Volver a renderizar la lista
-    renderizarPlanes();
-
-    // 5. Cerrar y notificar
-    modal.style.display = "none";
-    formCrearPlan.reset();
-    Swal.fire({
-      icon: 'success',
-      title: 'Plan Creado',
-      text: `Tu plan "${nombre}" ha sido creado.`,
-      confirmButtonColor: '#7984ff',
-      background: '#0f0f23',
-      color: '#fff'
-    });
-  });
-
-  // Delegación de eventos para botones de eliminar
-  document.getElementById("planesGrid").addEventListener("click", (e) => {
-    if (e.target.classList.contains("btn-plan-delete")) {
-      e.preventDefault();
-      const id = parseInt(e.target.dataset.id); // Obtener ID del data-attribute
-      eliminarPlan(id);
-    }
-  });
-
-});
-
-
-function renderizarPlanes() {
-  const grid = document.getElementById("planesGrid");
-  const msgVacio = document.getElementById("noPlanesMsg");
-  grid.innerHTML = ""; // Limpiar grid
-
-  // Guardar en localStorage para la página de detalles
-  localStorage.setItem("todosLosPlanes", JSON.stringify(mockPlanes));
-
-  if (mockPlanes.length === 0) {
-    msgVacio.style.display = "block";
-    return;
-  }
-
-  msgVacio.style.display = "none";
-
-  mockPlanes.forEach(plan => {
-    // Calcular progreso
-    const montoActual = plan.montoActual || 0;
-    const montoTotal = plan.monto;
-    let porcentaje = 0;
-    if (montoTotal > 0) {
-      porcentaje = (montoActual / montoTotal) * 100;
-    }
-    const esPresupuesto = plan.tipo === 'presupuesto';
-    const claseBarra = esPresupuesto ? 'gasto' : '';
-
-    const formatoMoneda = (monto) => (monto || 0).toLocaleString('es-MX', { style: 'currency', 'currency': 'MXN' });
-
-    const planHTML = `
-      <div class="plan-card">
-        <h3>${plan.nombre}</h3>
-        <p class="plan-meta">${esPresupuesto ? 'Presupuesto Mensual' : 'Meta de Ahorro'}</p>
-        <div class="progreso-info">
-          <span class="progreso-actual">${formatoMoneda(montoActual)}</span> / <span class="progreso-total">${formatoMoneda(montoTotal)}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-bar-fill ${claseBarra}" style="width: ${porcentaje}%;"></div> 
-        </div>
-        <div class="plan-actions">
-          <a href="plan-detalle.html?id=${plan.id}" class="btn-plan-detalle">Ver Detalles (Análisis)</a>
-          
-          <a href="#" class="btn-plan-delete" data-id="${plan.id}">🗑️</a>
-        </div>
-      </div>
-    `;
-    grid.innerHTML += planHTML;
+  Swal.fire({
+    icon,
+    title,
+    text,
+    confirmButtonColor: '#7984ff',
+    background: '#0f0f23',
+    color: '#fff'
   });
 }
 
+// ============================================================
+//      CARGAR USUARIO BIENVENIDA
+// ============================================================
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("📄 Página de planes cargada");
 
-function eliminarPlan(id) {
-  // Confirmación
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: "No podrás revertir esta acción.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#ff6b6b',
-    cancelButtonColor: '#7984ff',
-    confirmButtonText: 'Sí, ¡bórralo!',
-    cancelButtonText: 'Cancelar',
-    background: '#0f0f23',
-    color: '#fff'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Filtrar el array (inmutabilidad simulada)
-      mockPlanes = mockPlanes.filter(plan => plan.id !== id);
-      
-      // Volver a renderizar
-      renderizarPlanes();
-
-      Swal.fire({
-        title: '¡Eliminado!',
-        text: 'Tu plan ha sido eliminado.',
-        icon: 'success',
-        confirmButtonColor: '#7984ff',
-        background: '#0f0f23',
-        color: '#fff'
-      });
+  // Mostrar nombre del usuario
+  const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
+  if (usuarioActivo) {
+    const welcomeMsg = document.getElementById("welcomeMsg");
+    if (welcomeMsg) {
+      welcomeMsg.textContent = `Hola, ${usuarioActivo.nombre}`;
     }
-  });
+  }
+
+  // Cerrar sesión
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      API.cerrarSesion();
+    });
+  }
+
+  // Cargar planes
+  await cargarPlanes();
+
+  // Modal - Abrir
+  const btnAbrirModal = document.getElementById("btnAbrirModal");
+  if (btnAbrirModal) {
+    btnAbrirModal.addEventListener("click", abrirModal);
+  }
+
+  // Modal - Cerrar
+  const btnCerrarModal = document.getElementById("btnCerrarModal");
+  if (btnCerrarModal) {
+    btnCerrarModal.addEventListener("click", cerrarModal);
+  }
+
+  // Formulario crear plan
+  const formCrearPlan = document.getElementById("formCrearPlan");
+  if (formCrearPlan) {
+    formCrearPlan.addEventListener("submit", crearNuevoPlan);
+  }
+
+  // Cerrar modal al clickear overlay
+  const modalOverlay = document.getElementById("modalCrearPlan");
+  if (modalOverlay) {
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) {
+        cerrarModal();
+      }
+    });
+  }
+});
+
+// ============================================================
+//      FUNCIONES DEL MODAL
+// ============================================================
+
+function abrirModal() {
+  console.log("🪟 Abriendo modal");
+  const modal = document.getElementById("modalCrearPlan");
+  if (modal) {
+    modal.style.display = "flex";
+  }
+}
+
+function cerrarModal() {
+  console.log("🪟 Cerrando modal");
+  const modal = document.getElementById("modalCrearPlan");
+  if (modal) {
+    modal.style.display = "none";
+  }
+  // Limpiar formulario
+  const formCrearPlan = document.getElementById("formCrearPlan");
+  if (formCrearPlan) {
+    formCrearPlan.reset();
+  }
+}
+
+// ============================================================
+//      CREAR NUEVO PLAN
+// ============================================================
+
+async function crearNuevoPlan(e) {
+  e.preventDefault();
+  console.log("📋 Creando nuevo plan");
+
+  try {
+    // Obtener valores del formulario
+    const planNombre = document.getElementById("planNombre")?.value?.trim();
+    const planMonto = document.getElementById("planMonto")?.value;
+    const planAhorro = document.getElementById("planAhorro")?.value;
+    const planDuracion = document.getElementById("planDuracion")?.value;
+
+    console.log("📝 Datos del plan:", {
+      nombre: planNombre,
+      monto: planMonto,
+      ahorro: planAhorro,
+      duracion: planDuracion,
+    });
+
+    // Validaciones
+    if (!planNombre || !planMonto || !planDuracion) {
+      showAlert("warning", "Campos incompletos", "Completa todos los campos requeridos");
+      return;
+    }
+
+    if (isNaN(planMonto) || planMonto <= 0) {
+      showAlert("warning", "Monto inválido", "El ingreso debe ser un número mayor a 0");
+      return;
+    }
+
+    if (isNaN(planDuracion) || planDuracion <= 0) {
+      showAlert("warning", "Duración inválida", "La duración debe ser mayor a 0");
+      return;
+    }
+
+    // Preparar datos
+    const dataPlan = {
+      nombre_plan: planNombre,
+      ingreso_total: parseFloat(planMonto),
+      ahorro_deseado: planAhorro ? parseFloat(planAhorro) : 0,
+      duracion_meses: parseInt(planDuracion),
+    };
+
+    console.log("🚀 Enviando plan:", dataPlan);
+
+    // Enviar al backend
+    const respuesta = await API.crearPlanGestion(dataPlan);
+    console.log("✅ Plan creado:", respuesta);
+
+    showAlert("success", "Plan creado", "Tu plan ha sido guardado correctamente");
+
+    // Cerrar modal y recargar planes
+    cerrarModal();
+    await cargarPlanes();
+
+  } catch (err) {
+    console.error("❌ Error creando plan:", err);
+    showAlert("error", "Error al crear plan", err.message);
+  }
+}
+
+// ============================================================
+//      CARGAR Y MOSTRAR PLANES
+// ============================================================
+
+async function cargarPlanes() {
+  console.log("📥 Cargando planes...");
+
+  try {
+    const respuesta = await API.obtenerPlanesGestion();
+    console.log("✅ Planes obtenidos:", respuesta);
+
+    const planes = respuesta.data || respuesta || [];
+    const planesGrid = document.getElementById("planesGrid");
+    const noPlanesMsg = document.getElementById("noPlanesMsg");
+
+    if (!planesGrid) {
+      console.error("❌ No se encontró el elemento planesGrid");
+      return;
+    }
+
+    // Limpiar grid
+    planesGrid.innerHTML = "";
+
+    if (planes.length === 0) {
+      console.log("📭 No hay planes registrados");
+      noPlanesMsg.style.display = "block";
+      return;
+    }
+
+    noPlanesMsg.style.display = "none";
+
+    // Crear tarjetas de planes
+    planes.forEach((plan) => {
+      const planCard = document.createElement("div");
+      planCard.className = "plan-card";
+      planCard.innerHTML = `
+        <h3>${plan.nombre_plan}</h3>
+        <p class="plan-monto">Ingreso: $${parseFloat(plan.ingreso_total).toFixed(2)}</p>
+        <p class="plan-ahorro">Ahorro: $${parseFloat(plan.ahorro_deseado || 0).toFixed(2)}</p>
+        <p class="plan-duracion">Duración: ${plan.duracion_meses} meses</p>
+        <a href="plan-detalle.html?id=${plan.id}" class="btn btn-ver-detalle">Ver Detalle</a>
+      `;
+      planesGrid.appendChild(planCard);
+    });
+
+  } catch (err) {
+    console.error("❌ Error cargando planes:", err);
+    showAlert("error", "Error al cargar planes", err.message);
+  }
 }

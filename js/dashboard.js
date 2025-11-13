@@ -1,52 +1,14 @@
 // js/dashboard.js
+import * as API from './api.js';
 
-// =============================================================
-//      DATOS DE PRUEBA (MOCK DATA)
-// =============================================================
-// 🔸 ¡CAMBIO! Agregamos datos de meses anteriores (Agosto, Septiembre)
-// para que el gráfico de tendencia funcione.
-const mockTransacciones = [
-  // --- Octubre 2025 ---
-  { id: 1, fecha: "2025-10-28", tipo: "Ingreso", monto: 15000, categoria: "Salario", descripcion: "Quincena" },
-  { id: 2, fecha: "2025-10-28", tipo: "Gasto", monto: 800, categoria: "Servicios", descripcion: "Pago de luz" },
-  { id: 3, fecha: "2025-10-27", tipo: "Gasto", monto: 450, categoria: "Comida", descripcion: "Supermercado" },
-  { id: 4, fecha: "2025-10-26", tipo: "Ingreso", monto: 1000, categoria: "Freelance", descripcion: "Proyecto logo" },
-  { id: 5, fecha: "2025-10-25", tipo: "Gasto", monto: 2500, categoria: "Renta", descripcion: "Pago mensual" },
-  { id: 6, fecha: "2025-10-24", tipo: "Gasto", monto: 300, categoria: "Transporte", descripcion: "Gasolina" },
-  { id: 7, fecha: "2025-10-23", tipo: "Gasto", monto: 1200, categoria: "Ocio", descripcion: "Cine y cena" },
-
-  // --- Septiembre 2025 ---
-  { id: 8, fecha: "2025-09-30", tipo: "Ingreso", monto: 15000, categoria: "Salario", descripcion: "Quincena" },
-  { id: 9, fecha: "2025-09-28", tipo: "Gasto", monto: 800, categoria: "Servicios", descripcion: "Pago de luz" },
-  { id: 10, fecha: "2025-09-25", tipo: "Gasto", monto: 3000, categoria: "Renta", descripcion: "Pago mensual" },
-  { id: 11, fecha: "2025-09-20", tipo: "Gasto", monto: 1500, categoria: "Ocio", descripcion: "Concierto" },
-  { id: 12, fecha: "2025-09-15", tipo: "Gasto", monto: 600, categoria: "Comida", descripcion: "Supermercado" },
-
-  // --- Agosto 2025 ---
-  { id: 13, fecha: "2025-08-30", tipo: "Ingreso", monto: 15000, categoria: "Salario", descripcion: "Quincena" },
-  { id: 14, fecha: "2025-08-28", tipo: "Gasto", monto: 750, categoria: "Servicios", descripcion: "Pago de luz" },
-  { id: 15, fecha: "2025-08-25", tipo: "Gasto", monto: 3000, categoria: "Renta", descripcion: "Pago mensual" },
-  { id: 16, fecha: "2025-08-10", tipo: "Gasto", monto: 1000, categoria: "Transporte", descripcion: "Llantas" },
-];
-
-
-// =============================================================
-//      VARIABLES GLOBALES DE GRÁFICOS
-// =============================================================
 let todasLasTransacciones = [];
 let graficoDona = null;
 let graficoBarras = null;
 
-// Paleta de colores para la gráfica de dona
 const PALETA_COLORES_DONA = [
   '#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', 
   '#ffc94d', '#36a2eb', '#ff9f40', '#9966ff'
 ];
-
-
-// =============================================================
-//      LÓGICA DEL DASHBOARD (Sin API)
-// =============================================================
 
 window.addEventListener("DOMContentLoaded", () => {
   const welcomeMsg = document.getElementById("welcomeMsg");
@@ -61,56 +23,61 @@ window.addEventListener("DOMContentLoaded", () => {
   welcomeMsg.textContent = `Hola, ${usuarioActivo.nombre}`;
 
   logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("usuarioActivo");
-    localStorage.removeItem("authToken");
-    Swal.fire({
-      icon: 'success',
-      title: 'Sesión cerrada',
-      text: 'Has cerrado sesión exitosamente.',
-      confirmButtonColor: '#7984ff',
-      background: '#0f0f23',
-      color: '#fff'
-    });
-    setTimeout(() => (window.location.href = "index.html"), 1500);
+    API.cerrarSesion();
   });
 
   document.getElementById("tipoFiltro").addEventListener("change", aplicarFiltros);
   cargarTransacciones();
 });
 
-/**
- * Carga los datos (de mockTransacciones) y los muestra
- */
-function cargarTransacciones() {
+async function cargarTransacciones() {
   const transactionsBody = document.getElementById("transactionsBody");
   const noDataMsg = document.getElementById("noDataMsg");
   transactionsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
 
-  setTimeout(() => {
-    try {
-      todasLasTransacciones = mockTransacciones; 
-      
-      if (todasLasTransacciones.length === 0) {
-        transactionsBody.innerHTML = '';
-        noDataMsg.style.display = "block";
-        noDataMsg.textContent = "No hay transacciones registradas (datos de prueba).";
-      } else {
-        aplicarFiltros();
-      }
+  try {
+    const respuestaGastos = await API.obtenerGastos();
+    const respuestaIngresos = await API.obtenerIngresos();
 
-    } catch (error) {
-      console.error(error);
+    const gastos = respuestaGastos.data || [];
+    const ingresos = respuestaIngresos.data || [];
+
+    todasLasTransacciones = [
+      ...ingresos.map(i => ({
+        id: i.id,
+        fecha: i.fecha,
+        tipo: "Ingreso",
+        monto: i.monto,
+        categoria: i.nombre_fuente,
+        descripcion: i.descripcion
+      })),
+      ...gastos.map(g => ({
+        id: g.id,
+        fecha: g.fecha,
+        tipo: "Gasto",
+        monto: g.monto,
+        categoria: g.categoria,
+        descripcion: g.descripcion
+      }))
+    ];
+
+    if (todasLasTransacciones.length === 0) {
       transactionsBody.innerHTML = '';
-      noDataMsg.textContent = "Error al cargar los datos visuales.";
       noDataMsg.style.display = "block";
-      noDataMsg.style.color = "red";
+      noDataMsg.textContent = "No hay transacciones registradas.";
+    } else {
+      aplicarFiltros();
     }
-  }, 800); // 800ms de espera simulada
+
+  } catch (error) {
+    console.error("Error cargando transacciones:", error);
+    transactionsBody.innerHTML = '';
+    noDataMsg.textContent = "Error al cargar las transacciones.";
+    noDataMsg.style.display = "block";
+    noDataMsg.style.color = "red";
+  }
 }
 
-/**
- * Función central que filtra los datos y actualiza la UI
- */
 function aplicarFiltros() {
   const tipoFiltro = document.getElementById("tipoFiltro").value;
 
@@ -121,23 +88,13 @@ function aplicarFiltros() {
     transaccionesFiltradas = todasLasTransacciones.filter(tx => tx.tipo === tipoFiltro);
   }
   
-  // 1. Renderizar la tabla
   renderizarTabla(transaccionesFiltradas);
-  
-  // 2. Calcular tarjetas de resumen
-  // (Si filtramos, usamos 'todas' para el resumen, si no, las filtradas)
   const transaccionesParaResumen = (tipoFiltro === "todos") ? todasLasTransacciones : transaccionesFiltradas;
   calcularYMostrarResumen(transaccionesParaResumen);
-
-  // 3. 🔸 ¡NUEVO! Renderizar las gráficas con los datos filtrados
-  // (El filtro de tipo también afectará a las gráficas)
   renderizarGraficaDona(transaccionesFiltradas);
   renderizarGraficaTendencia(transaccionesFiltradas);
 }
 
-/**
- * Renderiza la tabla
- */
 function renderizarTabla(transacciones) {
   const transactionsBody = document.getElementById("transactionsBody");
   const noDataMsg = document.getElementById("noDataMsg");
@@ -169,9 +126,6 @@ function renderizarTabla(transacciones) {
   });
 }
 
-/**
- * Calcula y muestra los totales
- */
 function calcularYMostrarResumen(transacciones) {
   let totalIngresos = 0;
   let totalGastos = 0;
@@ -192,15 +146,6 @@ function calcularYMostrarResumen(transacciones) {
   document.getElementById("saldoActual").textContent = formatoMoneda(saldoActual);
 }
 
-
-// =============================================================
-//      NUEVAS FUNCIONES DE GRÁFICOS
-// =============================================================
-
-/**
- * 🔹 GRÁFICA 1: DESGLOSE DE GASTOS (DONA)
- * Renderiza la gráfica de dona con el desglose de gastos por categoría.
- */
 function renderizarGraficaDona(transacciones) {
   const ctx = document.getElementById('graficaGastosDona')?.getContext('2d');
   if (!ctx) return; 
@@ -209,9 +154,8 @@ function renderizarGraficaDona(transacciones) {
     graficoDona.destroy();
   }
   
-  // Procesar datos: Agrupar gastos por categoría
   const gastosPorCategoria = transacciones
-    .filter(tx => tx.tipo === 'Gasto') // Solo gastos
+    .filter(tx => tx.tipo === 'Gasto')
     .reduce((acc, tx) => {
       if (!acc[tx.categoria]) {
         acc[tx.categoria] = 0;
@@ -222,6 +166,11 @@ function renderizarGraficaDona(transacciones) {
 
   const labels = Object.keys(gastosPorCategoria);
   const data = Object.values(gastosPorCategoria);
+
+  if (labels.length === 0) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    return;
+  }
 
   graficoDona = new Chart(ctx, {
     type: 'doughnut',
@@ -250,10 +199,6 @@ function renderizarGraficaDona(transacciones) {
   });
 }
 
-/**
- * 🔹 GRÁFICA 2: TENDENCIA MENSUAL (BARRAS)
- * Renderiza la gráfica de barras con ingresos vs gastos por mes.
- */
 function renderizarGraficaTendencia(transacciones) {
   const ctx = document.getElementById('graficaTendencia')?.getContext('2d');
   if (!ctx) return;
@@ -262,23 +207,33 @@ function renderizarGraficaTendencia(transacciones) {
     graficoBarras.destroy();
   }
 
-  // Procesar datos: Agrupar por mes (Agosto=7, Sept=8, Oct=9)
-  const labels = ['Agosto', 'Septiembre', 'Octubre'];
-  const ingresosData = [0, 0, 0];
-  const gastosData = [0, 0, 0];
+  const mesesMap = {};
+  const mesesOrdenados = [];
 
   transacciones.forEach(tx => {
-    const mes = new Date(tx.fecha).getMonth(); // 7, 8, o 9
-    const index = mes - 7; // Convertir 7->0, 8->1, 9->2
+    const fecha = new Date(tx.fecha);
+    const mesKey = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (!mesesMap[mesKey]) {
+      mesesMap[mesKey] = { ingresos: 0, gastos: 0 };
+      mesesOrdenados.push(mesKey);
+    }
 
-    if (index >= 0 && index < 3) {
-      if (tx.tipo === 'Ingreso') {
-        ingresosData[index] += tx.monto;
-      } else if (tx.tipo === 'Gasto') {
-        gastosData[index] += tx.monto;
-      }
+    if (tx.tipo === 'Ingreso') {
+      mesesMap[mesKey].ingresos += tx.monto;
+    } else {
+      mesesMap[mesKey].gastos += tx.monto;
     }
   });
+
+  const labels = mesesOrdenados.map(m => {
+    const [año, mes] = m.split('-');
+    const mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return mesesNombres[parseInt(mes) - 1];
+  });
+
+  const ingresosData = mesesOrdenados.map(m => mesesMap[m].ingresos);
+  const gastosData = mesesOrdenados.map(m => mesesMap[m].gastos);
 
   graficoBarras = new Chart(ctx, {
     type: 'bar',
@@ -288,12 +243,12 @@ function renderizarGraficaTendencia(transacciones) {
         {
           label: 'Ingresos',
           data: ingresosData,
-          backgroundColor: '#4dff91', // Color ingreso
+          backgroundColor: '#4dff91',
         },
         {
           label: 'Gastos',
           data: gastosData,
-          backgroundColor: '#ff6b6b', // Color gasto
+          backgroundColor: '#ff6b6b',
         }
       ]
     },
@@ -320,9 +275,6 @@ function renderizarGraficaTendencia(transacciones) {
   });
 }
 
-/**
- * Función de ayuda para formatear el tooltip de Chart.js
- */
 function crearTooltipMoneda(context) {
   let label = context.dataset.label || context.label || '';
   if (label) {

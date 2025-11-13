@@ -15,25 +15,24 @@
       <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
     </div>
   </header>
-<!-- BOTÓN MENÚ (Hamburger Mejorado) -->
-<div id="menuToggle" class="menu-toggle">
-  <span></span>
-  <span></span>
-  <span></span>
-</div>
 
-<!-- MENÚ LATERAL -->
-<nav id="sideMenu" class="side-menu">
-  <a href="inicio.html">🏠 Inicio</a>
-  <a href="dashboard.html">📊 Dashboard</a>
-  <a href="planes.html">🎯 Planes</a>
-  <a href="perfil.html">👤 Perfil</a>
-</nav>
+  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
+  <div id="menuToggle" class="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
+  <!-- MENÚ LATERAL -->
+  <nav id="sideMenu" class="side-menu">
+    <a href="inicio.html">🏠 Inicio</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="planes.html">🎯 Planes</a>
+    <a href="perfil.html">👤 Perfil</a>
+  </nav>
 
-<!-- OVERLAY OSCURO -->
-<div id="menuOverlay" class="menu-overlay"></div>
-
+  <!-- OVERLAY OSCURO -->
+  <div id="menuOverlay" class="menu-overlay"></div>
 
   <main class="dashboard-container">
 
@@ -45,9 +44,9 @@
     <div class="detalle-container">
 
       <section class="grafica-card">
-        <h3>Progreso Actual</h3>
+        <h3>Distribución de Gastos</h3>
         <div class="progreso-resumen-card" id="progresoResumen">
-          </div>
+        </div>
         <div class="chart-wrapper">
           <canvas id="graficaProgresoDona"></canvas>
         </div>
@@ -55,46 +54,28 @@
 
       <section class="analisis-stats-card">
         <h3>Análisis del Plan</h3>
-        <p>Estadísticas y transacciones relacionadas con este plan.</p>
+        <p>Estadísticas y recomendaciones personalizadas.</p>
         
-        <div class="analisis-stats-container">
+        <div class="analisis-stats-container" id="statsContainer">
           <div class="stat-card">
-            <h4>Ahorro Promedio Mensual</h4>
-            <p>$1,875.00</p>
+            <h4>Total Gastos</h4>
+            <p id="totalGastosAnalisis">$0.00</p>
           </div>
           <div class="stat-card">
-            <h4>Tiempo Restante Estimado</h4>
-            <p>2 Meses</p>
+            <h4>% Ahorro</h4>
+            <p id="porcentajeAhorroAnalisis">0%</p>
           </div>
           <div class="stat-card">
-            <h4>Transacciones Vinculadas</h4>
-            <p>12</p>
+            <h4>Mayor Gasto</h4>
+            <p id="mayorGastoAnalisis">-</p>
           </div>
         </div>
         
-        <div class="table-container-mini">
-          <h4>Transacciones Recientes (Ejemplo)</h4>
-          <table>
-            <tbody>
-              <tr>
-                <td>2025-10-30</td>
-                <td class="ingreso">Abono</td>
-                <td class="ingreso">$500.00</td>
-              </tr>
-              <tr>
-                <td>2025-10-25</td>
-                <td class="ingreso">Abono</td>
-                <td class="ingreso">$1,200.00</td>
-              </tr>
-              <tr>
-                <td>2025-10-20</td>
-                <td class="gasto">Retiro</td>
-                <td class="gasto">-$150.00</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="table-container-mini" id="recomendacionesContainer" style="display: none;">
+          <h4>Recomendaciones</h4>
+          <ul id="recomendacionesList" style="color: #fff; opacity: 0.8;">
+          </ul>
         </div>
-        
       </section>
       
     </div>
@@ -102,28 +83,26 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="../js/plan-detalle.js"></script>
+  <script type="module" src="../js/plan-detalle.js"></script>
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+    const mainContent = document.querySelector("main");
+
+    toggle.addEventListener("click", () => {
+      const isOpen = toggle.classList.toggle("open");
+      menu.classList.toggle("open");
+      overlay.classList.toggle("open");
+      mainContent.classList.toggle("push-content");
+    });
+
+    overlay.addEventListener("click", () => {
+      toggle.classList.remove("open");
+      menu.classList.remove("open");
+      overlay.classList.remove("open");
+      mainContent.classList.remove("push-content");
+    });
+  </script>
 </body>
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const menu = document.getElementById("sideMenu");
-  const overlay = document.getElementById("menuOverlay");
-  const mainContent = document.querySelector("main");
-
-  toggle.addEventListener("click", () => {
-    const isOpen = toggle.classList.toggle("open");
-    menu.classList.toggle("open");
-    overlay.classList.toggle("open");
-    mainContent.classList.toggle("push-content");
-  });
-
-  /* Cerrar al hacer clic en el fondo */
-  overlay.addEventListener("click", () => {
-    toggle.classList.remove("open");
-    menu.classList.remove("open");
-    overlay.classList.remove("open");
-    mainContent.classList.remove("push-content");
-  });
-</script>
-
 </html>

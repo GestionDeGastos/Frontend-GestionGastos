@@ -167,28 +167,46 @@ input::placeholder {
 
 /* =================== DASHBOARD =================== */
 .bg-dashboard {
-  background: #0f0f23; /* Un fondo oscuro sólido para el dashboard */
+  background: radial-gradient(circle at top left, #0f1630, #070b18 60%, #03050c);
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Fondo animado sutil */
+.bg-dashboard::before {
+  content: "";
+  position: fixed;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(60,80,255,0.15), transparent 70%);
+  animation: movimientoFondo 12s infinite linear;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes movimientoFondo {
+  0% { transform: translate(-20%, -10%); }
+  50% { transform: translate(10%, 20%); }
+  100% { transform: translate(-20%, -10%); }
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
-  background: rgba(15, 15, 35, 0.85);
-  border-bottom: 1px solid #7984ff;
+  padding: 18px 40px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .dashboard-header h1 {
-  font-size: 2rem;
+  font-size: 30px;
   margin: 0;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-
-  /*  Nueva separación del menú */
-  margin-left: 80px;  
+  gap: 22px;
+  margin-left: 80px;
 }
 
 .user-info {
@@ -202,19 +220,20 @@ input::placeholder {
 }
 
 .btn-logout {
-  background: #ff4d4d;
+  padding: 8px 18px !important;
+  border-radius: 10px;
+  font-weight: 500;
+  background: #ff6b6b !important;
   color: #fff;
   border: none;
-  border-radius: 25px;
-  padding: 10px 15px;
   cursor: pointer;
-  font-weight: 600;
   font-size: 0.9rem;
-  transition: 0.3s;
+  transition: .2s ease;
 }
 
 .btn-logout:hover {
-  background: #ff6b6b;
+  background: #ff4b4b !important;
+  transform: translateY(-2px);
 }
 
 .dashboard-container {
@@ -230,11 +249,15 @@ input::placeholder {
 }
 
 .table-container {
-  width: 100%;
-  overflow-x: auto; /* Para diseño responsivo en móviles */
-  background: rgba(15, 15, 35, 0.75);
-  border-radius: 15px;
-  padding: 20px;
+  width: 95%;
+  margin: 40px auto;
+  background: rgba(255,255,255,0.04);
+  padding: 25px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  overflow-x: auto;
 }
 
 #transactionsTable {
@@ -252,20 +275,28 @@ input::placeholder {
 #transactionsTable th {
   background-color: #7984ff;
   color: #0f0f23;
+  font-size: 16px;
+}
+
+#transactionsTable tbody tr:nth-child(even) {
+  background: rgba(255,255,255,0.06);
 }
 
 #transactionsTable tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background: rgba(255,255,255,0.15);
+  transition: 0.2s;
 }
 
 /* Clases para colorear ingresos vs gastos */
 .ingreso {
-  color: #4dff91;
+  color: #7aff9c;
+  text-shadow: 0 0 10px #42ff74;
   font-weight: 600;
 }
 
 .gasto {
   color: #ff6b6b;
+  text-shadow: 0 0 10px #ff4b4b;
   font-weight: 600;
 }
 
@@ -277,44 +308,56 @@ input::placeholder {
 /* =================== RESUMEN Y FILTROS =================== */
 .resumen-container {
   display: flex;
-  justify-content: space-around;
-  gap: 20px;
-  margin-bottom: 30px;
+  justify-content: space-between;
+  gap: 25px;
+  margin: 30px auto;
+  width: 95%;
 }
 
 .resumen-card {
   flex: 1;
-  background: rgba(15, 15, 35, 0.75);
-  padding: 20px;
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 22px;
+  padding: 25px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: 0.35s;
+}
+
+.resumen-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.65);
 }
 
 .resumen-card h3 {
-  margin-top: 0;
-  font-size: 1.1rem;
-  opacity: 0.8;
+  color: #d6ddff;
+  font-size: 20px;
+  margin: 0 0 8px 0;
 }
 
 .resumen-card p {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 38px;
+  font-weight: bold;
+  margin-top: 15px;
   margin-bottom: 0;
 }
 
 .resumen-card.saldo p {
-  color: #c4caff; /* Color neutro para el saldo */
+  color: #8cb4ff;
+  text-shadow: 0 0 15px #588dff;
 }
 
 .filter-container {
-  margin-bottom: 20px;
+  width: 95%;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
   padding: 15px;
   background: rgba(15, 15, 35, 0.75);
   border-radius: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .filter-container label {
@@ -322,44 +365,47 @@ input::placeholder {
 }
 
 .filter-container select {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: #11182c;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #5a7aff;
   outline: none;
+  transition: 0.2s;
 }
 
-/* A partir de aqui agregue modificaciones al sprint2 */
-.grafica-container {
-  background: rgba(15, 15, 35, 0.75);
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 30px;
-  font-family: 'Poppins', sans-serif;
+.filter-container select:hover {
+  border-color: #8fa1ff;
 }
 
-.chart-wrapper {
-  max-width: 400px;
-  margin: 0 auto;
-  font-family: 'Poppins', sans-serif;
+select option {
+  background: #ffffff;
+  color: #000000;
 }
 
+/* =================== GRÁFICAS =================== */
 .dashboard-graficas {
   display: flex;
-  flex-wrap: wrap; /* Para que en móviles se pongan uno sobre otro */
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: 25px;
+  width: 95%;
+  margin: auto;
+  flex-wrap: wrap;
 }
 
 .grafica-card {
-  flex: 1; /* Ocupa mitad de espacio */
-  min-width: 300px; /* Ancho mínimo antes de envolverse */
-  background: rgba(15, 15, 35, 0.75);
-  border-radius: 15px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-family: 'Poppins', sans-serif;
+  flex: 1;
+  min-width: 300px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 22px;
+  padding: 25px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: 0.35s;
+}
+
+.grafica-card:hover {
+  transform: translateY(-5px) scale(1.01);
 }
 
 .grafica-card h3 {
@@ -367,24 +413,15 @@ input::placeholder {
   text-align: center;
   font-weight: 500;
   opacity: 0.9;
-  font-family: 'Poppins', sans-serif;
 }
 
-/* Wrapper para la dona (para mantenerla cuadrada) */
-.chart-wrapper {
-  max-width: 300px;
-  max-height: 300px;
-  margin: 0 auto;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* Wrapper para las barras (deja que use más altura) */
+.chart-wrapper,
 .chart-wrapper-barras {
-  max-height: 300px;
+  max-height: 350px;
   margin: 0 auto;
 }
 
-/* =================== ESTILOS MENU INICIO =================== */
+/* =================== MENÚ INICIO =================== */
 
 .menu-container {
   width: 100%;
@@ -410,12 +447,11 @@ input::placeholder {
 .menu-options {
   display: flex;
   justify-content: center;
-  align-items: stretch; /* Hace que las tarjetas tengan la misma altura */
+  align-items: stretch;
   gap: 25px;
-  flex-wrap: wrap; /* Para responsividad */
+  flex-wrap: wrap;
 }
 
-/* Estilo para los botones como tarjetas */
 .btn-menu {
   flex: 1;
   min-width: 250px;
@@ -424,16 +460,14 @@ input::placeholder {
   text-decoration: none;
   border-radius: 15px;
   background: linear-gradient(145deg, #7984ff, #a3acff);
-  color: #0f0f23; /* Texto oscuro para contraste */
+  color: #0f0f23;
   font-weight: 700;
   font-size: 1.3rem;
-  
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  
   transition: transform 0.3s, box-shadow 0.3s;
   border: none;
   box-shadow: 0 4px 15px rgba(121, 132, 255, 0.3);
@@ -442,7 +476,6 @@ input::placeholder {
 .btn-menu:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(121, 132, 255, 0.5);
-  /* Sobrescribimos el hover del .btn normal */
   background: linear-gradient(145deg, #9ca4ff, #c0c6ff);
 }
 
@@ -456,50 +489,43 @@ input::placeholder {
   opacity: 0.8;
 }
 
-/* Estilo para botones deshabilitados */
-.btn-menu.disabled {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.4);
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.btn-menu.disabled:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: none;
-  box-shadow: none;
-}
-
-/* =================== ESTILOS PAGINA PLANES =================== */
+/* =================== PLANES =================== */
 
 .planes-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap; /* Para móviles */
+  flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 25px;
+  margin-top: 30px;
 }
 
 .planes-header h2 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: 1px;
 }
 
 .btn-crear {
   background: linear-gradient(90deg, #4dff91, #7cffaa);
-  color: #0f0f23; /* Texto oscuro para contraste */
+  color: #0f0f23;
   font-weight: 700;
   font-size: 1rem;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .btn-crear:hover {
   background: linear-gradient(90deg, #6dffab, #9cffc1);
+  transform: scale(1.05);
 }
 
 .btn-crear .menu-icon {
@@ -511,24 +537,35 @@ input::placeholder {
 .planes-grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  gap: 30px;
+  margin-top: 30px;
 }
 
 .plan-card {
-  background: rgba(15, 15, 35, 0.75);
-  border-radius: 15px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  backdrop-filter: blur(12px);
+  border-radius: 22px;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+  transition: .35s ease;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+.plan-card:hover {
+  transform: translateY(-10px);
+  border-color: #738aff;
+  box-shadow: 0 12px 30px rgba(115,138,255,0.25);
+}
+
 .plan-card h3 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 22px;
   font-weight: 600;
   color: #c4caff;
+  letter-spacing: .4px;
 }
 
 .plan-card .plan-meta {
@@ -541,6 +578,7 @@ input::placeholder {
 .plan-card .progreso-info {
   font-size: 1.1rem;
   font-weight: 500;
+  margin-bottom: 10px;
 }
 
 .plan-card .progreso-actual {
@@ -554,24 +592,24 @@ input::placeholder {
   opacity: 0.8;
 }
 
-/* Barra de progreso */
+/* Barra de progreso PRO */
 .progress-bar {
+  height: 12px !important;
   width: 100%;
-  height: 10px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background-color: #4dff91; /* Color "ingreso" por defecto */
-  border-radius: 5px;
-  transition: width 0.5s ease;
+  background: linear-gradient(90deg, #45ff84, #3ffd6f);
+  border-radius: 20px;
+  transition: width .4s ease;
 }
 
 .progress-bar-fill.gasto {
-  background-color: #ff6b6b; /* Color "gasto" para presupuestos */
+  background: linear-gradient(90deg, #ff6b6b, #ff4b4b);
 }
 
 /* Acciones de la tarjeta */
@@ -583,18 +621,19 @@ input::placeholder {
 }
 
 .btn-plan-detalle {
-  background: #7984ff;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #738aff, #9faaff);
   color: #fff;
   text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  transition: .25s ease;
   font-weight: 500;
-  transition: background 0.3s;
+  border: none;
 }
 
 .btn-plan-detalle:hover {
-  background: #9ca4ff;
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #5f72ff, #8692ff);
 }
 
 .btn-plan-delete {
@@ -603,14 +642,15 @@ input::placeholder {
   color: rgba(255, 255, 255, 0.5);
   font-size: 1.3rem;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: .2s ease;
 }
 
 .btn-plan-delete:hover {
+  transform: scale(1.25);
   color: #ff6b6b;
 }
 
-/* =================== ESTILOS MODAL =================== */
+/* =================== MODAL =================== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -619,77 +659,108 @@ input::placeholder {
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(5px);
-  display: none; /* Oculto por defecto */
+  display: none;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
+.modal-overlay.open {
+  display: flex;
+}
+
 .modal-content {
-  background: #0f0f23;
-  border: 1px solid #7984ff;
+  background: rgba(0,0,0,0.60);
+  backdrop-filter: blur(12px);
   border-radius: 20px;
-  padding: 30px;
+  padding: 0;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 0 30px rgba(121, 132, 255, 0.3);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  padding: 25px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: #7984ff;
 }
 
 .modal-header h2 {
   margin: 0;
-  color: #fff;
+  font-size: 1.5em;
 }
 
 .btn-close-modal {
   background: none;
   border: none;
-  color: #fff;
-  font-size: 1.5rem;
-  font-weight: 300;
+  color: #7984ff;
+  font-size: 1.5em;
   cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.3s;
+  transition: all 0.3s ease;
 }
 
 .btn-close-modal:hover {
-  opacity: 1;
+  color: #ff6b6b;
+  transform: scale(1.2);
 }
 
-.modal-body .form-group {
+.modal-body {
+  padding: 25px;
+}
+
+.form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
-.modal-body label {
-  font-size: 0.95rem;
-  margin-bottom: 5px;
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #7984ff;
+  font-weight: bold;
 }
 
-.modal-body input,
-.modal-body select {
-  margin-top: 0; /* Quitamos el margen superior que tenían los inputs generales */
+.form-group input {
   padding: 12px;
-  border-radius: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(121, 132, 255, 0.3);
+  border-radius: 14px;
+  background-color: rgba(255, 255, 255, 0.07);
   color: #fff;
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
   outline: none;
-  font-size: 1rem;
+  border-color: #7984ff;
+  background-color: rgba(121, 132, 255, 0.1);
+  box-shadow: 0 0 10px rgba(121, 132, 255, 0.3);
 }
 
 .modal-body .btn {
-  width: 100%; /* El botón ocupa todo el ancho */
+  width: 100%;
+  padding: 12px;
+  background: #738aff !important;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-/* =================== ESTILOS DETALLE PLAN =================== */
+.modal-body .btn:hover {
+  background: #5f72ff !important;
+  transform: scale(1.05);
+}
+
+/* =================== DETALLE PLAN =================== */
 
 .detalle-header {
   display: flex;
@@ -703,10 +774,8 @@ input::placeholder {
 .detalle-header h2 {
   margin: 0;
   font-size: 1.8rem;
-  /* El ID #planTitulo se encargará del texto */
 }
 
-/* Reutilizamos el botón 'back' de la página de registro/recuperar */
 .detalle-header .back {
   font-size: 1.1rem;
   font-weight: 500;
@@ -722,20 +791,17 @@ input::placeholder {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Contenedor principal de dos columnas */
 .detalle-container {
   display: flex;
-  flex-wrap: wrap; /* Para móviles */
+  flex-wrap: wrap;
   gap: 20px;
 }
 
-/* La tarjeta gráfica de la izquierda (reutiliza .grafica-card) */
 .detalle-container .grafica-card {
   flex: 1;
   min-width: 300px;
 }
 
-/* Tarjeta de Resumen de Progreso (dentro de la gráfica-card) */
 .progreso-resumen-card {
   background: rgba(15, 15, 35, 0.85);
   border-radius: 15px;
@@ -767,13 +833,12 @@ input::placeholder {
 .progreso-resumen-card h4 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #c4caff; /* Color saldo/neutro */
+  color: #c4caff;
   margin: 0 0 5px 0;
 }
 
-/* Tarjeta de estadísticas de la derecha */
 .analisis-stats-card {
-  flex: 1.5; /* Un poco más ancha */
+  flex: 1.5;
   min-width: 320px;
   background: rgba(15, 15, 35, 0.75);
   border-radius: 15px;
@@ -787,6 +852,7 @@ input::placeholder {
   font-weight: 500;
   opacity: 0.9;
 }
+
 .analisis-stats-card > p {
   text-align: center;
   opacity: 0.7;
@@ -822,7 +888,6 @@ input::placeholder {
   color: #c4caff;
 }
 
-/* Mini tabla para transacciones */
 .table-container-mini {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
@@ -843,117 +908,35 @@ input::placeholder {
   padding: 8px 5px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 .table-container-mini tr:last-child td {
   border-bottom: none;
 }
+
 /* ========== MENÚ LATERAL (Hamburger Menu) ========== */
 
 .menu-toggle {
   position: absolute;
-  left: 20px;
-  top: 22px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  z-index: 1100;
-}
-
-.menu-toggle div {
+  left: 15px;
+  top: 18px;
   width: 28px;
-  height: 3px;
-  background: white;
-  border-radius: 5px;
-  transition: 0.3s;
-}
-
-/* Menú lateral */
-.side-menu {
-  position: fixed;
-  top: 0;
-  left: -260px;
-  width: 250px;
-  height: 100%;
-  background: rgba(15, 15, 35, 0.95);
-  backdrop-filter: blur(5px);
-  padding-top: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding-left: 30px;
-  border-right: 1px solid #7984ff;
-  transition: left 0.3s ease-in-out;
-  z-index: 1000;
-}
-
-.side-menu a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 1.2rem;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.side-menu a:hover {
-  color: #7984ff;
-}
-
-.side-menu .disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.side-menu.open {
-  left: 0;
-}
-
-/* Animación del botón al abrir */
-.menu-toggle.open div:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-.menu-toggle.open div:nth-child(2) {
-  opacity: 0;
-}
-.menu-toggle.open div:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
-/* ========== PRO MENU ========== */
-
-.menu-toggle {
-  position: absolute;
-  left: 30px;
-  top: 25px;
-  width: 40px;
-  height: 32px;
+  height: 23px;
   cursor: pointer;
-  z-index: 1200;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  z-index: 1200;
 }
 
 .menu-toggle span {
   display: block;
-  height: 5px;
+  height: 3px;
   background: white;
-  border-radius: 5px;
-  transition: 0.3s ease;
+  border-radius: 2px;
+  transition: 0.3s;
 }
 
-/* Animación X */
-.menu-toggle.open span:nth-child(1) {
-  transform: rotate(45deg) translate(7px, 7px);
-}
-
-.menu-toggle.open span:nth-child(2) {
-  opacity: 0;
-}
-
-.menu-toggle.open span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
-}
-
-/* Menú lateral PRO */
+/* Menú lateral */
 .side-menu {
   position: fixed;
   top: 0;
@@ -1015,388 +998,26 @@ input::placeholder {
   pointer-events: all;
 }
 
-/* Desplazar contenido hacia la derecha cuando el menú abre */
+/* Desplazar contenido */
 .push-content {
   transform: translateX(200px);
   transition: 0.35s ease;
 }
-/* ==========================================================
-   MEJORAS DE DISEÑO SUAVE — SIN ROMPER TU MAQUETADO
-   ========================================================== */
 
-/* Fondo general bonito */
-body.bg-dashboard {
-    background: linear-gradient(135deg, #0c0f27, #141833, #0f112a);
-    background-attachment: fixed;
+/* Animación X */
+.menu-toggle.open span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px);
 }
 
-/* HEADER — separo mejor menú + FINTRACK */
-.menu-toggle {
-    margin-right: 20px;
-    transform: scale(1.1);
+.menu-toggle.open span:nth-child(2) {
+  opacity: 0;
 }
 
-.dashboard-header h1 {
-    display: flex;
-    align-items: center;
-    gap: 18px;    /* <-- separa la hamburguesa del FINTRACK */
+.menu-toggle.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
 }
 
-/* FINTRACK logo más centrado y visible */
-.dashboard-header h1 {
-    font-size: 28px;
-    font-weight: 600;
-}
-/* ==========================================================
-   MEJORAS DE DISEÑO SUAVE — SIN ROMPER TU MAQUETADO
-   ========================================================== */
-
-/* Fondo general bonito */
-body.bg-dashboard {
-    background: linear-gradient(135deg, #0c0f27, #141833, #0f112a);
-    background-attachment: fixed;
-}
-
-/* HEADER — separo mejor menú + FINTRACK */
-.menu-toggle {
-    margin-right: 20px;
-    transform: scale(1.1);
-}
-
-.dashboard-header h1 {
-    display: flex;
-    align-items: center;
-    gap: 18px;    /* <-- separa la hamburguesa del FINTRACK */
-}
-
-/* FINTRACK logo más centrado y visible */
-.dashboard-header h1 {
-    font-size: 28px;
-    font-weight: 600;
-}
-
-/* =========================================
-   SECCIÓN: PLANES — SOLO MEJORAS VISUALES
-   ========================================= */
-
-.planes-header h2 {
-    font-size: 36px;
-    margin-top: 30px;
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-/* Tarjeta más elegante sin mover estructura */
-.plan-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px;
-    padding: 25px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    transition: 0.25s ease;
-}
-
-.plan-card:hover {
-    transform: translateY(-6px);
-    border-color: #738aff;
-}
-
-/* Barra de progreso mejorada */
-.progress-bar {
-    height: 10px !important;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.10);
-}
-
-.progress-bar-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width .4s ease;
-}
-
-/* Ahorro verde - Gasto rojo */
-.progress-bar-fill:not(.gasto) {
-    background: #45ff84;
-}
-
-.progress-bar-fill.gasto {
-    background: #ff6b6b;
-}
-
-/* Botón Detalles migliorado sin romper nada */
-.btn-plan-detalle {
-    background: #738aff;
-    border-radius: 12px;
-    padding: 10px 18px;
-    transition: .25s ease;
-}
-
-.btn-plan-detalle:hover {
-    background: #5f72ff;
-    transform: scale(1.05);
-}
-
-/* =========================================
-   MODAL — MÁS BONITO SIN CAMBIAR ESTRUCTURA
-   ========================================= */
-
-.modal-content {
-    background: rgba(0,0,0,0.60);
-    backdrop-filter: blur(12px);
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
-}
-
-/* Inputs más pro */
-.modal-content input,
-.modal-content select {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: white;
-    border-radius: 14px;
-}
-
-/* Botón del modal */
-.modal-content button {
-    background: #738aff !important;
-    border-radius: 14px;
-    transition: .25s ease;
-}
-
-.modal-content button:hover {
-    background: #5f72ff !important;
-    transform: scale(1.05);
-}
-/* ==========================================================
-   MODO ULTRAPRO — FINTRACK FINTECH THEME
-   ========================================================== */
-
-/* Fondo animado estilo fintech premium */
-body.bg-dashboard {
-    background: radial-gradient(at 20% 20%, #1a1f3c, #0b0e1f 70%);
-    background-attachment: fixed;
-    position: relative;
-    overflow-x: hidden;
-}
-
-/* Luz suave animada */
-body.bg-dashboard::before {
-    content: "";
-    position: fixed;
-    width: 500px;
-    height: 500px;
-    background: rgba(94, 132, 255, 0.15);
-    filter: blur(140px);
-    border-radius: 50%;
-    top: -100px;
-    left: -80px;
-    z-index: -1;
-    animation: luz1 18s infinite alternate ease-in-out;
-}
-
-@keyframes luz1 {
-    0% { transform: translate(0,0) scale(1); }
-    100% { transform: translate(120px, 80px) scale(1.4); }
-}
-
-/* ==========================================================
-   HEADER PRO
-   ========================================================== */
-
-.dashboard-header {
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding: 18px 40px;
-}
-
-.dashboard-header h1 {
-    font-size: 30px;
-    display: flex;
-    align-items: center;
-    gap: 22px;
-}
-
-/* Icono menú pro */
-/* Ajuste tamaño del botón */
-.menu-toggle {
-    width: 28px;        /* antes 35-40 */
-    height: 23px;       /* antes más alto */
-    top: 18px;          /* lo baja o sube */
-    left: 15px;         /* separa del borde */
-}
-
-
-/* Ajuste tamaño del botón hamburguesa */
-.menu-toggle {
-    width: 28px;        /* antes 35-40 */
-    height: 23px;       /* antes más alto */
-    top: 18px;          /* lo baja o sube */
-    left: 15px;         /* separa del borde */
-}
-
-/* Barras internas */
-.menu-toggle span {
-    height: 3px;        /* barra más delgada */
-    border-radius: 2px;
-}
-
-/* Espaciado entre barras */
-.menu-toggle span:not(:last-child) {
-    margin-bottom: 4px;
-}
-
-
-
-/* Botón cerrar sesión */
-.btn-logout {
-    padding: 8px 18px !important;
-    border-radius: 10px;
-    font-weight: 500;
-    background: #ff6b6b !important;
-    transition: .2s ease;
-}
-
-.btn-logout:hover {
-    background: #ff4b4b !important;
-    transform: translateY(-2px);
-}
-
-/* ==========================================================
-   PLANES — TARJETAS ULTRAPRO
-   ========================================================== */
-
-/* Contenedor general */
-.planes-grid-container {
-    margin-top: 30px;
-    gap: 30px !important;
-}
-
-/* Tarjeta PRO */
-.plan-card {
-    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-    backdrop-filter: blur(12px);
-    border-radius: 22px;
-    padding: 28px;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
-    transition: .35s ease;
-}
-
-.plan-card:hover {
-    transform: translateY(-10px);
-    border-color: #738aff;
-    box-shadow: 0 12px 30px rgba(115,138,255,0.25);
-}
-
-.plan-card h3 {
-    font-size: 22px;
-    margin-bottom: 5px;
-    letter-spacing: .4px;
-}
-
-.progreso-info {
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-/* Barra de progreso PRO */
-.progress-bar {
-    height: 12px !important;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.10);
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    border-radius: 20px;
-    background: linear-gradient(90deg, #45ff84, #3ffd6f);
-    transition: width .4s ease;
-}
-
-/* Gasto rojo */
-.progress-bar-fill.gasto {
-    background: linear-gradient(90deg, #ff6b6b, #ff4b4b);
-}
-
-/* Botón detalles PRO */
-.btn-plan-detalle {
-    padding: 12px 20px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #738aff, #9faaff);
-    transition: .25s ease;
-}
-
-.btn-plan-detalle:hover {
-    transform: scale(1.08);
-    background: linear-gradient(135deg, #5f72ff, #8692ff);
-}
-
-/* Icono basura */
-.btn-plan-delete {
-    transition: .2s ease;
-}
-
-.btn-plan-delete:hover {
-    transform: scale(1.25);
-    color: #ff6b6b;
-}
-
-/* ================================
-   mejoras
-   ================================ */
-
-select {
-    background: rgba(255, 255, 255, 0.08); /* Fondo suave oscuro */
-    border: 1px solid #7984ff;             /* Borde azul */
-    color: #ffffff;                        /* Texto blanco */
-    padding: 12px 16px;
-    width: 100%;
-    border-radius: 14px;
-    font-size: 1rem;
-    outline: none;
-    cursor: pointer;
-    transition: 0.25s ease;
-    appearance: none; /* Remueve estilo feo del navegador */
-}
-
-/* Icono de despliegue moderno */
-select::-ms-expand {
-    display: none;
-}
-
-/* Hover */
-select:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: #aabbff;
-}
-
-/* Focus (cuando se abre o selecciona) */
-select:focus {
-    border-color: #cfd6ff;
-    box-shadow: 0 0 12px #7984ff60;
-    background: rgba(255, 255, 255, 0.18);
-}
-
-/* Opciones internas del menú */
-select option {
-    background: #ffffff !important; /* Fondo blanco */
-    color: #000000 !important;      /* TEXTO NEGRO — bien visible */
-    padding: 12px;
-    font-size: 1rem;
-}
-
-/* Hover de las opciones */
-select option:hover {
-    background: #e6ebff !important; /* Azul clarito */
-    color: #000 !important;
-}
-
-/* ======================
-   PERFIL BÁSICO
-   ====================== */
+/* =================== PERFIL =================== */
 
 .perfil-card {
   margin: 80px auto;
@@ -1415,207 +1036,11 @@ select option:hover {
   border-radius: 50%;
   background-size: cover;
   background-position: center;
-  background-image: url('https://i.imgur.com/EFYy8US.png'); /* icono genérico */
+  background-image: url('https://i.imgur.com/EFYy8US.png');
   border: 3px solid #7984ff;
 }
 
 .perfil-card h2 {
   color: #fff;
   font-size: 1.4rem;
-}
-/* ============================
-    FONDO ANIMADO 
-============================ */
-body.bg-dashboard {
-    background: radial-gradient(circle at top left, #0f1630, #070b18 60%, #03050c);
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-/* Fondo animado sutil */
-body.bg-dashboard::before {
-    content: "";
-    position: fixed;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(60,80,255,0.15), transparent 70%);
-    animation: movimientoFondo 12s infinite linear;
-    pointer-events: none;
-}
-
-@keyframes movimientoFondo {
-    0% { transform: translate(-20%, -10%); }
-    50% { transform: translate(10%, 20%); }
-    100% { transform: translate(-20%, -10%); }
-}
-
-/* ============================
-   🎛 TARJETAS DEL RESUMEN
-============================ */
-.resumen-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 25px;
-    margin: 30px auto;
-    width: 95%;
-}
-
-.resumen-card {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 22px;
-    padding: 25px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    transition: 0.35s;
-}
-
-.resumen-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.65);
-}
-
-.resumen-card h3 {
-    color: #d6ddff;
-    font-size: 20px;
-    margin-bottom: 8px;
-}
-
-.resumen-card p {
-    font-size: 38px;
-    font-weight: bold;
-    margin-top: 15px;
-}
-
-/* Colores PRO */
-.ingreso { color: #7aff9c; text-shadow: 0 0 10px #42ff74; }
-.gasto { color: #ff6b6b; text-shadow: 0 0 10px #ff4b4b; }
-.saldo { color: #8cb4ff; text-shadow: 0 0 15px #588dff; }
-
-/* ============================
-   TARJETAS DE GRÁFICAS
-============================ */
-.dashboard-graficas {
-    display: flex;
-    gap: 25px;
-    width: 95%;
-    margin: auto;
-}
-
-.grafica-card {
-    flex: 1;
-    background: rgba(255,255,255,0.06);
-    border-radius: 22px;
-    padding: 25px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.12);
-    transition: 0.35s;
-}
-
-.grafica-card:hover {
-    transform: translateY(-5px) scale(1.01);
-}
-
-/* Ajuste tamaño gráficas */
-.chart-wrapper,
-.chart-wrapper-barras {
-    width: 100%;
-    height: 350px;
-}
-
-/* ============================
-   TABLA MEJORADA 
-============================ */
-.table-container {
-    width: 95%;
-    margin: 40px auto;
-    background: rgba(255,255,255,0.04);
-    padding: 25px;
-    border-radius: 22px;
-    border: 1px solid rgba(255,255,255,0.12);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    color: white;
-    font-size: 15px;
-}
-
-th {
-    background: rgba(255,255,255,0.10);
-    padding: 12px;
-    text-align: left;
-    font-size: 16px;
-}
-
-td {
-    padding: 12px;
-}
-
-tr:nth-child(even) {
-    background: rgba(255,255,255,0.06);
-}
-
-tr:hover {
-    background: rgba(255,255,255,0.15);
-    transition: 0.2s;
-}
-
-/* ============================
-   🎛 SELECT Y FILTROS
-============================ */
-.filter-container {
-    width: 95%;
-    margin: 20px auto;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.filter-container select {
-    background: #11182c;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 12px;
-    border: 1px solid #5a7aff;
-    outline: none;
-    transition: 0.2s;
-}
-
-.filter-container select:hover {
-    border-color: #8fa1ff;
-}
-
-/* Aseguramos texto negro en menú */
-select option {
-    background: #ffffff;
-    color: #000000;
-}
-
-/* ============================
-    MENÚ LATERAL 
-============================ */
-.side-menu {
-    background: rgba(15, 20, 40, 0.92);
-    backdrop-filter: blur(15px);
-    border-right: 1px solid rgba(255,255,255,0.1);
-}
-
-.side-menu a {
-    padding: 15px;
-    font-size: 20px;
-    color: #fff;
-    border-radius: 12px;
-    transition: 0.25s;
-}
-
-.side-menu a:hover {
-    background: rgba(255,255,255,0.15);
-    transform: translateX(8px);
 }
