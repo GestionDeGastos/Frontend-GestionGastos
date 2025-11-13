@@ -1,6 +1,8 @@
 // =================== CONFIGURACIÓN GENERAL ===================
-// 🔹 URL del backend (La quitamos, ya no se usa)
-// const API_URL = "http://127.0.0.1:8010"; 
+
+const CONFIG = {
+  API_URL: "http://127.0.0.1:8000",
+};
 
 function showAlert(icon, title, text) {
   Swal.fire({
@@ -14,73 +16,93 @@ function showAlert(icon, title, text) {
 }
 
 // =============================================================
-//      SECCIÓN DE CONEXIÓN (AHORA SIMULADA)
+//      CONEXIÓN REAL CON BACKEND (FASTAPI + SUPABASE)
 // =============================================================
 
 /**
- * SIMULADO: Registra un nuevo usuario.
+ * REGISTRO REAL
  */
 async function registerUser(data) {
-  console.log("SIMULADO: Registrando usuario", data);
-  // Simular un retraso
-  await new Promise(resolve => setTimeout(resolve, 500));
-  // Simplemente resolvemos con éxito
-  return { success: true, message: "Usuario registrado (simulado)" };
+  const res = await fetch(`${CONFIG.API_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nombre: data.nombre,
+      apellido: data.apellido,
+      edad: data.edad,
+      email: data.email,
+      password: data.pass
+    })
+  });
+
+  const json = await res.json();
+
+  if (!res.ok) {
+    throw new Error(json.detail || "Error al registrar");
+  }
+
+  return json;
 }
 
 /**
- * SIMULADO: Inicia sesión de un usuario.
- * Esto te permitirá entrar al dashboard.
+ * LOGIN REAL
  */
 async function loginUser(email, pass) {
-  console.log("SIMULADO: Iniciando sesión con", email);
+  const res = await fetch(`${CONFIG.API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password: pass })
+  });
 
-  // Simular un pequeño retraso
-  await new Promise(resolve => setTimeout(resolve, 500));
+  const data = await res.json();
 
-  // Simulación de error simple (solo para que veas)
-  if (pass.length < 4) {
-    throw new Error("Contraseña muy corta (simulado)");
+  if (!res.ok) {
+    throw new Error(data.detail || "Error al iniciar sesión");
   }
-  
-  // Guardamos un token falso
-  localStorage.setItem("authToken", "fake-jwt-token-for-visual-testing");
-  
-  // Guardamos datos básicos del usuario
-  localStorage.setItem("usuarioActivo", JSON.stringify({ 
-    email: email, 
-    nombre: email.split('@')[0] // Un nombre de prueba basado en el email
+
+  // Guardar token real
+  localStorage.setItem("authToken", data.access_token);
+
+  // Guardar datos del usuario
+  localStorage.setItem("usuarioActivo", JSON.stringify({
+    email: email,
+    nombre: email.split("@")[0]
   }));
-  
-  return { access_token: "fake-jwt-token-for-visual-testing" };
+
+  return data;
 }
 
 /**
- * SIMULADO: Verifica si el usuario tiene sesión activa
+ * VERIFICAR SESIÓN REAL
  */
 async function verificarSesion() {
   const token = localStorage.getItem("authToken");
 
   if (!token) {
-    console.log("Simulado: No hay token, redirigiendo a login.");
-    // Redirigir al login (index.html en tu caso)
-    window.location.href = "/index.html"; 
-    return false;
+    window.location.href = "index.html";
+    return;
   }
 
-  // Si hay un token (aunque sea falso), decimos que es válido.
-  console.log("Simulado: Sesión válida con token falso.");
-  return true;
+  const res = await fetch(`${CONFIG.API_URL}/perfil`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("usuarioActivo");
+    window.location.href = "index.html";
+  }
 }
 
 /**
- * Cierra sesión del usuario
- * (Esta función no cambia, es solo lógica de localStorage)
+ * CERRAR SESIÓN REAL
  */
 function logout() {
   localStorage.removeItem("authToken");
   localStorage.removeItem("usuarioActivo");
-  window.location.href = "/index.html"; // O login.html, usa el correcto
+  window.location.href = "index.html";
 }
 
 // =============================================================
@@ -88,86 +110,81 @@ function logout() {
 // =============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Si estamos en el dashboard, verificar que tenga sesión
-  if (window.location.pathname.includes("dashboard")) {
-    // 🔸 ¡CAMBIO AQUÍ! Llamamos a la versión simulada
+  if (
+    window.location.pathname.includes("dashboard") ||
+    window.location.pathname.includes("inicio")
+  ) {
     verificarSesion();
   }
 });
 
 // =============================================================
-//      FORMULARIOS (CONECTADOS A FUNCIONES SIMULADAS)
+//      FORMULARIOS – YA CONECTADOS AL BACKEND REAL
 // =============================================================
-// (Todo este bloque no cambia, ya que ahora llama
-// a las funciones simuladas 'registerUser' y 'loginUser')
 
-// 🔹 Registro
+// 🔹 REGISTRO
 document.getElementById("registerForm")?.addEventListener("submit", async e => {
   e.preventDefault();
   const form = e.target;
+
   const data = {
     nombre: form[0].value.trim(),
-    apellido: form[1].value.trim(), 
-    edad: form[2].value.trim(),     
+    apellido: form[1].value.trim(),
+    edad: form[2].value.trim(),
     email: form[3].value.trim(),
     pass: form[4].value.trim()
   };
-  
+
   if (!data.nombre || !data.email || !data.pass) {
-    return showAlert("warning", "Campos vacíos", "Completa Nombre, Correo y Contraseña");
+    return showAlert("warning", "Campos vacíos", "Completa todos los campos requeridos");
   }
 
   try {
-    await registerUser(data); // Llama a la función simulada
-    showAlert("success", "Registro exitoso", "Tu cuenta ha sido creada (Simulado)");
+    await registerUser(data);
+    showAlert("success", "Registro exitoso", "Tu cuenta ha sido creada correctamente");
+    
     setTimeout(() => {
       window.location.href = "index.html";
     }, 1500);
+
   } catch (err) {
-    showAlert("error", "Error en registro", err.message);
+    showAlert("error", "Error al registrar", err.message);
   }
 });
 
-// 🔹 Login
+// 🔹 LOGIN
 document.getElementById("loginForm")?.addEventListener("submit", async e => {
   e.preventDefault();
+
   const form = e.target;
   const email = form[0].value.trim();
   const pass = form[1].value.trim();
-  
+
   if (!email || !pass) {
     return showAlert("warning", "Campos vacíos", "Completa todos los campos");
   }
 
   try {
-    await loginUser(email, pass); // Llama a la función simulada
+    await loginUser(email, pass);
     showAlert("success", "Inicio exitoso", "Bienvenido");
-    
+
     setTimeout(() => {
-      // ⬇️ ¡CAMBIO AQUÍ! ⬇️
-      window.location.href = "inicio.html"; // Antes decía "dashboard.html"
-      // ⬆️ ¡CAMBIO AQUÍ! ⬆️
-    }, 1500);
+      window.location.href = "inicio.html";
+    }, 1200);
 
   } catch (err) {
-    showAlert("error", "Error de inicio", err.message);
+    showAlert("error", "Error al iniciar sesión", err.message);
   }
 });
 
-// 🔹 Recuperar (sigue siendo visual)
+// 🔹 RECUPERAR CONTRASEÑA (pendiente)
 document.getElementById("recuperarForm")?.addEventListener("submit", async e => {
   e.preventDefault();
   const email = e.target[0].value.trim();
-  
+
   if (!email) {
     return showAlert("warning", "Campo vacío", "Ingresa tu correo electrónico");
   }
 
-  try {
-    // TODO: Conectar con endpoint /auth/recover cuando esté listo
-    showAlert("info", "En desarrollo", "Esta función será habilitada pronto");
-    
-  } catch (err) {
-    showAlert("error", "Error", err.message);
-  }
+  showAlert("info", "En desarrollo", "Pronto estará disponible.");
 });
