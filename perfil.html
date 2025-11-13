@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Perfil</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-dashboard">
+
+  <!-- BOTÓN DEL MENÚ (3 rayitas) -->
+  <div id="menuToggle" class="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- MENÚ LATERAL -->
+  <nav id="sideMenu" class="side-menu">
+    <a href="inicio.html">🏠 Inicio</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="planes.html">🎯 Planes</a>
+    <a href="perfil.html">👤 Perfil</a>
+  </nav>
+
+  <header class="dashboard-header">
+    <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
+    <div class="user-info">
+      <span id="welcomeMsg">Perfil</span>
+      <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <div class="perfil-card">
+      <div class="perfil-foto"></div>
+      <h2 id="perfilNombre">Cargando...</h2>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script type="module" src="../js/inicio.js"></script>
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+
+    toggle.addEventListener("click", () => {
+      menu.classList.toggle("open");
+    });
+  </script>
+</body>
+</html>

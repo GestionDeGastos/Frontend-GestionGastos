@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FINTRACK - Dashboard</title>
+  <title>FINTRACK - Inicio</title>
   <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body class="bg-dashboard">
@@ -34,72 +34,34 @@
   <div id="menuOverlay" class="menu-overlay"></div>
 
   <main class="dashboard-container">
-    
-    <section class="resumen-container">
-      <div class="resumen-card">
-        <h3>Total Ingresos</h3>
-        <p id="totalIngresos" class="ingreso">$0.00</p>
-      </div>
-      <div class="resumen-card">
-        <h3>Total Gastos</h3>
-        <p id="totalGastos" class="gasto">$0.00</p>
-      </div>
-      <div class="resumen-card saldo">
-        <h3>Saldo Actual</h3>
-        <p id="saldoActual">$0.00</p>
-      </div>
-    </section>
-
-    <div class="dashboard-graficas">
-      <section class="grafica-card">
-        <h3>Desglose de Gastos</h3>
-        <div class="chart-wrapper">
-          <canvas id="graficaGastosDona"></canvas>
-        </div>
-      </section>
-
-      <section class="grafica-card">
-        <h3>Tendencia Mensual</h3>
-        <div class="chart-wrapper-barras">
-          <canvas id="graficaTendencia"></canvas>
-        </div>
-      </section>
-    </div>
-
-    <h2>Mis Transacciones</h2>
-    
-    <div class="filter-container">
-      <label for="tipoFiltro">Filtrar por tipo:</label>
-      <select id="tipoFiltro">
-        <option value="todos">Todos</option>
-        <option value="Ingreso">Ingresos</option>
-        <option value="Gasto">Gastos</option>
-      </select>
-    </div>
-
-    <div class="table-container">
-      <table id="transactionsTable">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Tipo</th>
-            <th>Monto</th>
-            <th>Categoría</th>
-            <th>Descripción</th>
-          </tr>
-        </thead>
-        <tbody id="transactionsBody">
-        </tbody>
-      </table>
-      <div id="noDataMsg" style="display: none; text-align: center; padding: 20px;">
-        No hay transacciones registradas.
+    <div class="menu-container">
+      <h2>Menú Principal</h2>
+      <p>Selecciona la sección a la que deseas ir.</p>
+      
+      <div class="menu-options">
+        <a href="perfil.html" class="btn btn-menu">
+          <span class="menu-icon">👤</span>
+          Perfil
+          <span style="opacity:0.6;">(Básico)</span>
+        </a>
+        
+        <a href="dashboard.html" class="btn btn-menu">
+          <span class="menu-icon">📊</span>
+          Dashboard
+          <span>(Gestión de gastos)</span>
+        </a>
+        
+        <a href="planes.html" class="btn btn-menu">
+          <span class="menu-icon">🎯</span>
+          Plan
+          <span>(Metas y Presupuestos)</span>
+        </a>
       </div>
     </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="../js/dashboard.js"></script>
+  <script type="module" src="../js/inicio.js"></script>
   <script>
     const toggle = document.getElementById("menuToggle");
     const menu = document.getElementById("sideMenu");

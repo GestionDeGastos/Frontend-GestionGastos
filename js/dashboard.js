@@ -1,163 +1,83 @@
 // js/dashboard.js
+import * as API from './api.js';
 
-// URL del backend (debe ser la misma que en script.js)
-const API_URL = "http://127.0.0.1:8010"; 
-
-// Variable global para almacenar todas las transacciones
 let todasLasTransacciones = [];
+let graficoDona = null;
+let graficoBarras = null;
 
-// =============================================================
-//      SECCIÓN DE CONEXIÓN REAL AL BACKEND
-// =============================================================
-
-/**
- * Obtiene los datos reales de ingresos y gastos del backend.
- * Utiliza el token guardado en localStorage.
- */
-async function getFinanzasReales() {
-  const token = localStorage.getItem("authToken");
-  if (!token) {
-    // Si no hay token, no podemos pedir datos.
-    throw new Error("No autenticado");
-  }
-
-  const headers = {
-    "Authorization": `Bearer ${token}`, // Así lo espera el backend
-    "Content-Type": "application/json"
-  };
-
-  try {
-    // Hacemos las dos peticiones en paralelo
-    const [resIngresos, resGastos] = await Promise.all([
-      fetch(`${API_URL}/ingresos/`, { headers }), // Llama a la ruta de ingresos
-      fetch(`${API_URL}/gastos/`, { headers })   // Llama a la ruta de gastos
-    ]);
-
-    // Manejo de error de autenticación (token expirado o inválido)
-    if (resIngresos.status === 401 || resGastos.status === 401) {
-      throw new Error("Token expirado o inválido");
-    }
-    
-    // Manejo de error 404 (si las rutas aún no existen en el backend)
-    if (resIngresos.status === 404 || resGastos.status === 404) {
-        console.warn("Una de las rutas (ingresos/gastos) no fue encontrada. Esperando implementación del backend.");
-        // Devuelve arrays vacíos para que la UI no se rompa
-        const dataIngresos = resIngresos.ok ? await resIngresos.json() : { data: [] };
-        const dataGastos = resGastos.ok ? await resGastos.json() : { data: [] };
-        
-        return [
-            ...(dataIngresos.data || []).map(item => ({ ...item, tipo: "Ingreso", categoria: item.concepto })),
-            ...(dataGastos.data || []).map(item => ({ ...item, tipo: "Gasto" }))
-        ];
-    }
-
-    if (!resIngresos.ok || !resGastos.ok) {
-      throw new Error("Error al cargar los datos del servidor");
-    }
-
-    const dataIngresos = await resIngresos.json();
-    const dataGastos = await resGastos.json();
-
-    // Combinamos los resultados en un solo array
-    // 1. Mapeamos ingresos para que coincidan con la tabla
-    const ingresos = dataIngresos.data.map(item => ({
-      ...item,
-      tipo: "Ingreso",
-      categoria: item.concepto // El backend lo llama 'concepto'
-    }));
-    
-    // 2. Mapeamos gastos para que coincidan con la tabla
-    const gastos = dataGastos.data.map(item => ({
-      ...item,
-      tipo: "Gasto" 
-      // 'categoria' ya viene bien en gastos
-    }));
-
-    // 3. Retornamos el array combinado
-    return [...ingresos, ...gastos];
-
-  } catch (error) {
-    // Si el token falla, limpiamos la sesión y redirigimos
-    if (error.message.includes("autenticado") || error.message.includes("Token")) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("usuarioActivo");
-      window.location.href = "index.html";
-    }
-    // Propagamos el error para que la UI muestre "Error al cargar"
-    throw error;
-  }
-}
-
-
-// =============================================================
-//      LÓGICA DEL DASHBOARD (Resto del código)
-// =============================================================
+const PALETA_COLORES_DONA = [
+  '#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', 
+  '#ffc94d', '#36a2eb', '#ff9f40', '#9966ff'
+];
 
 window.addEventListener("DOMContentLoaded", () => {
   const welcomeMsg = document.getElementById("welcomeMsg");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  // 1. Verificar autenticación
   const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
-
   if (!usuarioActivo) {
-    window.location.href = "index.html";
+    window.location.href = "index.html"; 
     return;
   }
 
-  // 2. Personalizar bienvenida
   welcomeMsg.textContent = `Hola, ${usuarioActivo.nombre}`;
 
-  // 3. Configurar botón de logout
   logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("usuarioActivo");
-    localStorage.removeItem("authToken"); // ¡Importante limpiar el token!
-    
-    Swal.fire({
-      icon: 'success',
-      title: 'Sesión cerrada',
-      text: 'Has cerrado sesión exitosamente.',
-      confirmButtonColor: '#7984ff',
-      background: '#0f0f23',
-      color: '#fff'
-    });
-    setTimeout(() => (window.location.href = "index.html"), 1500);
+    API.cerrarSesion();
   });
 
-  // 4. Configurar el listener del filtro
   document.getElementById("tipoFiltro").addEventListener("change", aplicarFiltros);
-
-  // 5. Cargar y renderizar transacciones iniciales
-  cargarTransacciones(usuarioActivo.email);
+  cargarTransacciones();
 });
 
-/**
- * Carga los datos y los muestra en la tabla
- */
-async function cargarTransacciones(userEmail) {
+async function cargarTransacciones() {
   const transactionsBody = document.getElementById("transactionsBody");
   const noDataMsg = document.getElementById("noDataMsg");
   transactionsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
 
   try {
-    // 🔸 ¡CAMBIO AQUÍ! Usamos la función real
-    todasLasTransacciones = await getFinanzasReales(); 
-    
-    // 5. Renderizar datos iniciales (todos)
-    aplicarFiltros();
+    const respuestaGastos = await API.obtenerGastos();
+    const respuestaIngresos = await API.obtenerIngresos();
+
+    const gastos = respuestaGastos.data || [];
+    const ingresos = respuestaIngresos.data || [];
+
+    todasLasTransacciones = [
+      ...ingresos.map(i => ({
+        id: i.id,
+        fecha: i.fecha,
+        tipo: "Ingreso",
+        monto: i.monto,
+        categoria: i.nombre_fuente,
+        descripcion: i.descripcion
+      })),
+      ...gastos.map(g => ({
+        id: g.id,
+        fecha: g.fecha,
+        tipo: "Gasto",
+        monto: g.monto,
+        categoria: g.categoria,
+        descripcion: g.descripcion
+      }))
+    ];
+
+    if (todasLasTransacciones.length === 0) {
+      transactionsBody.innerHTML = '';
+      noDataMsg.style.display = "block";
+      noDataMsg.textContent = "No hay transacciones registradas.";
+    } else {
+      aplicarFiltros();
+    }
 
   } catch (error) {
-    console.error(error);
+    console.error("Error cargando transacciones:", error);
     transactionsBody.innerHTML = '';
-    noDataMsg.textContent = "Error al cargar los datos. Revisa la conexión con el backend.";
+    noDataMsg.textContent = "Error al cargar las transacciones.";
     noDataMsg.style.display = "block";
     noDataMsg.style.color = "red";
   }
 }
 
-/**
- * Función central que filtra los datos y actualiza la UI
- */
 function aplicarFiltros() {
   const tipoFiltro = document.getElementById("tipoFiltro").value;
 
@@ -169,12 +89,12 @@ function aplicarFiltros() {
   }
   
   renderizarTabla(transaccionesFiltradas);
-  calcularYMostrarResumen(transaccionesFiltradas);
+  const transaccionesParaResumen = (tipoFiltro === "todos") ? todasLasTransacciones : transaccionesFiltradas;
+  calcularYMostrarResumen(transaccionesParaResumen);
+  renderizarGraficaDona(transaccionesFiltradas);
+  renderizarGraficaTendencia(transaccionesFiltradas);
 }
 
-/**
- * Renderiza la tabla
- */
 function renderizarTabla(transacciones) {
   const transactionsBody = document.getElementById("transactionsBody");
   const noDataMsg = document.getElementById("noDataMsg");
@@ -182,18 +102,18 @@ function renderizarTabla(transacciones) {
 
   if (transacciones.length === 0) {
     noDataMsg.style.display = "block";
+    noDataMsg.textContent = "No hay transacciones para este filtro.";
     return;
   }
 
   noDataMsg.style.display = "none";
   
-  // Ordenamos por fecha (más reciente primero)
   transacciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   transacciones.forEach(tx => {
     const tr = document.createElement('tr');
     const tipoClase = tx.tipo.toLowerCase() === 'ingreso' ? 'ingreso' : 'gasto';
-    const montoFormateado = (tx.monto || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+    const montoFormateado = (tx.monto || 0).toLocaleString('es-MX', { style: 'currency', 'currency': 'MXN' });
     
     tr.innerHTML = `
       <td>${tx.fecha}</td>
@@ -206,9 +126,6 @@ function renderizarTabla(transacciones) {
   });
 }
 
-/**
- * Calcula y muestra los totales
- */
 function calcularYMostrarResumen(transacciones) {
   let totalIngresos = 0;
   let totalGastos = 0;
@@ -222,9 +139,150 @@ function calcularYMostrarResumen(transacciones) {
   });
 
   const saldoActual = totalIngresos - totalGastos;
-  const formatoMoneda = (monto) => (monto || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+  const formatoMoneda = (monto) => (monto || 0).toLocaleString('es-MX', { style: 'currency', 'currency': 'MXN' });
 
   document.getElementById("totalIngresos").textContent = formatoMoneda(totalIngresos);
   document.getElementById("totalGastos").textContent = formatoMoneda(totalGastos);
   document.getElementById("saldoActual").textContent = formatoMoneda(saldoActual);
+}
+
+function renderizarGraficaDona(transacciones) {
+  const ctx = document.getElementById('graficaGastosDona')?.getContext('2d');
+  if (!ctx) return; 
+
+  if (graficoDona) {
+    graficoDona.destroy();
+  }
+  
+  const gastosPorCategoria = transacciones
+    .filter(tx => tx.tipo === 'Gasto')
+    .reduce((acc, tx) => {
+      if (!acc[tx.categoria]) {
+        acc[tx.categoria] = 0;
+      }
+      acc[tx.categoria] += tx.monto;
+      return acc;
+    }, {});
+
+  const labels = Object.keys(gastosPorCategoria);
+  const data = Object.values(gastosPorCategoria);
+
+  if (labels.length === 0) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    return;
+  }
+
+  graficoDona = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Gastos',
+        data: data,
+        backgroundColor: PALETA_COLORES_DONA,
+        borderColor: '#0f0f23',
+        borderWidth: 2,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: '#fff', font: { family: 'Poppins' } }
+        },
+        tooltip: { callbacks: { label: crearTooltipMoneda } }
+      }
+    }
+  });
+}
+
+function renderizarGraficaTendencia(transacciones) {
+  const ctx = document.getElementById('graficaTendencia')?.getContext('2d');
+  if (!ctx) return;
+
+  if (graficoBarras) {
+    graficoBarras.destroy();
+  }
+
+  const mesesMap = {};
+  const mesesOrdenados = [];
+
+  transacciones.forEach(tx => {
+    const fecha = new Date(tx.fecha);
+    const mesKey = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (!mesesMap[mesKey]) {
+      mesesMap[mesKey] = { ingresos: 0, gastos: 0 };
+      mesesOrdenados.push(mesKey);
+    }
+
+    if (tx.tipo === 'Ingreso') {
+      mesesMap[mesKey].ingresos += tx.monto;
+    } else {
+      mesesMap[mesKey].gastos += tx.monto;
+    }
+  });
+
+  const labels = mesesOrdenados.map(m => {
+    const [año, mes] = m.split('-');
+    const mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return mesesNombres[parseInt(mes) - 1];
+  });
+
+  const ingresosData = mesesOrdenados.map(m => mesesMap[m].ingresos);
+  const gastosData = mesesOrdenados.map(m => mesesMap[m].gastos);
+
+  graficoBarras = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Ingresos',
+          data: ingresosData,
+          backgroundColor: '#4dff91',
+        },
+        {
+          label: 'Gastos',
+          data: gastosData,
+          backgroundColor: '#ff6b6b',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#fff', font: { family: 'Poppins' } }
+        },
+        tooltip: { callbacks: { label: crearTooltipMoneda } }
+      },
+      scales: {
+        x: { 
+          ticks: { color: '#fff' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        },
+        y: { 
+          ticks: { color: '#fff' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        }
+      }
+    }
+  });
+}
+
+function crearTooltipMoneda(context) {
+  let label = context.dataset.label || context.label || '';
+  if (label) {
+    label += ': ';
+  }
+  if (context.parsed.y !== null || context.parsed !== null) {
+    const valor = context.parsed.y || context.parsed;
+    label += valor.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+  }
+  return label;
 }
