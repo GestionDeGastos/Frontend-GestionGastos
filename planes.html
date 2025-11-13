@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Mis Planes</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-dashboard">
+
+  <header class="dashboard-header">
+    <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
+    <div class="user-info">
+      <span id="welcomeMsg">Hola, ...</span>
+      <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <div class="planes-header">
+      <h2>Mis Planes y Presupuestos</h2>
+      <button id="btnAbrirModal" class="btn btn-crear">
+        <span class="menu-icon">＋</span> Crear Nuevo Plan
+      </button>
+    </div>
+
+    <div id="planesGrid" class="planes-grid-container">
+      </div>
+
+    <div id="noPlanesMsg" style="display: none; text-align: center; padding: 40px; opacity: 0.7;">
+      <h3>No tienes planes registrados.</h3>
+      <p>Usa el botón "Crear Nuevo Plan" para empezar.</p>
+    </div>
+
+  </main>
+
+  <div id="modalCrearPlan" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Crear Nuevo Plan</h2>
+        <button id="btnCerrarModal" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formCrearPlan">
+          <div class="form-group">
+            <label for="planNombre">Nombre del Plan</label>
+            <input type="text" id="planNombre" placeholder="Ej: Ahorro Vacaciones" required>
+          </div>
+          <div class="form-group">
+            <label for="planTipo">Tipo de Plan</label>
+            <select id="planTipo" required>
+              <option value="">Selecciona un tipo...</option>
+              <option value="ahorro">Meta de Ahorro</option>
+              <option value="presupuesto">Presupuesto (Gasto)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="planMonto">Monto Objetivo</label>
+            <input type="number" id="planMonto" placeholder="Ej: 10000" required>
+          </div>
+          <div class="form-group">
+            <label for="planFecha">Fecha Límite (Opcional)</label>
+            <input type="date" id="planFecha">
+          </div>
+          <button type="submit" class="btn">Guardar Plan</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../js/planes.js"></script>
+</body>
+</html>

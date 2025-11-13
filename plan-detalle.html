@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Detalle del Plan</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-dashboard">
+
+  <header class="dashboard-header">
+    <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
+    <div class="user-info">
+      <span id="welcomeMsg">Hola, ...</span>
+      <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <div class="detalle-header">
+      <a href="planes.html" class="back">← Volver a Planes</a>
+      <h2 id="planTitulo">Cargando...</h2>
+    </div>
+
+    <div class="detalle-container">
+
+      <section class="grafica-card">
+        <h3>Progreso Actual</h3>
+        <div class="progreso-resumen-card" id="progresoResumen">
+          </div>
+        <div class="chart-wrapper">
+          <canvas id="graficaProgresoDona"></canvas>
+        </div>
+      </section>
+
+      <section class="analisis-stats-card">
+        <h3>Análisis del Plan</h3>
+        <p>Estadísticas y transacciones relacionadas con este plan.</p>
+        
+        <div class="analisis-stats-container">
+          <div class="stat-card">
+            <h4>Ahorro Promedio Mensual</h4>
+            <p>$1,875.00</p>
+          </div>
+          <div class="stat-card">
+            <h4>Tiempo Restante Estimado</h4>
+            <p>2 Meses</p>
+          </div>
+          <div class="stat-card">
+            <h4>Transacciones Vinculadas</h4>
+            <p>12</p>
+          </div>
+        </div>
+        
+        <div class="table-container-mini">
+          <h4>Transacciones Recientes (Ejemplo)</h4>
+          <table>
+            <tbody>
+              <tr>
+                <td>2025-10-30</td>
+                <td class="ingreso">Abono</td>
+                <td class="ingreso">$500.00</td>
+              </tr>
+              <tr>
+                <td>2025-10-25</td>
+                <td class="ingreso">Abono</td>
+                <td class="ingreso">$1,200.00</td>
+              </tr>
+              <tr>
+                <td>2025-10-20</td>
+                <td class="gasto">Retiro</td>
+                <td class="gasto">-$150.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+      </section>
+      
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../js/plan-detalle.js"></script>
+</body>
+</html>

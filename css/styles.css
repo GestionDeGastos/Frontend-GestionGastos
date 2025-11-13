@@ -468,3 +468,381 @@ input::placeholder {
   transform: none;
   box-shadow: none;
 }
+
+/* =================== ESTILOS PAGINA PLANES =================== */
+
+.planes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Para móviles */
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.planes-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.btn-crear {
+  background: linear-gradient(90deg, #4dff91, #7cffaa);
+  color: #0f0f23; /* Texto oscuro para contraste */
+  font-weight: 700;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+
+.btn-crear:hover {
+  background: linear-gradient(90deg, #6dffab, #9cffc1);
+}
+
+.btn-crear .menu-icon {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Grid para las tarjetas de planes */
+.planes-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.plan-card {
+  background: rgba(15, 15, 35, 0.75);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plan-card h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #c4caff;
+}
+
+.plan-card .plan-meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #fff;
+  opacity: 0.7;
+}
+
+.plan-card .progreso-info {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.plan-card .progreso-actual {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.plan-card .progreso-total {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+/* Barra de progreso */
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #4dff91; /* Color "ingreso" por defecto */
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+
+.progress-bar-fill.gasto {
+  background-color: #ff6b6b; /* Color "gasto" para presupuestos */
+}
+
+/* Acciones de la tarjeta */
+.plan-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.btn-plan-detalle {
+  background: #7984ff;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.btn-plan-detalle:hover {
+  background: #9ca4ff;
+}
+
+.btn-plan-delete {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.btn-plan-delete:hover {
+  color: #ff6b6b;
+}
+
+
+/* =================== ESTILOS MODAL =================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: none; /* Oculto por defecto */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #0f0f23;
+  border: 1px solid #7984ff;
+  border-radius: 20px;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 30px rgba(121, 132, 255, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #fff;
+}
+
+.btn-close-modal {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 300;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.btn-close-modal:hover {
+  opacity: 1;
+}
+
+.modal-body .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.modal-body label {
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.modal-body input,
+.modal-body select {
+  margin-top: 0; /* Quitamos el margen superior que tenían los inputs generales */
+  padding: 12px;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+}
+
+.modal-body .btn {
+  width: 100%; /* El botón ocupa todo el ancho */
+}
+
+/* =================== ESTILOS DETALLE PLAN =================== */
+
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.detalle-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  /* El ID #planTitulo se encargará del texto */
+}
+
+/* Reutilizamos el botón 'back' de la página de registro/recuperar */
+.detalle-header .back {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #c4caff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 15px;
+  border-radius: 20px;
+  transition: background 0.3s;
+}
+
+.detalle-header .back:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Contenedor principal de dos columnas */
+.detalle-container {
+  display: flex;
+  flex-wrap: wrap; /* Para móviles */
+  gap: 20px;
+}
+
+/* La tarjeta gráfica de la izquierda (reutiliza .grafica-card) */
+.detalle-container .grafica-card {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* Tarjeta de Resumen de Progreso (dentro de la gráfica-card) */
+.progreso-resumen-card {
+  background: rgba(15, 15, 35, 0.85);
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.progreso-resumen-card h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 5px 0;
+}
+
+.progreso-resumen-card p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.progreso-resumen-card hr {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 15px 0;
+}
+
+.progreso-resumen-card h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #c4caff; /* Color saldo/neutro */
+  margin: 0 0 5px 0;
+}
+
+
+/* Tarjeta de estadísticas de la derecha */
+.analisis-stats-card {
+  flex: 1.5; /* Un poco más ancha */
+  min-width: 320px;
+  background: rgba(15, 15, 35, 0.75);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.analisis-stats-card h3 {
+  margin-top: 0;
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.9;
+}
+.analisis-stats-card > p {
+  text-align: center;
+  opacity: 0.7;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.analisis-stats-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+}
+
+.stat-card h4 {
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #c4caff;
+}
+
+/* Mini tabla para transacciones */
+.table-container-mini {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.table-container-mini h4 {
+  margin: 0 0 10px 0;
+  font-weight: 500;
+}
+
+.table-container-mini table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-container-mini td {
+  padding: 8px 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.table-container-mini tr:last-child td {
+  border-bottom: none;
+}
