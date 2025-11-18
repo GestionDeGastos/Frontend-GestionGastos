@@ -10,29 +10,56 @@ console.log("✅ api.js cargado. CONFIG:", CONFIG);
 /**
  * Registra un nuevo usuario
  * POST /auth/register
+ *
+ * IMPORTANTE: el backend espera:
+ * {
+ *   nombre: string,
+ *   apellido: string,
+ *   edad: number,
+ *   correo: string,
+ *   password: string
+ * }
  */
-export async function registrarUsuario(nombre, correo, password) {
+export async function registrarUsuario(nombre, apellido, edad, correo, password) {
   try {
-    console.log("📤 Enviando registro a:", CONFIG.API_URL + "/auth/register");
-    
+    console.log("📤 Enviando registro a:", `${CONFIG.API_URL}/auth/register`);
+
     const response = await fetch(`${CONFIG.API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        nombre,
-        correo,
-        password,
+        nombre: nombre,
+        apellido: apellido,
+        edad: parseInt(edad, 10),
+        correo: correo,
+        password: password,
       }),
     });
 
-    console.log("📥 Status:", response.status);
+    console.log("📥 Status registro:", response.status);
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error("❌ Error del backend:", error);
-      throw new Error(error.detail || "Error en el registro");
+      let errorMessage = "Error en el registro";
+
+      try {
+        const error = await response.json();
+        console.error("❌ Error del backend:", error);
+
+        if (Array.isArray(error.detail)) {
+          // FastAPI 422: detail es un arreglo de errores
+          errorMessage = error.detail
+            .map((d) => d.msg || JSON.stringify(d))
+            .join(" | ");
+        } else if (typeof error.detail === "string") {
+          errorMessage = error.detail;
+        }
+      } catch (parseErr) {
+        console.error("❌ No se pudo parsear el error:", parseErr);
+      }
+
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -51,7 +78,7 @@ export async function registrarUsuario(nombre, correo, password) {
 export async function loginUsuario(correo, password) {
   try {
     console.log("📤 Enviando login a:", CONFIG.API_URL + "/auth/login");
-    
+
     const response = await fetch(`${CONFIG.API_URL}/auth/login`, {
       method: "POST",
       headers: {
@@ -63,7 +90,7 @@ export async function loginUsuario(correo, password) {
       }),
     });
 
-    console.log("📥 Status:", response.status);
+    console.log("📥 Status login:", response.status);
 
     if (!response.ok) {
       const error = await response.json();
@@ -73,10 +100,10 @@ export async function loginUsuario(correo, password) {
 
     const data = await response.json();
     console.log("✅ Token recibido:", data.access_token);
-    
+
     // Guardar token en localStorage
     localStorage.setItem("authToken", data.access_token);
-    
+
     // Obtener datos del usuario
     const usuarioData = await obtenerPerfilUsuario(data.access_token);
     console.log("✅ Usuario obtenido:", usuarioData);
@@ -96,11 +123,11 @@ export async function loginUsuario(correo, password) {
 export async function obtenerPerfilUsuario(token) {
   try {
     console.log("📤 Obteniendo perfil...");
-    
+
     const response = await fetch(`${CONFIG.API_URL}/auth/me`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -124,12 +151,12 @@ export async function obtenerPerfilUsuario(token) {
 
 export async function crearIngreso(ingreso) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/ingresos/`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(ingreso),
@@ -149,12 +176,12 @@ export async function crearIngreso(ingreso) {
 
 export async function obtenerIngresos() {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/ingresos/`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -172,12 +199,12 @@ export async function obtenerIngresos() {
 
 export async function obtenerIngresoById(id) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/ingresos/${id}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -195,12 +222,12 @@ export async function obtenerIngresoById(id) {
 
 export async function actualizarIngreso(id, ingreso) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/ingresos/${id}`, {
       method: "PUT",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(ingreso),
@@ -220,12 +247,12 @@ export async function actualizarIngreso(id, ingreso) {
 
 export async function eliminarIngreso(id) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/ingresos/${id}`, {
       method: "DELETE",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -248,12 +275,12 @@ export async function eliminarIngreso(id) {
 
 export async function crearGasto(gasto) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/gastos/`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(gasto),
@@ -273,12 +300,12 @@ export async function crearGasto(gasto) {
 
 export async function obtenerGastos() {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/gastos/`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -296,12 +323,12 @@ export async function obtenerGastos() {
 
 export async function obtenerGastoById(id) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/gastos/${id}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -319,12 +346,12 @@ export async function obtenerGastoById(id) {
 
 export async function actualizarGasto(id, gasto) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/gastos/${id}`, {
       method: "PUT",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(gasto),
@@ -344,12 +371,12 @@ export async function actualizarGasto(id, gasto) {
 
 export async function eliminarGasto(id) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/gastos/${id}`, {
       method: "DELETE",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -372,12 +399,12 @@ export async function eliminarGasto(id) {
 
 export async function crearPlanGestion(plan) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(plan),
@@ -397,12 +424,12 @@ export async function crearPlanGestion(plan) {
 
 export async function obtenerPlanesGestion() {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -420,12 +447,12 @@ export async function obtenerPlanesGestion() {
 
 export async function obtenerPlanGestionById(planId) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
     const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${planId}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -443,15 +470,18 @@ export async function obtenerPlanGestionById(planId) {
 
 export async function obtenerAnalisisPlan(planId) {
   const token = localStorage.getItem("authToken");
-  
+
   try {
-    const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${planId}/analisis`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${CONFIG.API_URL}/api/plan-gestion/${planId}/analisis`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Error al obtener análisis");
