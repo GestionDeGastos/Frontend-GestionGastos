@@ -1,288 +1,255 @@
-// js/dashboard.js
-import * as API from './api.js';
+import { 
+    obtenerReporte, 
+    obtenerGastos, 
+    obtenerIngresos, 
+    obtenerDatosPerfil,
+    cerrarSesion,
+    estaAutenticado 
+} from './api.js';
 
-let todasLasTransacciones = [];
-let graficoDona = null;
-let graficoBarras = null;
+// --- CONFIGURACIÓN INICIAL ---
+if (!estaAutenticado()) window.location.href = "index.html";
 
-const PALETA_COLORES_DONA = [
-  '#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', 
-  '#ffc94d', '#36a2eb', '#ff9f40', '#9966ff'
-];
+// Instancias de las gráficas para poder destruirlas al recargar
+let chartDona = null;
+let chartBarras = null;
 
-window.addEventListener("DOMContentLoaded", () => {
-  const welcomeMsg = document.getElementById("welcomeMsg");
-  const logoutBtn = document.getElementById("logoutBtn");
+document.addEventListener("DOMContentLoaded", async () => {
+    console.log("🚀 Cargando Dashboard...");
 
-  const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
-  if (!usuarioActivo) {
-    window.location.href = "index.html"; 
-    return;
-  }
+    // 1. Cargar nombre del usuario
+    cargarUsuario();
 
-  welcomeMsg.textContent = `Hola, ${usuarioActivo.nombre}`;
+    // 2. Configurar Fechas (Por defecto: mes actual)
+    const hoy = new Date();
+    const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1); // 1er día del mes
+    const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0); // Último día del mes
 
-  logoutBtn.addEventListener("click", () => {
-    API.cerrarSesion();
-  });
+    // Formato YYYY-MM-DD para el backend de Python
+    const strInicio = formatearFechaISO(primerDia);
+    const strFin = formatearFechaISO(ultimoDia);
 
-  document.getElementById("tipoFiltro").addEventListener("change", aplicarFiltros);
-  cargarTransacciones();
+    // 3. Cargar Datos del Dashboard
+    await cargarDatosDashboard(strInicio, strFin);
+
+    // 4. Configurar Botones y Filtros
+    setupEventListeners();
 });
 
-async function cargarTransacciones() {
-  const transactionsBody = document.getElementById("transactionsBody");
-  const noDataMsg = document.getElementById("noDataMsg");
-  transactionsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
+/**
+ * Carga toda la información visual
+ */
+async function cargarDatosDashboard(inicio, fin) {
+    try {
+        // A. Obtener TOTALES (Endpoint de Reporte)
+        const reporte = await obtenerReporte(inicio, fin);
+        actualizarTarjetas(reporte);
 
-  try {
-    const respuestaGastos = await API.obtenerGastos();
-    const respuestaIngresos = await API.obtenerIngresos();
+        // B. Obtener LISTAS CRUDAS (Para Gráficas y Tabla)
+        // Como el endpoint de reporte no da categorías, traemos los datos y procesamos en JS
+        const [listaIngresos, listaGastos] = await Promise.all([
+            obtenerIngresos(),
+            obtenerGastos()
+        ]);
 
-    const gastos = respuestaGastos.data || [];
-    const ingresos = respuestaIngresos.data || [];
+        // C. Generar Gráficas
+        generarGraficaGastos(listaGastos);
+        generarGraficaTendencia(listaIngresos, listaGastos);
 
-    todasLasTransacciones = [
-      ...ingresos.map(i => ({
-        id: i.id,
-        fecha: i.fecha,
-        tipo: "Ingreso",
-        monto: i.monto,
-        categoria: i.nombre_fuente,
-        descripcion: i.descripcion
-      })),
-      ...gastos.map(g => ({
-        id: g.id,
-        fecha: g.fecha,
-        tipo: "Gasto",
-        monto: g.monto,
-        categoria: g.categoria,
-        descripcion: g.descripcion
-      }))
-    ];
+        // D. Generar Tabla Combinada
+        generarTablaTransacciones(listaIngresos, listaGastos);
 
-    if (todasLasTransacciones.length === 0) {
-      transactionsBody.innerHTML = '';
-      noDataMsg.style.display = "block";
-      noDataMsg.textContent = "No hay transacciones registradas.";
-    } else {
-      aplicarFiltros();
+    } catch (error) {
+        console.error("Error cargando dashboard:", error);
+        // No mostrar alert intrusivo al inicio, mejor log
     }
-
-  } catch (error) {
-    console.error("Error cargando transacciones:", error);
-    transactionsBody.innerHTML = '';
-    noDataMsg.textContent = "Error al cargar las transacciones.";
-    noDataMsg.style.display = "block";
-    noDataMsg.style.color = "red";
-  }
 }
 
-function aplicarFiltros() {
-  const tipoFiltro = document.getElementById("tipoFiltro").value;
+// ============================================================
+//      LÓGICA DE UI (TARJETAS Y TABLA)
+// ============================================================
 
-  let transaccionesFiltradas = [];
-  if (tipoFiltro === "todos") {
-    transaccionesFiltradas = todasLasTransacciones;
-  } else {
-    transaccionesFiltradas = todasLasTransacciones.filter(tx => tx.tipo === tipoFiltro);
-  }
-  
-  renderizarTabla(transaccionesFiltradas);
-  const transaccionesParaResumen = (tipoFiltro === "todos") ? todasLasTransacciones : transaccionesFiltradas;
-  calcularYMostrarResumen(transaccionesParaResumen);
-  renderizarGraficaDona(transaccionesFiltradas);
-  renderizarGraficaTendencia(transaccionesFiltradas);
-}
+function actualizarTarjetas(data) {
+    // Formateador de moneda
+    const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 
-function renderizarTabla(transacciones) {
-  const transactionsBody = document.getElementById("transactionsBody");
-  const noDataMsg = document.getElementById("noDataMsg");
-  transactionsBody.innerHTML = ''; 
-
-  if (transacciones.length === 0) {
-    noDataMsg.style.display = "block";
-    noDataMsg.textContent = "No hay transacciones para este filtro.";
-    return;
-  }
-
-  noDataMsg.style.display = "none";
-  
-  transacciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-  transacciones.forEach(tx => {
-    const tr = document.createElement('tr');
-    const tipoClase = tx.tipo.toLowerCase() === 'ingreso' ? 'ingreso' : 'gasto';
-    const montoFormateado = (tx.monto || 0).toLocaleString('es-MX', { style: 'currency', 'currency': 'MXN' });
+    // Los nombres de las keys vienen de report_service.py
+    document.getElementById("totalIngresos").textContent = formatter.format(data.total_ingresos);
+    document.getElementById("totalGastos").textContent = formatter.format(data.total_gastos);
+    document.getElementById("saldoActual").textContent = formatter.format(data.balance);
     
-    tr.innerHTML = `
-      <td>${tx.fecha}</td>
-      <td class="${tipoClase}">${tx.tipo}</td>
-      <td class="${tipoClase}">${montoFormateado}</td>
-      <td>${tx.categoria}</td>
-      <td>${tx.descripcion || ''}</td> 
-    `;
-    transactionsBody.appendChild(tr);
-  });
-}
-
-function calcularYMostrarResumen(transacciones) {
-  let totalIngresos = 0;
-  let totalGastos = 0;
-
-  transacciones.forEach(tx => {
-    if (tx.tipo === "Ingreso") {
-      totalIngresos += tx.monto;
-    } else if (tx.tipo === "Gasto") {
-      totalGastos += tx.monto;
-    }
-  });
-
-  const saldoActual = totalIngresos - totalGastos;
-  const formatoMoneda = (monto) => (monto || 0).toLocaleString('es-MX', { style: 'currency', 'currency': 'MXN' });
-
-  document.getElementById("totalIngresos").textContent = formatoMoneda(totalIngresos);
-  document.getElementById("totalGastos").textContent = formatoMoneda(totalGastos);
-  document.getElementById("saldoActual").textContent = formatoMoneda(saldoActual);
-}
-
-function renderizarGraficaDona(transacciones) {
-  const ctx = document.getElementById('graficaGastosDona')?.getContext('2d');
-  if (!ctx) return; 
-
-  if (graficoDona) {
-    graficoDona.destroy();
-  }
-  
-  const gastosPorCategoria = transacciones
-    .filter(tx => tx.tipo === 'Gasto')
-    .reduce((acc, tx) => {
-      if (!acc[tx.categoria]) {
-        acc[tx.categoria] = 0;
-      }
-      acc[tx.categoria] += tx.monto;
-      return acc;
-    }, {});
-
-  const labels = Object.keys(gastosPorCategoria);
-  const data = Object.values(gastosPorCategoria);
-
-  if (labels.length === 0) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    return;
-  }
-
-  graficoDona = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Gastos',
-        data: data,
-        backgroundColor: PALETA_COLORES_DONA,
-        borderColor: '#0f0f23',
-        borderWidth: 2,
-        hoverOffset: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'right',
-          labels: { color: '#fff', font: { family: 'Poppins' } }
-        },
-        tooltip: { callbacks: { label: crearTooltipMoneda } }
-      }
-    }
-  });
-}
-
-function renderizarGraficaTendencia(transacciones) {
-  const ctx = document.getElementById('graficaTendencia')?.getContext('2d');
-  if (!ctx) return;
-
-  if (graficoBarras) {
-    graficoBarras.destroy();
-  }
-
-  const mesesMap = {};
-  const mesesOrdenados = [];
-
-  transacciones.forEach(tx => {
-    const fecha = new Date(tx.fecha);
-    const mesKey = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
-    
-    if (!mesesMap[mesKey]) {
-      mesesMap[mesKey] = { ingresos: 0, gastos: 0 };
-      mesesOrdenados.push(mesKey);
-    }
-
-    if (tx.tipo === 'Ingreso') {
-      mesesMap[mesKey].ingresos += tx.monto;
+    // Color dinámico del saldo
+    const saldoEl = document.getElementById("saldoActual");
+    if(data.balance >= 0) {
+        saldoEl.style.color = "#2ecc71"; // Verde
     } else {
-      mesesMap[mesKey].gastos += tx.monto;
+        saldoEl.style.color = "#e74c3c"; // Rojo
     }
-  });
-
-  const labels = mesesOrdenados.map(m => {
-    const [año, mes] = m.split('-');
-    const mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return mesesNombres[parseInt(mes) - 1];
-  });
-
-  const ingresosData = mesesOrdenados.map(m => mesesMap[m].ingresos);
-  const gastosData = mesesOrdenados.map(m => mesesMap[m].gastos);
-
-  graficoBarras = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Ingresos',
-          data: ingresosData,
-          backgroundColor: '#4dff91',
-        },
-        {
-          label: 'Gastos',
-          data: gastosData,
-          backgroundColor: '#ff6b6b',
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: { color: '#fff', font: { family: 'Poppins' } }
-        },
-        tooltip: { callbacks: { label: crearTooltipMoneda } }
-      },
-      scales: {
-        x: { 
-          ticks: { color: '#fff' },
-          grid: { color: 'rgba(255, 255, 255, 0.1)' }
-        },
-        y: { 
-          ticks: { color: '#fff' },
-          grid: { color: 'rgba(255, 255, 255, 0.1)' }
-        }
-      }
-    }
-  });
 }
 
-function crearTooltipMoneda(context) {
-  let label = context.dataset.label || context.label || '';
-  if (label) {
-    label += ': ';
-  }
-  if (context.parsed.y !== null || context.parsed !== null) {
-    const valor = context.parsed.y || context.parsed;
-    label += valor.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-  }
-  return label;
+let transaccionesGlobales = []; // Para poder filtrar sin recargar API
+
+function generarTablaTransacciones(ingresos, gastos) {
+    // 1. Unificar arrays y normalizar datos
+    const ingresosNorm = ingresos.map(i => ({ ...i, tipo: "Ingreso", categoria: "Ingreso" }));
+    const gastosNorm = gastos.map(g => ({ ...g, tipo: "Gasto" })); // Gastos ya traen categoría
+
+    // 2. Unir y Ordenar por fecha (más reciente primero)
+    transaccionesGlobales = [...ingresosNorm, ...gastosNorm].sort((a, b) => {
+        return new Date(b.fecha) - new Date(a.fecha);
+    });
+
+    renderizarTabla(transaccionesGlobales);
+}
+
+function renderizarTabla(lista) {
+    const tbody = document.getElementById("transactionsBody");
+    const noDataMsg = document.getElementById("noDataMsg");
+    tbody.innerHTML = "";
+
+    if (lista.length === 0) {
+        noDataMsg.style.display = "block";
+        return;
+    }
+    noDataMsg.style.display = "none";
+
+    const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+    lista.forEach(item => {
+        const tr = document.createElement("tr");
+        
+        // Estilo visual para tipo
+        const claseTipo = item.tipo === "Ingreso" ? "badge-ingreso" : "badge-gasto";
+        const signo = item.tipo === "Ingreso" ? "+" : "-";
+        
+        tr.innerHTML = `
+            <td>${item.fecha}</td>
+            <td><span class="${claseTipo}">${item.tipo}</span></td>
+            <td style="font-weight:bold; color: ${item.tipo === 'Ingreso' ? '#2ecc71' : '#e74c3c'}">
+                ${signo} ${formatter.format(item.monto)}
+            </td>
+            <td>${item.categoria || 'General'}</td>
+            <td>${item.descripcion || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ============================================================
+//      LÓGICA DE GRÁFICAS (CHART.JS)
+// ============================================================
+
+function generarGraficaGastos(gastos) {
+    const ctx = document.getElementById('graficaGastosDona').getContext('2d');
+
+    // 1. Agrupar gastos por categoría
+    const categorias = {};
+    gastos.forEach(g => {
+        const cat = g.categoria || "Otros";
+        categorias[cat] = (categorias[cat] || 0) + g.monto;
+    });
+
+    const labels = Object.keys(categorias);
+    const dataValues = Object.values(categorias);
+
+    // Destruir anterior si existe
+    if (chartDona) chartDona.destroy();
+
+    if (labels.length === 0) {
+        // Gráfica vacía visual
+        labels.push("Sin Datos");
+        dataValues.push(1);
+    }
+
+    chartDona = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: dataValues,
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' }
+            }
+        }
+    });
+}
+
+function generarGraficaTendencia(ingresos, gastos) {
+    const ctx = document.getElementById('graficaTendencia').getContext('2d');
+
+    // Destruir anterior
+    if (chartBarras) chartBarras.destroy();
+
+    // Agrupar por Fechas (Últimos 7 registros o días, simplificado para demo)
+    // Para simplificar visualización: Comparativa Total Ingresos vs Gastos
+    const totalI = ingresos.reduce((sum, i) => sum + i.monto, 0);
+    const totalG = gastos.reduce((sum, g) => sum + g.monto, 0);
+
+    chartBarras = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Ingresos Totales', 'Gastos Totales'],
+            datasets: [{
+                label: 'Monto (MXN)',
+                data: [totalI, totalG],
+                backgroundColor: ['#2ecc71', '#e74c3c'],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+// ============================================================
+//      UTILIDADES Y EVENTOS
+// ============================================================
+
+async function cargarUsuario() {
+    try {
+        const perfil = await obtenerDatosPerfil();
+        const msg = document.getElementById("welcomeMsg");
+        if(msg) msg.textContent = `Hola, ${perfil.nombre}`;
+    } catch (e) { console.log("Usuario no cargado"); }
+}
+
+function setupEventListeners() {
+    // Filtro de tabla
+    const filtro = document.getElementById("tipoFiltro");
+    filtro.addEventListener("change", (e) => {
+        const valor = e.target.value;
+        if (valor === "todos") {
+            renderizarTabla(transaccionesGlobales);
+        } else {
+            const filtrados = transaccionesGlobales.filter(item => item.tipo === valor);
+            renderizarTabla(filtrados);
+        }
+    });
+
+    // Botón Logout
+    const btnLogout = document.getElementById("logoutBtn");
+    if(btnLogout) btnLogout.addEventListener("click", cerrarSesion);
+}
+
+function formatearFechaISO(fecha) {
+    const d = new Date(fecha);
+    const month = '' + (d.getMonth() + 1);
+    const day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    return [year, month.padStart(2, '0'), day.padStart(2, '0')].join('-');
 }

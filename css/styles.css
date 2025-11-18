@@ -1150,3 +1150,22 @@ select option {
         inset 0 0 10px rgba(255,255,255,0.25);
     transform: scale(1.03);
 }
+
+/* Etiquetas para la tabla */
+.badge-ingreso {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.badge-gasto {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: bold;
+}

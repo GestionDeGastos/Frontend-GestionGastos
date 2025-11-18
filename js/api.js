@@ -588,3 +588,32 @@ export async function subirFotoPerfil(archivo) {
     throw error;
   }
 }
+
+/**
+ * Obtiene el reporte de totales por rango de fechas
+ * GET /api/reporte?inicio=YYYY-MM-DD&fin=YYYY-MM-DD
+ */
+export async function obtenerReporte(fechaInicio, fechaFin) {
+  const token = localStorage.getItem("authToken");
+  try {
+    // Construimos la URL con los parámetros query
+    const url = `${CONFIG.API_URL}/api/reporte?inicio=${fechaInicio}&fin=${fechaFin}`;
+    
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Error al obtener reporte");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en obtenerReporte:", error);
+    throw error;
+  }
+}
