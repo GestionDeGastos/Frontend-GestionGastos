@@ -511,3 +511,80 @@ export function cerrarSesion() {
   localStorage.removeItem("usuarioActivo");
   window.location.href = "index.html";
 }
+
+/**
+ * Obtiene los datos completos del perfil (incluyendo foto y apellido)
+ * GET /perfil/
+ */
+export async function obtenerDatosPerfil() {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await fetch(`${CONFIG.API_URL}/perfil/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) throw new Error("Error al cargar datos del perfil");
+    return await response.json();
+  } catch (error) {
+    console.error("Error en obtenerDatosPerfil:", error);
+    throw error;
+  }
+}
+
+/**
+ * Actualiza nombre, apellido o password
+ * PATCH /perfil/
+ */
+export async function actualizarDatosPerfil(datos) {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await fetch(`${CONFIG.API_URL}/perfil/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(datos),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Error al actualizar perfil");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en actualizarDatosPerfil:", error);
+    throw error;
+  }
+}
+
+/**
+ * Sube la foto de perfil
+ * POST /perfil/foto
+ */
+export async function subirFotoPerfil(archivo) {
+  const token = localStorage.getItem("authToken");
+  const formData = new FormData();
+  formData.append("file", archivo); // 'file' es el nombre que espera FastAPI
+
+  try {
+    const response = await fetch(`${CONFIG.API_URL}/perfil/foto`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // NO poner Content-Type aquí, el navegador lo pone automático con el boundary
+      },
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error("Error al subir la imagen");
+    return await response.json();
+  } catch (error) {
+    console.error("Error en subirFotoPerfil:", error);
+    throw error;
+  }
+}

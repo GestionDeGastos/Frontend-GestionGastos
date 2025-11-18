@@ -1,105 +1,145 @@
-import CONFIG from "./config.js";
-import { obtenerPerfilUsuario } from "./api.js";
+import { 
+    obtenerDatosPerfil, 
+    actualizarDatosPerfil, 
+    subirFotoPerfil, 
+    cerrarSesion,
+    estaAutenticado 
+} from './api.js';
 
-const token = localStorage.getItem("authToken");
-const usuarioActivo = JSON.parse(localStorage.getItem("usuarioActivo"));
-
-document.getElementById("welcomeMsg").textContent = "Hola, " + usuarioActivo.nombre;
-
-document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.clear();
+// Validar sesión al inicio
+if (!estaAutenticado()) {
     window.location.href = "index.html";
-});
+}
 
-let USER_ID = null;
+document.addEventListener("DOMContentLoaded", async () => {
+    console.log("🚀 Cargando módulo de Perfil...");
 
-window.addEventListener("DOMContentLoaded", async () => {
-    if (!token) return alert("Inicia sesión de nuevo");
+    // Referencias al DOM
+    const inputNombre = document.getElementById("nombre");
+    const inputApellido = document.getElementById("apellido");
+    const inputCorreo = document.getElementById("correo");
+    const inputPassword = document.getElementById("password");
+    const imgPerfil = document.getElementById("fotoPerfil");
+    const btnGuardar = document.getElementById("btnGuardar");
+    
+    // Manejo de Foto
+    const btnCambiarFoto = document.getElementById("btnCambiarFoto");
+    const inputFile = document.getElementById("fileFoto");
 
+    // Manejo de Logout
+    const logoutBtn = document.getElementById("logoutBtn");
+    if(logoutBtn) logoutBtn.addEventListener("click", cerrarSesion);
+
+    // =========================================
+    // 1. CARGAR DATOS INICIALES
+    // =========================================
     try {
-        const res = await fetch(`${CONFIG.API_URL}/auth/me`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+        const usuario = await obtenerDatosPerfil();
+        console.log("Datos recibidos del backend:", usuario); // Para depurar
+        
+        // Rellenar campos de texto
+        inputNombre.value = usuario.nombre || "";
+        inputApellido.value = usuario.apellido || "";
+        inputCorreo.value = usuario.correo || ""; 
+        
+        // Actualizar saludo
+        const welcomeMsg = document.getElementById("welcomeMsg");
+        if(welcomeMsg) welcomeMsg.textContent = `Hola, ${usuario.nombre}`;
 
-        if (!res.ok) throw new Error();
+        // --- CORRECCIÓN AQUÍ ---
+        // El backend envía 'foto_perfil', no 'foto_url' al cargar
+        if (usuario.foto_perfil) {
+            imgPerfil.src = `${usuario.foto_perfil}?t=${new Date().getTime()}`;
+        }
 
-        const user = await res.json();
-        USER_ID = user.id;
-
-        document.getElementById("correo").value = user.correo;
-        document.getElementById("nombre").value = user.nombre;
-        document.getElementById("apellido").value = user.apellido;
-
-        if (user.foto_perfil)
-            document.getElementById("fotoPerfil").src = user.foto_perfil;
-
-    } catch (err) {
-        alert("Error cargando tus datos");
+    } catch (error) {
+        alert("No se pudieron cargar los datos del perfil.");
+        console.error(error);
     }
-});
 
-document.getElementById("btnCambiarFoto").addEventListener("click", () => {
-    document.getElementById("fileFoto").click();
-});
-
-document.getElementById("fileFoto").addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    document.getElementById("fotoPerfil").src = URL.createObjectURL(file);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-        const res = await fetch(`${CONFIG.API_URL}/perfil/foto`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}` },
-            body: formData
+    // =========================================
+    // 2. SUBIR FOTO
+    // =========================================
+    if(btnCambiarFoto) {
+        btnCambiarFoto.addEventListener("click", () => {
+            inputFile.click(); 
         });
-
-        const data = await res.json();
-
-        if (!res.ok) throw new Error();
-
-        usuarioActivo.foto_perfil = data;
-        localStorage.setItem("usuarioActivo", JSON.stringify(usuarioActivo));
-
-        alert("Foto actualizada ✔");
-
-    } catch (err) {
-        alert("Error al subir la foto ❌");
     }
-});
 
-document.getElementById("btnGuardar").addEventListener("click", async () => {
-    if (!USER_ID) return alert("Error interno");
+    if(inputFile) {
+        inputFile.addEventListener("change", async (e) => {
+            const archivo = e.target.files[0];
+            if (!archivo) return;
 
-    const body = {
-        nombre: document.getElementById("nombre").value,
-        apellido: document.getElementById("apellido").value
-    };
+            try {
+                document.body.style.cursor = "wait";
+                
+                const respuesta = await subirFotoPerfil(archivo);
+                
+                // NOTA: El endpoint de SUBIDA (POST) sí devuelve 'foto_url'
+                // El endpoint de LECTURA (GET) devuelve 'foto_perfil'
+                if (respuesta.foto_url) {
+                    imgPerfil.src = `${respuesta.foto_url}?t=${new Date().getTime()}`;
+                }
+                
+                alert("✅ Foto actualizada correctamente");
 
-    const pass = document.getElementById("password").value;
-    if (pass.length >= 8) body.password = pass;
-
-    try {
-        const res = await fetch(`${CONFIG.API_URL}/usuarios/${USER_ID}`, {
-            method: "PUT",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
+            } catch (error) {
+                alert("❌ Error al subir la foto: " + error.message);
+            } finally {
+                document.body.style.cursor = "default";
+            }
         });
+    }
 
-        const data = await res.json();
+    // =========================================
+    // 3. GUARDAR CAMBIOS (TEXTO)
+    // =========================================
+    if(btnGuardar) {
+        btnGuardar.addEventListener("click", async () => {
+            const datosAActualizar = {};
 
-        if (!res.ok) throw new Error();
+            // Solo enviamos lo que tenga valor y sea distinto de vacío
+            if (inputNombre.value.trim()) datosAActualizar.nombre = inputNombre.value.trim();
+            if (inputApellido.value.trim()) datosAActualizar.apellido = inputApellido.value.trim();
+            
+            // Validación extra de contraseña
+            if (inputPassword.value.trim()) {
+                if (inputPassword.value.length < 8) {
+                    alert("⚠️ La contraseña debe tener al menos 8 caracteres.");
+                    return;
+                }
+                datosAActualizar.password = inputPassword.value.trim();
+            }
 
-        alert("Datos actualizados ✔");
+            // Evitar enviar petición vacía
+            if (Object.keys(datosAActualizar).length === 0) {
+                alert("⚠️ No has realizado ningún cambio.");
+                return;
+            }
 
-    } catch (err) {
-        alert("Error al guardar ❌");
+            try {
+                btnGuardar.textContent = "Guardando...";
+                btnGuardar.disabled = true;
+
+                await actualizarDatosPerfil(datosAActualizar);
+                
+                alert("✅ Perfil actualizado con éxito.");
+                inputPassword.value = ""; // Limpiar password por seguridad
+                
+                // Actualizar saludo
+                if (datosAActualizar.nombre) {
+                    const welcomeMsg = document.getElementById("welcomeMsg");
+                    if(welcomeMsg) welcomeMsg.textContent = `Hola, ${datosAActualizar.nombre}`;
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("❌ Error al actualizar: " + error.message);
+            } finally {
+                btnGuardar.textContent = "GUARDAR CAMBIOS";
+                btnGuardar.disabled = false;
+            }
+        });
     }
 });
