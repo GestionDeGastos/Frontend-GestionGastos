@@ -268,11 +268,19 @@ export async function eliminarIngreso(id) {
     throw error;
   }
 }
-
+export async function crearGastoExtraordinarioEspecifico(datos) {
+  const token = localStorage.getItem("authToken");
+  const response = await fetch(`${CONFIG.API_URL}/gastos/extraordinario`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(datos),
+  });
+  if (!response.ok) throw new Error("Error al desbloquear plan");
+  return await response.json();
+}
 // ============================================================
 //      FUNCIONES DE GASTOS
 // ============================================================
-
 export async function crearGasto(gasto) {
   const token = localStorage.getItem("authToken");
 
@@ -288,7 +296,17 @@ export async function crearGasto(gasto) {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.detail || "Error al crear gasto");
+      console.error("❌ Error del backend al crear gasto:", error);
+      
+      let errorMessage = "Error al crear gasto";
+      if (error.detail) {
+        if (Array.isArray(error.detail)) {
+          errorMessage = error.detail.map(d => d.msg || JSON.stringify(d)).join(" | ");
+        } else {
+          errorMessage = error.detail;
+        }
+      }
+      throw new Error(errorMessage);
     }
 
     return await response.json();
@@ -617,3 +635,40 @@ export async function obtenerReporte(fechaInicio, fechaFin) {
     throw error;
   }
 }
+
+export async function actualizarPlanGestion(id, datos) {
+  const token = localStorage.getItem("authToken"); 
+  
+  const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${id}/personalizar`, { 
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(datos)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    
+    console.log("❌ DETALLES DEL ERROR 422:", errorData);
+
+    let mensajeError = 'Error al actualizar el plan';
+
+    if (errorData.detail) {
+        if (Array.isArray(errorData.detail)) {
+            mensajeError = errorData.detail
+                .map(e => `${e.loc[e.loc.length - 1]}: ${e.msg}`)
+                .join('\n');
+        } else {
+            mensajeError = errorData.detail;
+        }
+    }
+    
+    throw new Error(mensajeError);
+  }
+
+  return await response.json();
+}
+
+

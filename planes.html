@@ -3,8 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <title>FINTRACK - Mis Planes</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* --- ESTILOS ESPECÍFICOS PARA EL SCROLL DEL MODAL --- */
+    .modal-content {
+        max-height: 90vh; /* Altura máxima del 90% de la pantalla */
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Evita que el borde se rompa */
+    }
+
+    .modal-header {
+        flex-shrink: 0; /* El header no se encoge */
+        padding: 20px;
+        background: #1f2335;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .modal-body {
+        padding: 20px;
+        overflow-y: auto; /* AQUÍ ESTÁ LA MAGIA DEL SCROLL */
+        flex-grow: 1;
+    }
+
+    /* Scrollbar personalizado para que se vea bonito */
+    .modal-body::-webkit-scrollbar {
+        width: 8px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+        background: #15192b; 
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #7984ff; 
+        border-radius: 4px;
+    }
+
+    /* Grid para los gastos personalizados */
+    .gastos-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Dos columnas */
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    /* Estilo para el resumen de validación en tiempo real */
+    .validacion-info {
+        background: rgba(121, 132, 255, 0.1);
+        border: 1px solid #7984ff;
+        color: #b1b9ff;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        text-align: center;
+        display: none; /* Oculto por defecto */
+    }
+    
+    .validacion-info.error {
+        background: rgba(255, 107, 107, 0.1);
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+    }
+    
+    .validacion-info.success {
+        background: rgba(77, 255, 145, 0.1);
+        border-color: #4dff91;
+        color: #4dff91;
+    }
+
+    /* Ajuste inputs */
+    .input-gasto-crear {
+        background: #0f0f23 !important;
+        border: 1px solid #2a2f45 !important;
+        color: #fff !important;
+    }
+  </style>
 </head>
 <body class="bg-dashboard">
 
@@ -16,26 +91,20 @@
     </div>
   </header>
 
-  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
   <div id="menuToggle" class="menu-toggle">
-    <span></span>
-    <span></span>
-    <span></span>
+    <span></span><span></span><span></span>
   </div>
 
-  <!-- MENÚ LATERAL -->
   <nav id="sideMenu" class="side-menu">
-    <a href="inicio.html">🏠 Inicio</a>
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="planes.html">🎯 Planes</a>
-    <a href="perfil.html">👤 Perfil</a>
+    <a href="inicio.html"><i class='bx bx-grid-alt'></i> Inicio</a>
+    <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
+    <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
+    <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
   </nav>
 
-  <!-- OVERLAY OSCURO -->
   <div id="menuOverlay" class="menu-overlay"></div>
 
   <main class="dashboard-container">
-
     <div class="planes-header">
       <h2>Mis Planes y Presupuestos</h2>
       <button id="btnAbrirModal" class="btn btn-crear">
@@ -43,41 +112,92 @@
       </button>
     </div>
 
-    <div id="planesGrid" class="planes-grid-container">
-    </div>
+    <div id="planesGrid" class="planes-grid-container"></div>
 
     <div id="noPlanesMsg" style="display: none; text-align: center; padding: 40px; opacity: 0.7;">
       <h3>No tienes planes registrados.</h3>
       <p>Usa el botón "Crear Nuevo Plan" para empezar.</p>
     </div>
-
   </main>
 
+  <!-- MODAL CREAR PLAN -->
   <div id="modalCrearPlan" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Crear Nuevo Plan</h2>
         <button id="btnCerrarModal" class="btn-close-modal">✕</button>
       </div>
+      
       <div class="modal-body">
         <form id="formCrearPlan">
+          
+          <!-- Información Básica -->
           <div class="form-group">
             <label for="planNombre">Nombre del Plan</label>
             <input type="text" id="planNombre" placeholder="Ej: Ahorro Vacaciones" required>
           </div>
-          <div class="form-group">
-            <label for="planMonto">Ingreso Total Mensual</label>
-            <input type="number" id="planMonto" placeholder="Ej: 5000" step="0.01" required>
+          
+          <div class="gastos-grid"> <!-- Usamos grid aquí también para ahorrar espacio -->
+              <div class="form-group">
+                <label for="planMonto">Ingreso Mensual</label>
+                <input type="number" id="planMonto" placeholder="Ej: 5000" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="planAhorro">Ahorro Meta</label>
+                <input type="number" id="planAhorro" placeholder="Ej: 1000" step="0.01" required>
+              </div>
           </div>
-          <div class="form-group">
-            <label for="planAhorro">Ahorro Deseado (Opcional)</label>
-            <input type="number" id="planAhorro" placeholder="Ej: 1000" step="0.01">
-          </div>
+          
           <div class="form-group">
             <label for="planDuracion">Duración (meses)</label>
             <input type="number" id="planDuracion" placeholder="Ej: 12" min="1" max="360" required>
           </div>
-          <button type="submit" class="btn">Guardar Plan</button>
+
+          <!-- Checkbox Personalizar -->
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 15px; padding: 10px; background: #15192b; border-radius: 8px;">
+            <input type="checkbox" id="checkPersonalizar" style="width: auto; margin: 0; transform: scale(1.2);">
+            <label for="checkPersonalizar" style="margin: 0; cursor: pointer; color: #fff;">Personalizar distribución de gastos ahora</label>
+          </div>
+
+          <!-- Sección Dinámica de Gastos -->
+          <div id="seccionGastosPersonalizados" style="display: none; margin-top: 15px;">
+            
+            <!-- BARRA DE VALIDACIÓN EN TIEMPO REAL -->
+            <div id="validacionCrear" class="validacion-info">
+                Ingresa tus montos para calcular el disponible.
+            </div>
+
+            <h4 style="margin: 0 0 10px 0; color: #fff;">Define tus gastos fijos:</h4>
+            
+            <div class="gastos-grid">
+                <div class="form-group">
+                   <label>Vivienda</label>
+                   <input type="number" class="input-gasto-crear" data-cat="Vivienda" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                   <label>Alimentos</label>
+                   <input type="number" class="input-gasto-crear" data-cat="Alimentos" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                   <label>Transporte</label>
+                   <input type="number" class="input-gasto-crear" data-cat="Transporte" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                   <label>Servicios</label>
+                   <input type="number" class="input-gasto-crear" data-cat="Servicios" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                   <label>Entretenimiento</label>
+                   <input type="number" class="input-gasto-crear" data-cat="Entretenimiento" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                   <label>Otros</label>
+                   <input type="number" class="input-gasto-crear" data-cat="Otros" placeholder="0.00" step="0.01">
+                </div>
+            </div>
+          </div>
+
+          <button type="submit" id="btnCrearSubmit" class="btn" style="margin-top: 20px; width: 100%;">Crear Plan</button>
         </form>
       </div>
     </div>

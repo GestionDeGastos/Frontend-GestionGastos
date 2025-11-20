@@ -4,6 +4,7 @@ body {
   color: #fff;
 }
 
+/* =================== LOGIN =================== */
 .bg-login {
   background: url('../png/fondo.jpg') no-repeat center center/cover;
   height: 100vh;
@@ -481,6 +482,10 @@ select option {
 
 .btn-menu .menu-icon {
   font-size: 2.5rem;
+  /* Aseguramos que el icono (i) también se comporte bien aquí */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-menu span {
@@ -625,7 +630,8 @@ select option {
   border-radius: 14px;
   background: linear-gradient(135deg, #738aff, #9faaff);
   color: #fff;
-  text-decoration: none;
+  text-align: center;
+  text-decoration: none !important;
   transition: .25s ease;
   font-weight: 500;
   border: none;
@@ -913,7 +919,7 @@ select option {
   border-bottom: none;
 }
 
-/* ========== MENÚ LATERAL (Hamburger Menu) ========== */
+/* ========== MENÚ LATERAL (Hamburger Menu) - ACTUALIZADO ========== */
 
 .menu-toggle {
   position: absolute;
@@ -936,23 +942,24 @@ select option {
   transition: 0.3s;
 }
 
-/* Menú lateral */
+/* Contenedor del menú */
 .side-menu {
   position: fixed;
   top: 0;
-  left: -280px;
+  left: -320px;
   width: 260px;
   height: 100%;
   background: rgba(20, 20, 45, 0.97);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px); /* Más blur para efecto moderno */
   padding-top: 100px;
-  padding-left: 30px;
+  padding-left: 20px; /* Ajuste para centrar mejor los botones */
+  padding-right: 20px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  border-right: 2px solid #7984ff;
-  box-shadow: 6px 0 20px rgba(0,0,0,0.6);
-  transition: left 0.35s ease;
+  gap: 15px; /* Espacio entre opciones */
+  border-right: 1px solid rgba(121, 132, 255, 0.3); /* Borde sutil neón */
+  box-shadow: 6px 0 30px rgba(0,0,0,0.6);
+  transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1); /* Animación suave */
   z-index: 1100;
 }
 
@@ -960,17 +967,44 @@ select option {
   left: 0;
 }
 
+/* Enlaces del menú con soporte para iconos */
 .side-menu a {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
+  transition: 0.3s;
+  
+  /* Flexbox para alinear icono y texto */
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  border-radius: 12px;
+}
+
+/* Estilo de los iconos Boxicons dentro del menú */
+.side-menu a i {
+  font-size: 1.5rem;
+  color: #7984ff; /* Color acento inicial */
+  width: 24px;
+  text-align: center;
   transition: 0.3s;
 }
 
+/* Hover del botón completo */
 .side-menu a:hover {
-  color: #9ca4ff;
+  color: #fff;
+  background: rgba(121, 132, 255, 0.15);
   transform: translateX(5px);
+  box-shadow: 0 0 15px rgba(121, 132, 255, 0.1);
+}
+
+/* Efecto neón en el icono al hacer hover */
+.side-menu a:hover i {
+  color: #9ca4ff;
+  transform: scale(1.1);
+  text-shadow: 0 0 10px rgba(121, 132, 255, 0.8);
 }
 
 .side-menu .disabled {
@@ -986,7 +1020,7 @@ select option {
   top: 0;
   left: 0;
   background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;

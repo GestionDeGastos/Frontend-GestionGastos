@@ -3,11 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <title>FINTRACK - Detalle del Plan</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <!-- NUEVO CSS VINCULADO -->
+  <link rel="stylesheet" href="../css/plan-detalle.css">
+  <!-- FontAwesome para iconos -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    /* --- ESTILO PARA CAMPOS BLOQUEADOS --- */
+    .input-locked {
+        background-color: #161a2b !important; /* Fondo oscuro para indicar inactivo */
+        border-color: #2a2f45 !important;
+        color: #6b7280 !important; /* Texto grisáceo */
+        cursor: not-allowed !important; /* Cursor de prohibido */
+        pointer-events: none; /* Evita que se pueda hacer clic o seleccionar */
+        font-weight: 600;
+    }
+    
+    /* Títulos de sección */
+    .edit-section-title {
+        color: #b1b9ff;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+        margin-top: 20px;
+        font-size: 1rem;
+    }
+  </style>
 </head>
 <body class="bg-dashboard">
 
+  <!-- HEADER Y MENÚ (Igual que antes) -->
   <header class="dashboard-header">
     <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
     <div class="user-info">
@@ -16,37 +43,34 @@
     </div>
   </header>
 
-  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
-  <div id="menuToggle" class="menu-toggle">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-
-  <!-- MENÚ LATERAL -->
+  <div id="menuToggle" class="menu-toggle"><span></span><span></span><span></span></div>
   <nav id="sideMenu" class="side-menu">
-    <a href="inicio.html">🏠 Inicio</a>
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="planes.html">🎯 Planes</a>
-    <a href="perfil.html">👤 Perfil</a>
+    <a href="inicio.html"><i class='bx bx-grid-alt'></i> Inicio</a>
+    <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
+    <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
+    <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
   </nav>
 
-  <!-- OVERLAY OSCURO -->
-  <div id="menuOverlay" class="menu-overlay"></div>
+  <div id="menuOverlay" class="menu-overlay-menu"></div>
 
   <main class="dashboard-container">
 
     <div class="detalle-header">
-      <a href="planes.html" class="back">← Volver a Planes</a>
-      <h2 id="planTitulo">Cargando...</h2>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="planes.html" class="back">← Volver</a>
+        <h2 id="planTitulo">Cargando...</h2>
+      </div>
+      
+      <!-- BOTÓN EDITAR -->
+      <button id="btnEditarPlan" class="btn-editar-plan">
+        <i class="fas fa-edit"></i> Editar Distribución
+      </button>
     </div>
 
     <div class="detalle-container">
-
       <section class="grafica-card">
         <h3>Distribución de Gastos</h3>
-        <div class="progreso-resumen-card" id="progresoResumen">
-        </div>
+        <div class="progreso-resumen-card" id="progresoResumen"></div>
         <div class="chart-wrapper">
           <canvas id="graficaProgresoDona"></canvas>
         </div>
@@ -55,48 +79,88 @@
       <section class="analisis-stats-card">
         <h3>Análisis del Plan</h3>
         <p>Estadísticas y recomendaciones personalizadas.</p>
-        
-        <div class="analisis-stats-container" id="statsContainer">
-          <div class="stat-card">
-            <h4>Total Gastos</h4>
-            <p id="totalGastosAnalisis">$0.00</p>
-          </div>
-          <div class="stat-card">
-            <h4>% Ahorro</h4>
-            <p id="porcentajeAhorroAnalisis">0%</p>
-          </div>
-          <div class="stat-card">
-            <h4>Mayor Gasto</h4>
-            <p id="mayorGastoAnalisis">-</p>
-          </div>
-        </div>
-        
+        <div class="analisis-stats-container" id="statsContainer"></div>
         <div class="table-container-mini" id="recomendacionesContainer" style="display: none;">
           <h4>Recomendaciones</h4>
-          <ul id="recomendacionesList" style="color: #fff; opacity: 0.8;">
-          </ul>
+          <ul id="recomendacionesList" style="color: #fff; opacity: 0.8;"></ul>
         </div>
       </section>
-      
     </div>
   </main>
+
+  <!-- ==========================================
+       MODAL DE EDICIÓN (SOLO DISTRIBUCIÓN)
+       ========================================== -->
+  <div id="modalEditarPlan" class="modal-overlay">
+    <div class="modal-content-edit">
+      <div class="modal-header-edit">
+        <h3><i class="fas fa-sliders-h"></i> Editar Distribución</h3>
+        <button id="btnCerrarEdit" class="btn-close-edit">&times;</button>
+      </div>
+      
+      <div class="modal-body-edit">
+        <form id="formEditarPlan">
+            
+            <!-- SECCIÓN 1: DATOS FIJOS (BLOQUEADOS) -->
+            <h4 class="edit-section-title" style="margin-top: 0;">Datos del Plan</h4>
+            <div class="form-grid">
+                <div class="form-group-edit">
+                    <label>Nombre del Plan</label>
+                    <input type="text" id="editNombre" class="input-locked" readonly>
+                </div>
+                <div class="form-group-edit">
+                    <label>Duración (meses)</label>
+                    <input type="number" id="editDuracion" class="input-locked" readonly>
+                </div>
+                <div class="form-group-edit">
+                    <label>Ingreso Mensual ($)</label>
+                    <input type="number" id="editIngreso" class="input-locked" readonly>
+                </div>
+                <div class="form-group-edit">
+                    <label>Meta de Ahorro ($)</label>
+                    <input type="number" id="editAhorro" class="input-locked" readonly>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: DISTRIBUCIÓN (EDITABLE) -->
+            <h4 class="edit-section-title">Ajustar Presupuesto</h4>
+            <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">
+                Distribuye tu <strong>Ingreso Disponible</strong> entre las categorías.
+            </p>
+            
+            <div id="containerDistribucion" class="distribucion-container">
+                <!-- JS llenará esto con inputs editables -->
+            </div>
+
+            <!-- Barra de Validación -->
+            <div class="validacion-bar">
+                Cargando validación...
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnCancelarEdit" class="btn-cancelar">Cancelar</button>
+                <button type="submit" id="btnGuardarCambios" class="btn-guardar-cambios">Guardar Cambios</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="../js/plan-detalle.js"></script>
   <script>
+    /* Hamburguesa */
     const toggle = document.getElementById("menuToggle");
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");
     const mainContent = document.querySelector("main");
-
     toggle.addEventListener("click", () => {
       const isOpen = toggle.classList.toggle("open");
       menu.classList.toggle("open");
       overlay.classList.toggle("open");
       mainContent.classList.toggle("push-content");
     });
-
     overlay.addEventListener("click", () => {
       toggle.classList.remove("open");
       menu.classList.remove("open");
