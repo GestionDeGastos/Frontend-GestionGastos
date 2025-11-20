@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINTRACK – Perfil</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body class="bg-dashboard">
+
+<header class="dashboard-header">
+    <h1>FINTRACK <img src="../png/flecha.png" class="logo-arrow"></h1>
+
+    <div class="user-info">
+        <span id="welcomeMsg">Hola...</span>
+        <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    </div>
+</header>
+
+<!-- MENU HAMBURGUESA -->
+<div id="menuToggle" class="menu-toggle">
+    <span></span><span></span><span></span>
+</div>
+
+<nav id="sideMenu" class="side-menu">
+    <a href="inicio.html">🏠 Inicio</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="planes.html">🎯 Planes</a>
+    <a class="active" href="perfil.html">👤 Perfil</a>
+</nav>
+
+<div id="menuOverlay" class="menu-overlay"></div>
+
+<!-- PERFIL -->
+<div class="perfil-container">
+    <div class="perfil-card">
+
+        <!-- FOTO -->
+        <div class="perfil-foto-wrapper">
+            <img id="fotoPerfil" src="../png/user-default.png" class="perfil-foto">
+
+            <div class="btn-lapiz" id="btnCambiarFoto">
+                <svg width="42" height="42" fill="white">
+                    <path d="M3 28l2 8 8 2 20-20-10-10L3 28zm28-18l4-4-6-6-4 4 6 6z"/>
+                </svg>
+            </div>
+
+            <input type="file" id="fileFoto" style="display:none" accept="image/*">
+        </div>
+
+        <!-- FORM -->
+        <div class="perfil-info">
+            
+            <div class="perfil-item">
+                <label>Correo</label>
+                <input id="correo" disabled>
+            </div>
+
+            <div class="perfil-item">
+                <label>Nombre</label>
+                <input id="nombre">
+            </div>
+
+            <div class="perfil-item">
+                <label>Apellido</label>
+                <input id="apellido">
+            </div>
+
+            <div class="perfil-item">
+                <label>Nueva Contraseña</label>
+                <input type="password" id="password">
+            </div>
+
+        </div>
+
+        <button id="btnGuardar" class="btn-guardar">
+            GUARDAR CAMBIOS
+        </button>
+
+    </div>
+</div>
+
+<script src="../js/perfil.js" type="module"></script>
+
+<script>
+const toggle = document.getElementById("menuToggle");
+const menu = document.getElementById("sideMenu");
+const overlay = document.getElementById("menuOverlay");
+
+toggle.addEventListener("click",()=>{
+    toggle.classList.toggle("open");
+    menu.classList.toggle("open");
+    overlay.classList.toggle("open");
+});
+overlay.addEventListener("click",()=>{
+    toggle.classList.remove("open");
+    menu.classList.remove("open");
+    overlay.classList.remove("open");
+});
+</script>
+
+</body>
+</html>
