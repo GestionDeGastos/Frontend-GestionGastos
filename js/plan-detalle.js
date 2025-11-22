@@ -20,9 +20,7 @@ function cargarUsuario() {
   if(logoutBtn) logoutBtn.addEventListener("click", () => API.cerrarSesion());
 }
 
-// ============================================================
 //      CARGAR DETALLES
-// ============================================================
 async function cargarDetallesDelPlan() {
   const params = new URLSearchParams(window.location.search);
   const planId = params.get('id');
@@ -71,9 +69,7 @@ function actualizarVistaDetalle(plan, analisis) {
     mostrarAnalisis(analisis);
 }
 
-// ============================================================
 //      LÓGICA DE EDICIÓN Y MODAL
-// ============================================================
 
 function setupModalEdicion() {
     const modal = document.getElementById("modalEditarPlan");
@@ -111,7 +107,7 @@ function setupModalEdicion() {
 }
 
 function llenarFormularioEdicion(plan) {
-    // Llenamos los campos (Visibles pero bloqueados en HTML)
+    // Llenamos los campos
     document.getElementById("editNombre").value = plan.nombre_plan || "";
     document.getElementById("editDuracion").value = plan.duracion_meses || 1;
     document.getElementById("editIngreso").value = plan.ingreso_total || 0;
@@ -199,9 +195,8 @@ function validarPresupuesto() {
     if(btnGuardar) btnGuardar.disabled = bloqueado;
 }
 
-// ============================================================
 //      GUARDAR CAMBIOS (ALGORITMO MATEMÁTICO CORREGIDO)
-// ============================================================
+
 async function guardarCambiosPlan() {
     try {
         const ingreso = parseFloat(planActual.ingreso_total);
@@ -241,7 +236,7 @@ async function guardarCambiosPlan() {
             
             // Ajustar el monto antes de calcular porcentajes
             montosTemp[catDestino] += remanenteDinero;
-            console.log(`⚖️ Auto-balanceo: Sumando $${remanenteDinero.toFixed(2)} a ${catDestino}`);
+            console.log(`Auto-balanceo: Sumando $${remanenteDinero.toFixed(2)} a ${catDestino}`);
         } else if (remanenteDinero < -1) {
              throw new Error("Tus gastos superan el ingreso disponible.");
         }
@@ -270,7 +265,7 @@ async function guardarCambiosPlan() {
             const keys = Object.keys(porcentajesFinales);
             const catMayor = keys.reduce((a, b) => porcentajesFinales[a] > porcentajesFinales[b] ? a : b);
             
-            console.log(`🔧 Ajuste de precisión: ${diferencia.toFixed(2)}% aplicado a ${catMayor}`);
+            console.log(`Ajuste de precisión: ${diferencia.toFixed(2)}% aplicado a ${catMayor}`);
             
             // Sumamos la diferencia y aseguramos el formato
             let nuevoValor = porcentajesFinales[catMayor] + diferencia;
@@ -278,7 +273,7 @@ async function guardarCambiosPlan() {
         }
 
         const payload = { porcentajes: porcentajesFinales };
-        console.log("📤 Enviando Payload Perfecto:", payload);
+        console.log("Enviando Payload Perfecto:", payload);
 
         // 5. Enviar al Backend
         await API.actualizarPlanGestion(planActual.id, payload);
@@ -303,7 +298,7 @@ async function guardarCambiosPlan() {
         cargarDetallesDelPlan(); 
 
     } catch (error) {
-        console.error("❌ Error al guardar:", error);
+        console.error("Error al guardar:", error);
         Swal.fire({
             icon: 'error', 
             title: 'Error', 
