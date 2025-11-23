@@ -20,50 +20,53 @@ console.log("✅ api.js cargado. CONFIG:", CONFIG);
  *   password: string
  * }
  */
-export async function registrarUsuario(nombre, apellido, edad, correo, password) {
+/**
+ * Registra un nuevo usuario (Ahora soporta registro de Admin)
+ * POST /auth/register
+ */
+export async function registrarUsuario(nombre, apellido, edad, correo, password, adminKey = null) {
   try {
     console.log("📤 Enviando registro a:", `${CONFIG.API_URL}/auth/register`);
+
+    const payload = {
+      nombre: nombre,
+      apellido: apellido,
+      edad: parseInt(edad, 10),
+      correo: correo,
+      password: password,
+    };
+
+    // Si el usuario mandó clave de admin, la agregamos
+    if (adminKey) {
+        payload.admin_key = adminKey;
+    }
 
     const response = await fetch(`${CONFIG.API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        nombre: nombre,
-        apellido: apellido,
-        edad: parseInt(edad, 10),
-        correo: correo,
-        password: password,
-      }),
+      body: JSON.stringify(payload),
     });
 
     console.log("📥 Status registro:", response.status);
 
     if (!response.ok) {
       let errorMessage = "Error en el registro";
-
       try {
         const error = await response.json();
-        console.error("❌ Error del backend:", error);
-
+        // Manejo de errores detallados de FastAPI
         if (Array.isArray(error.detail)) {
-          // FastAPI 422: detail es un arreglo de errores
-          errorMessage = error.detail
-            .map((d) => d.msg || JSON.stringify(d))
-            .join(" | ");
+          errorMessage = error.detail.map((d) => d.msg || JSON.stringify(d)).join(" | ");
         } else if (typeof error.detail === "string") {
           errorMessage = error.detail;
         }
-      } catch (parseErr) {
-        console.error("❌ No se pudo parsear el error:", parseErr);
-      }
-
+      } catch (e) { console.error(e); }
+      
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    console.log("✅ Registro exitoso:", data);
     return data;
   } catch (error) {
     console.error("❌ Error registrando usuario:", error);

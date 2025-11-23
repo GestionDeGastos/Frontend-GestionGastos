@@ -29,6 +29,14 @@
         <input type="email" placeholder="tucorreo@example.com" required>
         <label>Contraseña</label>
         <input type="password" placeholder="Contraseña" required>
+        <div style="margin-top: 15px; display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="checkAdmin" style="width: auto; margin: 0;">
+            <label for="checkAdmin" style="margin: 0; font-size: 0.9rem; cursor: pointer;">Registrarme como Admin</label>
+        </div>
+        <div id="adminKeyContainer" style="display: none; margin-top: 10px;">
+            <label style="color: #ffce47;">Clave de Administrador</label>
+            <input type="password" id="adminKey" placeholder="Ingresa la clave secreta">
+        </div>
         <button type="submit" class="btn">Registrarme</button>
       </form>
     </div>

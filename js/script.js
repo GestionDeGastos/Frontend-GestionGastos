@@ -4,6 +4,24 @@ import * as API from './api.js';
 
 console.log("✅ script.js cargado");
 
+// Lógica para mostrar/ocultar el campo de Clave Admin
+document.addEventListener("DOMContentLoaded", () => {
+    const checkAdmin = document.getElementById("checkAdmin");
+    const keyContainer = document.getElementById("adminKeyContainer");
+    const adminKeyInput = document.getElementById("adminKey");
+
+    if(checkAdmin && keyContainer) {
+        checkAdmin.addEventListener("change", (e) => {
+            if (e.target.checked) {
+                keyContainer.style.display = "block";
+            } else {
+                keyContainer.style.display = "none";
+                if(adminKeyInput) adminKeyInput.value = ""; // Limpiar si se desmarca
+            }
+        });
+    }
+});
+
 function showAlert(icon, title, text) {
   console.log(`🔔 Mostrando alerta: ${icon} - ${title}`);
 
@@ -31,38 +49,35 @@ document.getElementById("registerForm")?.addEventListener("submit", async e => {
   console.log("📝 Registro iniciado");
 
   const form = e.target;
-
-  // ⚠️ IMPORTANTE: los índices corresponden al HTML que ya tienes:
-  // 0: nombre, 1: apellido, 2: edad, 3: correo, 4: password
+  
+  // Obtenemos los valores. Usamos querySelector para mayor seguridad si cambiaron los índices
+  // O mantenemos los índices asumiendo que el checkbox está AL FINAL.
   const nombre   = form[0].value.trim();
   const apellido = form[1].value.trim();
   const edadStr  = form[2].value.trim();
   const correo   = form[3].value.trim();
   const password = form[4].value.trim();
+  
+  // Obtenemos la clave de admin 
+  const adminKeyInput = document.getElementById("adminKey");
+  const adminKey = (adminKeyInput && adminKeyInput.value.trim() !== "") ? adminKeyInput.value.trim() : null;
 
   const edad = parseInt(edadStr, 10);
 
   if (!nombre || !apellido || !edadStr || !correo || !password) {
-    return showAlert("warning", "Campos vacíos", "Completa todos los campos");
+    return showAlert("warning", "Campos vacíos", "Completa todos los campos obligatorios");
   }
 
-  if (Number.isNaN(edad)) {
-    return showAlert("warning", "Edad inválida", "Ingresa una edad numérica");
-  }
-
-  if (edad < 18) {
-    return showAlert("warning", "Edad mínima", "Debes ser mayor de 18 años");
-  }
-
-  if (password.length < 8) {
-    return showAlert("warning", "Contraseña débil", "Mínimo 8 caracteres");
-  }
+  if (edad < 18) return showAlert("warning", "Edad mínima", "Debes ser mayor de 18 años");
+  if (password.length < 8) return showAlert("warning", "Contraseña débil", "Mínimo 8 caracteres");
 
   try {
-    console.log("🚀 Registrando...", { nombre, apellido, edad, correo });
-    await API.registrarUsuario(nombre, apellido, edad, correo, password);
+    console.log("🚀 Registrando...", { nombre, correo, admin: !!adminKey });
+    
+    await API.registrarUsuario(nombre, apellido, edad, correo, password, adminKey);
+    
     console.log("✅ Registro exitoso");
-    showAlert("success", "Registro exitoso", "Tu cuenta ha sido creada");
+    showAlert("success", "Registro exitoso", "Tu cuenta ha sido creada. Inicia sesión.");
 
     setTimeout(() => {
       window.location.href = "index.html";
