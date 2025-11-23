@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINTRACK - Panel Administrativo</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body class="bg-dashboard">
+
+    <header class="dashboard-header">
+        <h1>FINTRACK <span class="badge-admin">ADMIN</span></h1>
+        <div class="user-info">
+            <span>Modo Administrador</span>
+            <button id="logoutBtn" class="btn-logout">Salir</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav>
+                <a href="#" class="active"><i class='bx bx-grid-alt'></i> Dashboard Global</a>
+                <a href="inicio.html" class="back-link"><i class='bx bx-exit'></i> Volver a App</a>
+            </nav>
+        </aside>
+
+        <main class="admin-content">
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon-box blue"><i class='bx bx-user'></i></div>
+                    <div>
+                        <h3>Usuarios</h3>
+                        <p id="kpiUsuarios">Cargando...</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box purple"><i class='bx bx-target-lock'></i></div>
+                    <div>
+                        <h3>Planes Creados</h3>
+                        <p id="kpiPlanes">Cargando...</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box green"><i class='bx bx-wallet'></i></div>
+                    <div>
+                        <h3>Ahorro Promedio</h3>
+                        <p id="kpiAhorro">Cargando...</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box orange"><i class='bx bx-error-circle'></i></div>
+                    <div>
+                        <h3>Gastos Extra (Total)</h3>
+                        <p id="kpiExtra">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h3><i class='bx bx-bar-chart-square'></i> Top Categorías de Gasto (Sistema)</h3>
+                <div class="chart-container-main">
+                    <canvas id="chartGlobal"></canvas>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <h3><i class='bx bx-list-ul'></i> Gestión de Usuarios</h3>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Ingresos</th>
+                                <th>Ahorro Actual</th>
+                                <th>Planes</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuariosBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modalUsuario" class="modal-overlay">
+        <div class="modal-content-admin">
+            <div class="modal-header">
+                <h2 id="modalNombreUser">Detalle de Usuario</h2>
+                <button id="btnCerrarModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="user-summary">
+                    <div class="summary-item">
+                        <small>Total Ingresos</small>
+                        <strong id="modalIngresos" class="text-green">$0.00</strong>
+                    </div>
+                    <div class="summary-item">
+                        <small>Total Gastos</small>
+                        <strong id="modalGastos" class="text-red">$0.00</strong>
+                    </div>
+                    <div class="summary-item">
+                        <small>Ahorro Neto</small>
+                        <strong id="modalAhorro" class="text-blue">$0.00</strong>
+                    </div>
+                </div>
+
+                <h4>Distribución de Gastos</h4>
+                <div class="modal-chart-wrapper">
+                    <canvas id="chartUsuario"></canvas>
+                </div>
+
+                <div class="extra-info">
+                    <p><strong>Fecha Registro:</strong> <span id="modalFecha"></span></p>
+                    <p><strong>Planes Activos:</strong> <span id="modalPlanes"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="../js/admin.js"></script>
+</body>
+</html>
