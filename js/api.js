@@ -671,4 +671,66 @@ export async function actualizarPlanGestion(id, datos) {
   return await response.json();
 }
 
+export async function obtenerDashboardAdmin() {
+    const token = localStorage.getItem("authToken");
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/admin/dashboard`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
 
+        if (!response.ok) {
+            // Si es 403, es que no es admin
+            if(response.status === 403) throw new Error("Acceso denegado: No eres administrador.");
+            throw new Error("Error al obtener datos del dashboard admin");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error en obtenerDashboardAdmin:", error);
+        throw error;
+    }
+}
+
+export async function obtenerListaUsuariosAdmin() {
+    const token = localStorage.getItem("authToken");
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/admin/usuarios`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) throw new Error("Error al cargar lista de usuarios");
+        
+        return await response.json(); // Retorna { total_usuarios, usuarios: [] }
+    } catch (error) {
+        console.error("Error en obtenerListaUsuariosAdmin:", error);
+        throw error;
+    }
+}
+
+export async function obtenerDetalleUsuarioAdmin(idUsuario) {
+    const token = localStorage.getItem("authToken");
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/admin/usuario/${idUsuario}`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) throw new Error("Error al obtener detalle del usuario");
+        
+        return await response.json();
+    } catch (error) {
+        console.error("Error en obtenerDetalleUsuarioAdmin:", error);
+        throw error;
+    }
+}
