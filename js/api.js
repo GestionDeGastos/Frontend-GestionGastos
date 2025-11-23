@@ -7,63 +7,55 @@ console.log("✅ api.js cargado. CONFIG:", CONFIG);
 //      FUNCIONES DE AUTENTICACIÓN
 // ============================================================
 
-/**
- * Registra un nuevo usuario
- * POST /auth/register
- *
- * IMPORTANTE: el backend espera:
- * {
- *   nombre: string,
- *   apellido: string,
- *   edad: number,
- *   correo: string,
- *   password: string
- * }
- */
-export async function registrarUsuario(nombre, apellido, edad, correo, password) {
-  try {
-    console.log("📤 Enviando registro a:", `${CONFIG.API_URL}/auth/register`);
 
-    const response = await fetch(`${CONFIG.API_URL}/auth/register`, {
+export async function registrarUsuario(nombre, apellido, edad, correo, password, adminKey = null) {
+  try {
+    
+    // 1. DECIDIR EL ENDPOINT CORRECTO
+    const endpoint = adminKey ? "/auth/register/admin" : "/auth/register";
+    const url = `${CONFIG.API_URL}${endpoint}`;
+
+    console.log(`📤 Enviando registro a: ${url}`);
+
+    // 2. Construir el objeto de datos
+    const payload = {
+      nombre: nombre,
+      apellido: apellido,
+      edad: parseInt(edad, 10),
+      correo: correo,
+      password: password,
+    };
+
+    // Si es admin, agregamos la clave al JSON
+    if (adminKey) {
+        payload.admin_key = adminKey;
+    }
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        nombre: nombre,
-        apellido: apellido,
-        edad: parseInt(edad, 10),
-        correo: correo,
-        password: password,
-      }),
+      body: JSON.stringify(payload),
     });
 
     console.log("📥 Status registro:", response.status);
 
     if (!response.ok) {
       let errorMessage = "Error en el registro";
-
       try {
         const error = await response.json();
-        console.error("❌ Error del backend:", error);
-
         if (Array.isArray(error.detail)) {
-          // FastAPI 422: detail es un arreglo de errores
-          errorMessage = error.detail
-            .map((d) => d.msg || JSON.stringify(d))
-            .join(" | ");
+          errorMessage = error.detail.map((d) => d.msg || JSON.stringify(d)).join(" | ");
         } else if (typeof error.detail === "string") {
           errorMessage = error.detail;
         }
-      } catch (parseErr) {
-        console.error("❌ No se pudo parsear el error:", parseErr);
-      }
-
+      } catch (e) { console.error(e); }
+      
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    console.log("✅ Registro exitoso:", data);
     return data;
   } catch (error) {
     console.error("❌ Error registrando usuario:", error);
@@ -671,4 +663,66 @@ export async function actualizarPlanGestion(id, datos) {
   return await response.json();
 }
 
+export async function obtenerDashboardAdmin() {
+    const token = localStorage.getItem("authToken");
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/admin/dashboard`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
 
+        if (!response.ok) {
+            // Si es 403, es que no es admin
+            if(response.status === 403) throw new Error("Acceso denegado: No eres administrador.");
+            throw new Error("Error al obtener datos del dashboard admin");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error en obtenerDashboardAdmin:", error);
+        throw error;
+    }
+}
+
+export async function obtenerListaUsuariosAdmin() {
+    const token = localStorage.getItem("authToken");
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/admin/usuarios`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) throw new Error("Error al cargar lista de usuarios");
+        
+        return await response.json(); // Retorna { total_usuarios, usuarios: [] }
+    } catch (error) {
+        console.error("Error en obtenerListaUsuariosAdmin:", error);
+        throw error;
+    }
+}
+
+export async function obtenerDetalleUsuarioAdmin(idUsuario) {
+    const token = localStorage.getItem("authToken");
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/admin/usuario/${idUsuario}`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) throw new Error("Error al obtener detalle del usuario");
+        
+        return await response.json();
+    } catch (error) {
+        console.error("Error en obtenerDetalleUsuarioAdmin:", error);
+        throw error;
+    }
+}

@@ -16,25 +16,17 @@
     </div>
   </header>
 
-  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
   <div id="menuToggle" class="menu-toggle">
-    <span></span>
-    <span></span>
-    <span></span>
+    <span></span><span></span><span></span>
   </div>
 
-  <!-- MENÚ LATERAL -->
   <nav id="sideMenu" class="side-menu">
     <a href="inicio.html"><i class='bx bx-grid-alt'></i> Inicio</a>
-    
     <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
-    
     <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
-    
     <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
   </nav>
 
-  <!-- OVERLAY OSCURO -->
   <div id="menuOverlay" class="menu-overlay"></div>
 
   <main class="dashboard-container">
@@ -43,23 +35,26 @@
       <p>Selecciona la sección a la que deseas ir.</p>
       
       <div class="menu-options">
+        
+        <a href="admin.html" id="btnPanelAdmin" class="btn btn-menu" style="display: none; background: linear-gradient(145deg, #ffce47, #d4a017); color: #0f0f23;">
+          <span class="menu-icon"><i class='bx bx-shield-quarter'></i></span>
+          Panel Admin
+          <span style="opacity:0.7; font-size:0.85em;">(Gestión)</span>
+        </a>
         <a href="perfil.html" class="btn btn-menu">
-          <span class="menu-icon">
-            <i class='bx bx-user-circle'></i> </span>
+          <span class="menu-icon"><i class='bx bx-user-circle'></i></span>
           Perfil
           <span style="opacity:0.6;">(Básico)</span>
         </a>
         
         <a href="dashboard.html" class="btn btn-menu">
-          <span class="menu-icon">
-            <i class='bx bx-bar-chart-alt-2'></i> </span>
+          <span class="menu-icon"><i class='bx bx-bar-chart-alt-2'></i></span>
           Dashboard
           <span>(Gestión de gastos)</span>
         </a>
         
         <a href="planes.html" class="btn btn-menu">
-          <span class="menu-icon">
-            <i class='bx bx-target-lock'></i> </span>
+          <span class="menu-icon"><i class='bx bx-target-lock'></i></span>
           Plan
           <span>(Metas y Presupuestos)</span>
         </a>
@@ -70,24 +65,27 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script type="module" src="../js/inicio.js"></script>
   <script>
+    // Lógica del menú hamburguesa
     const toggle = document.getElementById("menuToggle");
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");
     const mainContent = document.querySelector("main");
 
-    toggle.addEventListener("click", () => {
-      const isOpen = toggle.classList.toggle("open");
-      menu.classList.toggle("open");
-      overlay.classList.toggle("open");
-      mainContent.classList.toggle("push-content");
-    });
+    if(toggle && menu && overlay && mainContent) {
+        toggle.addEventListener("click", () => {
+          toggle.classList.toggle("open");
+          menu.classList.toggle("open");
+          overlay.classList.toggle("open");
+          mainContent.classList.toggle("push-content");
+        });
 
-    overlay.addEventListener("click", () => {
-      toggle.classList.remove("open");
-      menu.classList.remove("open");
-      overlay.classList.remove("open");
-      mainContent.classList.remove("push-content");
-    });
+        overlay.addEventListener("click", () => {
+          toggle.classList.remove("open");
+          menu.classList.remove("open");
+          overlay.classList.remove("open");
+          mainContent.classList.remove("push-content");
+        });
+    }
   </script>
 </body>
 </html>
