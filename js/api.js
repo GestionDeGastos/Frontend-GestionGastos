@@ -7,27 +7,17 @@ console.log("✅ api.js cargado. CONFIG:", CONFIG);
 //      FUNCIONES DE AUTENTICACIÓN
 // ============================================================
 
-/**
- * Registra un nuevo usuario
- * POST /auth/register
- *
- * IMPORTANTE: el backend espera:
- * {
- *   nombre: string,
- *   apellido: string,
- *   edad: number,
- *   correo: string,
- *   password: string
- * }
- */
-/**
- * Registra un nuevo usuario (Ahora soporta registro de Admin)
- * POST /auth/register
- */
+
 export async function registrarUsuario(nombre, apellido, edad, correo, password, adminKey = null) {
   try {
-    console.log("📤 Enviando registro a:", `${CONFIG.API_URL}/auth/register`);
+    
+    // 1. DECIDIR EL ENDPOINT CORRECTO
+    const endpoint = adminKey ? "/auth/register/admin" : "/auth/register";
+    const url = `${CONFIG.API_URL}${endpoint}`;
 
+    console.log(`📤 Enviando registro a: ${url}`);
+
+    // 2. Construir el objeto de datos
     const payload = {
       nombre: nombre,
       apellido: apellido,
@@ -36,12 +26,12 @@ export async function registrarUsuario(nombre, apellido, edad, correo, password,
       password: password,
     };
 
-    // Si el usuario mandó clave de admin, la agregamos
+    // Si es admin, agregamos la clave al JSON
     if (adminKey) {
         payload.admin_key = adminKey;
     }
 
-    const response = await fetch(`${CONFIG.API_URL}/auth/register`, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -55,7 +45,6 @@ export async function registrarUsuario(nombre, apellido, edad, correo, password,
       let errorMessage = "Error en el registro";
       try {
         const error = await response.json();
-        // Manejo de errores detallados de FastAPI
         if (Array.isArray(error.detail)) {
           errorMessage = error.detail.map((d) => d.msg || JSON.stringify(d)).join(" | ");
         } else if (typeof error.detail === "string") {

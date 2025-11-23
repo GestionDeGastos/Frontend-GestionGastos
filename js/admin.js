@@ -27,15 +27,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     await cargarTablaUsuarios();
 });
 
-// ============================================
-// LOGICA DASHBOARD GLOBAL
-// ============================================
 async function cargarDashboard() {
     try {
         const data = await API.obtenerDashboardAdmin();
         
         // Mapeamos los datos según tu admin_dashboard_service.py:
-        // data.metricas_globales -> contiene total_usuarios, planes_creados, etc.
+
         const metricas = data.metricas_globales;
         const categorias = data.top_categorias;
 
@@ -84,13 +81,9 @@ function renderizarChartGlobal(labels, values) {
     });
 }
 
-// ============================================
-// LOGICA TABLA DE USUARIOS
-// ============================================
 async function cargarTablaUsuarios() {
     try {
         const data = await API.obtenerListaUsuariosAdmin();
-        // Backend retorna: { "usuarios": [...] }
         const lista = data.usuarios || [];
         
         const tbody = document.getElementById("tablaUsuariosBody");
@@ -115,7 +108,6 @@ async function cargarTablaUsuarios() {
             tbody.appendChild(tr);
         });
 
-        // Hacer la función accesible globalmente para el onclick
         window.verDetalleUsuario = verDetalleUsuario;
 
     } catch (error) {
@@ -123,9 +115,6 @@ async function cargarTablaUsuarios() {
     }
 }
 
-// ============================================
-// LOGICA DETALLE USUARIO (MODAL)
-// ============================================
 async function verDetalleUsuario(id) {
     try {
         const user = await API.obtenerDetalleUsuarioAdmin(id);
@@ -164,7 +153,6 @@ function renderizarChartUsuario(labels, values) {
 
     // Si no hay datos, mostrar algo vacío o texto
     if (values.length === 0) {
-        // Opcional: manejar gráfico vacío
     }
 
     chartUsuarioInstance = new Chart(ctx, {
