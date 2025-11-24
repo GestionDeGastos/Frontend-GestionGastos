@@ -5,79 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <title>FINTRACK - Detalle del Plan</title>
+  
   <link rel="stylesheet" href="../css/styles.css">
-  <!-- NUEVO CSS VINCULADO -->
   <link rel="stylesheet" href="../css/plan-detalle.css">
-  <!-- FontAwesome para iconos -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <style>
-    /* --- ESTILO PARA CAMPOS BLOQUEADOS --- */
-    .input-locked {
-        background-color: #161a2b !important;
-        border-color: #2a2f45 !important;
-        color: #6b7280 !important;
-        cursor: not-allowed !important;
-        pointer-events: none;
-        font-weight: 600;
-    }
-
-    /* Títulos de sección */
-    .edit-section-title {
-        color: #b1b9ff;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding-bottom: 5px;
-        margin-bottom: 15px;
-        margin-top: 20px;
-        font-size: 1rem;
-    }
-
-    /* ESTILOS PARA LOS BOTONES EXTRA */
-    .acciones-extra {
-        margin-top: 20px;
-        padding: 15px;
-        background: #15192b;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .btn-extra-action {
-        width: 100%;
-        padding: 12px;
-        margin-top: 10px;
-        background: #7984ff;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: 0.2s ease-in-out;
-    }
-
-    .btn-extra-action:hover {
-        background: #5e68d4;
-    }
-
-    /* --- OCULTAR MINI-MODALES SIEMPRE --- */
-    .modal-small {
-        display: none;
-        position: fixed;
-        top: 0; 
-        left: 0;
-        width: 100%;
-        height: 100%;
-        justify-content: center;
-        align-items: center;
-        background: rgba(0,0,0,0.7);
-        z-index: 99999;
-    }
-
-
-</style>
-
 </head>
 <body class="bg-dashboard">
 
-  <!-- HEADER Y MENÚ (Igual que antes) -->
   <header class="dashboard-header">
     <h1>FINTRACK <img src="../png/flecha.png" alt="flecha" class="logo-arrow"></h1>
     <div class="user-info">
@@ -93,34 +27,42 @@
     <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
     <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
   </nav>
-
   <div id="menuOverlay" class="menu-overlay-menu"></div>
 
   <main class="dashboard-container">
 
     <div class="detalle-header">
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <a href="planes.html" class="back">← Volver</a>
-        <h2 id="planTitulo">Cargando...</h2>
-    </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="planes.html" class="back">← Volver</a>
+            <h2 id="planTitulo">Cargando...</h2>
+        </div>
 
-    <div style="display: flex; gap: 10px;">
-        <button id="btnEliminarPlan" class="btn-eliminar-plan" 
-            style="background:#ff4d4d; padding:10px 15px; border-radius:8px; border:none;
-                   cursor:pointer; color:white; font-weight:600;">
-            <i class="fas fa-trash"></i> Eliminar Plan
-        </button>
+        <div style="display: flex; gap: 10px;">
+            <button id="btnEliminarPlan" class="btn-eliminar-plan">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
 
-        <button id="btnEditarPlan" class="btn-editar-plan">
-            <i class="fas fa-edit"></i> Editar Distribución
-        </button>
+            <button id="btnEditarPlan" class="btn-editar-plan">
+                <i class="fas fa-edit"></i> Editar Distribución
+            </button>
+        </div>
     </div>
-</div>
 
     <div class="detalle-container">
       <section class="grafica-card">
         <h3>Distribución de Gastos</h3>
+        
         <div class="progreso-resumen-card" id="progresoResumen"></div>
+        
+        <div class="acciones-rapidas">
+            <button type="button" id="btnNuevoIngreso" class="btn-extra-action btn-ingreso">
+                <i class="fas fa-arrow-up"></i> Ingreso Extra
+            </button>
+            <button type="button" id="btnGastoExtra" class="btn-extra-action btn-gasto">
+                <i class="fas fa-arrow-down"></i> Gasto Extra
+            </button>
+        </div>
+
         <div class="chart-wrapper">
           <canvas id="graficaProgresoDona"></canvas>
         </div>
@@ -130,6 +72,7 @@
         <h3>Análisis del Plan</h3>
         <p>Estadísticas y recomendaciones personalizadas.</p>
         <div class="analisis-stats-container" id="statsContainer"></div>
+        
         <div class="table-container-mini" id="recomendacionesContainer" style="display: none;">
           <h4>Recomendaciones</h4>
           <ul id="recomendacionesList" style="color: #fff; opacity: 0.8;"></ul>
@@ -138,9 +81,6 @@
     </div>
   </main>
 
-  <!-- ==========================================
-       MODAL DE EDICIÓN (SOLO DISTRIBUCIÓN)
-       ========================================== -->
   <div id="modalEditarPlan" class="modal-overlay">
     <div class="modal-content-edit">
       <div class="modal-header-edit">
@@ -150,8 +90,6 @@
       
       <div class="modal-body-edit">
         <form id="formEditarPlan">
-            
-            <!-- SECCIÓN 1: DATOS FIJOS (BLOQUEADOS) -->
             <h4 class="edit-section-title" style="margin-top: 0;">Datos del Plan</h4>
             <div class="form-grid">
                 <div class="form-group-edit">
@@ -172,101 +110,80 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN 2: DISTRIBUCIÓN (EDITABLE) -->
             <h4 class="edit-section-title">Ajustar Presupuesto</h4>
             <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">
                 Distribuye tu <strong>Ingreso Disponible</strong> entre las categorías.
             </p>
             
-            <div id="containerDistribucion" class="distribucion-container">
-                <!-- JS llenará esto con inputs editables -->
-            </div>
-
-            <!-- Barra de Validación -->
-            <div class="validacion-bar">
-                Cargando validación...
-            </div>
-
+            <div id="containerDistribucion" class="distribucion-container"></div>
 
             <div class="modal-footer">
                 <button type="button" id="btnCancelarEdit" class="btn-cancelar">Cancelar</button>
                 <button type="submit" id="btnGuardarCambios" class="btn-guardar-cambios">Guardar Cambios</button>
             </div>
         </form>
-        <!-- NUEVOS BOTONES -->
-<div class="acciones-extra">
-    <h4 class="edit-section-title">Acciones del Plan</h4>
-
-    <button type="button" id="btnNuevoIngreso" class="btn-extra-action">
-        Ingresar Nuevo Ingreso
-    </button>
-
-    <button type="button" id="btnGastoExtra" class="btn-extra-action">
-        Registrar Gasto Extraordinario
-    </button>
-</div>
       </div>
     </div>
   </div>
 
-<!-- MODAL PARA NUEVO INGRESO-->
-<div id="modalNuevoIngreso" class="modal-small">
-  <div class="modal-content-edit" style="max-width: 400px;">
-    <div class="modal-header-edit">
-      <h3>Registrar Nuevo Ingreso</h3>
-      <button class="btn-close-edit" onclick="cerrarMiniModal('modalNuevoIngreso')">&times;</button>
-    </div>
+  <div id="modalNuevoIngreso" class="modal-small">
+    <div class="modal-content-mini border-green">
+      <div class="modal-mini-header border-bottom-green">
+        <h3 class="text-green">Registrar Nuevo Ingreso</h3>
+        <button class="btn-close-edit" id="btnCloseIngreso">&times;</button>
+      </div>
 
-    <div class="modal-body-edit">
-      <label>Monto del ingreso:</label>
-      <input type="number" id="montoNuevoIngreso" class="input-monto-dist" min="1" step="0.01" placeholder="Ej: 1200">
-
-      <button class="btn-extra-action" onclick="guardarNuevoIngreso()">Guardar Ingreso</button>
-    </div>
-  </div>
-</div>
-
-<!--MODAL PARA GASTO EXTRAORDINARIO-->
-<div id="modalGastoExtra" class="modal-small">
-  <div class="modal-content-edit" style="max-width: 400px;">
-    <div class="modal-header-edit">
-      <h3>Registrar Gasto Extraordinario</h3>
-      <button class="btn-close-edit" onclick="cerrarMiniModal('modalGastoExtra')">&times;</button>
-    </div>
-
-    <div class="modal-body-edit">
-      <label>Monto del gasto extraordinario:</label>
-      <input type="number" id="montoGastoExtra" class="input-monto-dist" 
-             min="1" step="0.01" placeholder="Ej: 450">
-
-      <button class="btn-extra-action" onclick="guardarGastoExtra()">Guardar Gasto</button>
+      <div class="modal-mini-body">
+        <label>Monto del ingreso:</label>
+        <input type="number" id="montoNuevoIngreso" class="input-dark" min="1" step="0.01" placeholder="Ej: 1200">
+        <button id="btnConfirmarIngreso" class="btn-extra-action btn-ingreso">
+            Guardar Ingreso
+        </button>
+      </div>
     </div>
   </div>
-</div>
+
+  <div id="modalGastoExtra" class="modal-small">
+    <div class="modal-content-mini border-red">
+      <div class="modal-mini-header border-bottom-red">
+        <h3 class="text-red">Registrar Gasto Extra</h3>
+        <button class="btn-close-edit" id="btnCloseGasto">&times;</button>
+      </div>
+
+      <div class="modal-mini-body">
+        <label>Monto del gasto:</label>
+        <input type="number" id="montoGastoExtra" class="input-dark" min="1" step="0.01" placeholder="Ej: 450">
+        <button id="btnConfirmarGasto" class="btn-extra-action btn-gasto">
+            Guardar Gasto
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
   
-
   <script>
-    
-    /* Hamburguesa */
+    /* Lógica Menú Hamburguesa (Simple) */
     const toggle = document.getElementById("menuToggle");
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");
     const mainContent = document.querySelector("main");
-    toggle.addEventListener("click", () => {
-      const isOpen = toggle.classList.toggle("open");
-      menu.classList.toggle("open");
-      overlay.classList.toggle("open");
-      mainContent.classList.toggle("push-content");
-    });
-    overlay.addEventListener("click", () => {
-      toggle.classList.remove("open");
-      menu.classList.remove("open");
-      overlay.classList.remove("open");
-      mainContent.classList.remove("push-content");
-    });
+    
+    if(toggle){
+        toggle.addEventListener("click", () => {
+          toggle.classList.toggle("open");
+          menu.classList.toggle("open");
+          overlay.classList.toggle("open");
+          mainContent.classList.toggle("push-content");
+        });
+        overlay.addEventListener("click", () => {
+          toggle.classList.remove("open");
+          menu.classList.remove("open");
+          overlay.classList.remove("open");
+          mainContent.classList.remove("push-content");
+        });
+    }
   </script>
   <script type="module" src="../js/plan-detalle.js"></script>
 </body>
