@@ -337,3 +337,29 @@
     box-shadow: none;
     opacity: 0.6;
 }
+/* =========================================
+   FIX PARA QUE LOS MINI MODALES SE VEAN
+   ========================================= */
+
+.modal-small {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: none !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: rgba(0,0,0,0.7) !important;
+    z-index: 999999 !important;
+}
+
+.modal-small .modal-box {
+    background: #15192b;
+    padding: 25px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 350px;
+    border: 1px solid #7984ff;
+    box-shadow: 0 0 20px rgba(121,132,255,0.2);
+}
