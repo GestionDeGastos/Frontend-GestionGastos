@@ -262,7 +262,7 @@ async function eliminarPlan() {
 
     if (result.isConfirmed) {
         try {
-            await API.eliminarPlanGestion(planActual.id);
+            await API.eliminarPlan(planActual.id);
             await Swal.fire("Eliminado", "", "success");
             window.location.href = "planes.html";
         } catch (e) {

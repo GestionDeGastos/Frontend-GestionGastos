@@ -201,7 +201,7 @@ export async function actualizarPlanGestion(id, datos) {
   return await response.json();
 }
 
-export async function eliminarPlanGestion(id) {
+export async function eliminarPlan(id) {
   const token = obtenerToken();
   const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${id}`, {
     method: "DELETE",
