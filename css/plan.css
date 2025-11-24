@@ -357,3 +357,18 @@ input[type="date"]:invalid {
         font-size: 1.3rem;
     }
 }
+
+/* ===== MODALES PEQUEÑOS (INGRESO EXTRA / GASTO EXTRA) ===== */
+.modal-small {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0,0,0,0.8) !important;
+    z-index: 999999 !important;
+    display: none !important;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
