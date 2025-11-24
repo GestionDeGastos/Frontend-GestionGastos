@@ -32,50 +32,60 @@
                 <div class="stat-card">
                     <div class="icon-box blue"><i class='bx bx-user'></i></div>
                     <div>
-                        <h3>Usuarios</h3>
-                        <p id="kpiUsuarios">Cargando...</p>
+                        <h3>Usuarios Totales</h3>
+                        <p id="kpiUsuarios">Calculando...</p>
                     </div>
                 </div>
+
                 <div class="stat-card">
-                    <div class="icon-box purple"><i class='bx bx-target-lock'></i></div>
+                    <div class="icon-box purple"><i class='bx bx-face'></i></div>
                     <div>
-                        <h3>Planes Creados</h3>
-                        <p id="kpiPlanes">Cargando...</p>
+                        <h3>Edad Promedio</h3>
+                        <p id="kpiEdad">Calculando...</p>
                     </div>
                 </div>
+
                 <div class="stat-card">
-                    <div class="icon-box green"><i class='bx bx-wallet'></i></div>
+                    <div class="icon-box green"><i class='bx bx-money'></i></div>
                     <div>
-                        <h3>Ahorro Promedio</h3>
-                        <p id="kpiAhorro">Cargando...</p>
+                        <h3>Ingreso Promedio</h3>
+                        <p id="kpiIngresoPromedio">Calculando...</p>
                     </div>
                 </div>
+
                 <div class="stat-card">
-                    <div class="icon-box orange"><i class='bx bx-error-circle'></i></div>
+                    <div class="icon-box orange"><i class='bx bx-list-check'></i></div>
                     <div>
-                        <h3>Gastos Extra (Total)</h3>
-                        <p id="kpiExtra">Cargando...</p>
+                        <h3>Planes / Usuario</h3>
+                        <p id="kpiPlanesPromedio">Calculando...</p>
                     </div>
                 </div>
             </div>
 
             <div class="chart-section">
-                <h3><i class='bx bx-bar-chart-square'></i> Top Categorías de Gasto (Sistema)</h3>
+                <h3><i class='bx bx-line-chart'></i> Tendencias Generales de la Plataforma</h3>
                 <div class="chart-container-main">
                     <canvas id="chartGlobal"></canvas>
                 </div>
             </div>
 
             <div class="table-section">
-                <h3><i class='bx bx-list-ul'></i> Gestión de Usuarios</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3><i class='bx bx-data'></i> Base de Datos de Usuarios</h3>
+                    
+                    <div class="search-box">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="buscadorUsuarios" placeholder="Buscar usuario...">
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
                                 <th>Correo</th>
-                                <th>Ingresos</th>
-                                <th>Ahorro Actual</th>
+                                <th>Edad</th> <th>Ingresos Totales</th>
                                 <th>Planes</th>
                                 <th>Acciones</th>
                             </tr>
@@ -92,34 +102,35 @@
     <div id="modalUsuario" class="modal-overlay">
         <div class="modal-content-admin">
             <div class="modal-header">
-                <h2 id="modalNombreUser">Detalle de Usuario</h2>
+                <h2 id="modalNombreUser">Estadísticas Personales</h2>
                 <button id="btnCerrarModal" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
                 
-                <div class="user-summary">
+                <div class="user-summary" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="summary-item">
-                        <small>Total Ingresos</small>
-                        <strong id="modalIngresos" class="text-green">$0.00</strong>
+                        <small>Total de Planes</small>
+                        <strong id="modalPlanesCount" class="text-blue">0</strong>
                     </div>
                     <div class="summary-item">
-                        <small>Total Gastos</small>
-                        <strong id="modalGastos" class="text-red">$0.00</strong>
-                    </div>
-                    <div class="summary-item">
-                        <small>Ahorro Neto</small>
-                        <strong id="modalAhorro" class="text-blue">$0.00</strong>
+                        <small>Uso de Plataforma</small>
+                        <strong id="modalUso" class="text-green">Calculando...</strong>
                     </div>
                 </div>
 
-                <h4>Distribución de Gastos</h4>
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+                    <small style="color: #aaa;">Promedio de Ingresos (entre todos sus planes)</small>
+                    <h2 id="modalPromedioIngresoPlan" style="margin: 5px 0; color: #ffce47;">$0.00</h2>
+                </div>
+
+                <h4>Distribución Financiera Actual</h4>
                 <div class="modal-chart-wrapper">
                     <canvas id="chartUsuario"></canvas>
                 </div>
 
                 <div class="extra-info">
+                    <p><strong>Correo:</strong> <span id="modalCorreo"></span></p>
                     <p><strong>Fecha Registro:</strong> <span id="modalFecha"></span></p>
-                    <p><strong>Planes Activos:</strong> <span id="modalPlanes"></span></p>
                 </div>
             </div>
         </div>

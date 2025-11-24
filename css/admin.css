@@ -170,3 +170,67 @@
     background: none; border: none; color: #fff; font-size: 2rem; 
     cursor: pointer; position: absolute; top: 15px; right: 20px;
 }
+
+.admin-select {
+    background: #15192b;
+    color: #fff;
+    border: 1px solid rgba(121, 132, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+}
+
+.search-box {
+    position: relative;
+    width: 250px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 8px 10px 8px 35px; 
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    outline: none;
+}
+
+.search-box i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+}
+
+.btn-eliminar {
+    background: transparent;
+    border: 1px solid #ff5555;
+    color: #ff5555;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 5px;
+}
+
+.btn-eliminar:hover {
+    background: #ff5555;
+    color: white;
+}
+
+.btn-eliminar {
+    background: transparent;
+    border: 1px solid #ff5555;
+    color: #ff5555;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 5px;
+}
+.btn-eliminar:hover {
+    background: #ff5555;
+    color: white;
+}
