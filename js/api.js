@@ -257,9 +257,16 @@ export async function obtenerReporte(inicio, fin) {
   return await response.json();
 }
 
-export async function obtenerDashboardAdmin() {
+export async function obtenerDashboardAdmin(inicio = null, fin = null) {
   const token = obtenerToken();
-  const response = await fetch(`${CONFIG.API_URL}/api/admin/dashboard`, {
+  let url = `${CONFIG.API_URL}/api/admin/dashboard`;
+  
+  // Si hay fechas, las agregamos a la URL
+  if (inicio && fin) {
+    url += `?fecha_inicio=${inicio}&fecha_fin=${fin}`;
+  }
+
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!response.ok) throw new Error("Error admin dashboard");
@@ -282,4 +289,14 @@ export async function obtenerDetalleUsuarioAdmin(id) {
   });
   if (!response.ok) throw new Error("Error detalle usuario");
   return await response.json();
+}
+
+export async function eliminarUsuarioAdmin(id) {
+  const token = obtenerToken();
+  const response = await fetch(`${CONFIG.API_URL}/api/admin/usuario/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!response.ok) throw new Error("Error al eliminar usuario");
+  return await response.json(); 
 }
