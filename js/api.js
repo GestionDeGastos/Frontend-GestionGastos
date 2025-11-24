@@ -15,7 +15,7 @@ export async function registrarUsuario(nombre, apellido, edad, correo, password,
     const endpoint = adminKey ? "/auth/register/admin" : "/auth/register";
     const url = `${CONFIG.API_URL}${endpoint}`;
 
-    console.log(`📤 Enviando registro a: ${url}`);
+    console.log(`Enviando registro a: ${url}`);
 
     // 2. Construir el objeto de datos
     const payload = {
@@ -39,7 +39,7 @@ export async function registrarUsuario(nombre, apellido, edad, correo, password,
       body: JSON.stringify(payload),
     });
 
-    console.log("📥 Status registro:", response.status);
+    console.log("Status registro:", response.status);
 
     if (!response.ok) {
       let errorMessage = "Error en el registro";
@@ -58,7 +58,7 @@ export async function registrarUsuario(nombre, apellido, edad, correo, password,
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("❌ Error registrando usuario:", error);
+    console.error("Error registrando usuario:", error);
     throw error;
   }
 }
@@ -69,7 +69,7 @@ export async function registrarUsuario(nombre, apellido, edad, correo, password,
  */
 export async function loginUsuario(correo, password) {
   try {
-    console.log("📤 Enviando login a:", CONFIG.API_URL + "/auth/login");
+    console.log("Enviando login a:", CONFIG.API_URL + "/auth/login");
 
     const response = await fetch(`${CONFIG.API_URL}/auth/login`, {
       method: "POST",
@@ -82,28 +82,28 @@ export async function loginUsuario(correo, password) {
       }),
     });
 
-    console.log("📥 Status login:", response.status);
+    console.log("Status login:", response.status);
 
     if (!response.ok) {
       const error = await response.json();
-      console.error("❌ Error del backend:", error);
+      console.error("Error del backend:", error);
       throw new Error(error.detail || "Error al iniciar sesión");
     }
 
     const data = await response.json();
-    console.log("✅ Token recibido:", data.access_token);
+    console.log("Token recibido:", data.access_token);
 
     // Guardar token en localStorage
     localStorage.setItem("authToken", data.access_token);
 
     // Obtener datos del usuario
     const usuarioData = await obtenerPerfilUsuario(data.access_token);
-    console.log("✅ Usuario obtenido:", usuarioData);
+    console.log("Usuario obtenido:", usuarioData);
     localStorage.setItem("usuarioActivo", JSON.stringify(usuarioData));
 
     return data;
   } catch (error) {
-    console.error("❌ Error en loginUsuario:", error);
+    console.error("Error en loginUsuario:", error);
     throw error;
   }
 }
@@ -114,7 +114,7 @@ export async function loginUsuario(correo, password) {
  */
 export async function obtenerPerfilUsuario(token) {
   try {
-    console.log("📤 Obteniendo perfil...");
+    console.log("Obteniendo perfil...");
 
     const response = await fetch(`${CONFIG.API_URL}/auth/me`, {
       method: "GET",
@@ -129,10 +129,10 @@ export async function obtenerPerfilUsuario(token) {
     }
 
     const data = await response.json();
-    console.log("✅ Perfil obtenido:", data);
+    console.log("Perfil obtenido:", data);
     return data;
   } catch (error) {
-    console.error("❌ Error obteniendo perfil:", error);
+    console.error("Error obteniendo perfil:", error);
     throw error;
   }
 }
@@ -629,38 +629,24 @@ export async function obtenerReporte(fechaInicio, fechaFin) {
 }
 
 export async function actualizarPlanGestion(id, datos) {
-  const token = localStorage.getItem("authToken"); 
-  
-  const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${id}/personalizar`, { 
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(datos)
-  });
+    const token = localStorage.getItem("authToken"); 
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    
-    console.log("❌ DETALLES DEL ERROR 422:", errorData);
+    const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${id}/personalizar`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(datos)
+    });
 
-    let mensajeError = 'Error al actualizar el plan';
-
-    if (errorData.detail) {
-        if (Array.isArray(errorData.detail)) {
-            mensajeError = errorData.detail
-                .map(e => `${e.loc[e.loc.length - 1]}: ${e.msg}`)
-                .join('\n');
-        } else {
-            mensajeError = errorData.detail;
-        }
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.log("DETALLES DEL ERROR:", errorData);
+        throw new Error(errorData.detail || 'Error al actualizar el plan');
     }
-    
-    throw new Error(mensajeError);
-  }
 
-  return await response.json();
+    return await response.json();
 }
 
 export async function obtenerDashboardAdmin() {
@@ -725,4 +711,75 @@ export async function obtenerDetalleUsuarioAdmin(idUsuario) {
         console.error("Error en obtenerDetalleUsuarioAdmin:", error);
         throw error;
     }
+}
+export async function registrarIngresoExtra(plan_id, data) {
+    const token = localStorage.getItem("authToken");
+
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/ingresos_extra/${plan_id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+            },
+            body: JSON.stringify({
+                monto: data.monto
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || "Error al registrar ingreso extra");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error en registrarIngresoExtra:", error);
+        throw error;
+    }
+}
+
+export async function registrarGastoExtra(plan_id, data) {
+    const token = localStorage.getItem("authToken");
+
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/gastos_extra/${plan_id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+            },
+            body: JSON.stringify({
+                monto: data.monto
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || "Error al registrar gasto extraordinario");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error en registrarGastoExtra:", error);
+        throw error;
+    }
+}
+export async function eliminarPlan(planId) {
+    const token = localStorage.getItem("authToken");
+
+    const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${planId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        let error = {};
+        try { error = await response.json(); } catch {}
+        throw new Error(error.detail || "Error al eliminar el plan");
+    }
+
+    return await response.json();
 }

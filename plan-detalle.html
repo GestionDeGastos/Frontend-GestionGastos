@@ -13,14 +13,14 @@
   <style>
     /* --- ESTILO PARA CAMPOS BLOQUEADOS --- */
     .input-locked {
-        background-color: #161a2b !important; /* Fondo oscuro para indicar inactivo */
+        background-color: #161a2b !important;
         border-color: #2a2f45 !important;
-        color: #6b7280 !important; /* Texto grisáceo */
-        cursor: not-allowed !important; /* Cursor de prohibido */
-        pointer-events: none; /* Evita que se pueda hacer clic o seleccionar */
+        color: #6b7280 !important;
+        cursor: not-allowed !important;
+        pointer-events: none;
         font-weight: 600;
     }
-    
+
     /* Títulos de sección */
     .edit-section-title {
         color: #b1b9ff;
@@ -30,7 +30,50 @@
         margin-top: 20px;
         font-size: 1rem;
     }
-  </style>
+
+    /* ESTILOS PARA LOS BOTONES EXTRA */
+    .acciones-extra {
+        margin-top: 20px;
+        padding: 15px;
+        background: #15192b;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-extra-action {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        background: #7984ff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s ease-in-out;
+    }
+
+    .btn-extra-action:hover {
+        background: #5e68d4;
+    }
+
+    /* --- OCULTAR MINI-MODALES SIEMPRE --- */
+    .modal-small {
+        display: none !important;
+        position: fixed;
+        top: 0; 
+        left: 0;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0,0,0,0.7);
+        z-index: 99999;
+    }
+
+
+</style>
+
 </head>
 <body class="bg-dashboard">
 
@@ -56,16 +99,23 @@
   <main class="dashboard-container">
 
     <div class="detalle-header">
-      <div style="display: flex; align-items: center; gap: 15px;">
+    <div style="display: flex; align-items: center; gap: 15px;">
         <a href="planes.html" class="back">← Volver</a>
         <h2 id="planTitulo">Cargando...</h2>
-      </div>
-      
-      <!-- BOTÓN EDITAR -->
-      <button id="btnEditarPlan" class="btn-editar-plan">
-        <i class="fas fa-edit"></i> Editar Distribución
-      </button>
     </div>
+
+    <div style="display: flex; gap: 10px;">
+        <button id="btnEliminarPlan" class="btn-eliminar-plan" 
+            style="background:#ff4d4d; padding:10px 15px; border-radius:8px; border:none;
+                   cursor:pointer; color:white; font-weight:600;">
+            <i class="fas fa-trash"></i> Eliminar Plan
+        </button>
+
+        <button id="btnEditarPlan" class="btn-editar-plan">
+            <i class="fas fa-edit"></i> Editar Distribución
+        </button>
+    </div>
+</div>
 
     <div class="detalle-container">
       <section class="grafica-card">
@@ -137,19 +187,69 @@
                 Cargando validación...
             </div>
 
+
             <div class="modal-footer">
                 <button type="button" id="btnCancelarEdit" class="btn-cancelar">Cancelar</button>
                 <button type="submit" id="btnGuardarCambios" class="btn-guardar-cambios">Guardar Cambios</button>
             </div>
         </form>
+        <!-- NUEVOS BOTONES -->
+<div class="acciones-extra">
+    <h4 class="edit-section-title">Acciones del Plan</h4>
+
+    <button type="button" id="btnNuevoIngreso" class="btn-extra-action">
+        Ingresar Nuevo Ingreso
+    </button>
+
+    <button type="button" id="btnGastoExtra" class="btn-extra-action">
+        Registrar Gasto Extraordinario
+    </button>
+</div>
       </div>
     </div>
   </div>
 
+<!-- MODAL PARA NUEVO INGRESO-->
+<div id="modalNuevoIngreso" class="modal-small">
+  <div class="modal-content-edit" style="max-width: 400px;">
+    <div class="modal-header-edit">
+      <h3>Registrar Nuevo Ingreso</h3>
+      <button class="btn-close-edit" onclick="cerrarMiniModal('modalNuevoIngreso')">&times;</button>
+    </div>
+
+    <div class="modal-body-edit">
+      <label>Monto del ingreso:</label>
+      <input type="number" id="montoNuevoIngreso" class="input-monto-dist" min="1" step="0.01" placeholder="Ej: 1200">
+
+      <button class="btn-extra-action" onclick="guardarNuevoIngreso()">Guardar Ingreso</button>
+    </div>
+  </div>
+</div>
+
+<!--MODAL PARA GASTO EXTRAORDINARIO-->
+<div id="modalGastoExtra" class="modal-small">
+  <div class="modal-content-edit" style="max-width: 400px;">
+    <div class="modal-header-edit">
+      <h3>Registrar Gasto Extraordinario</h3>
+      <button class="btn-close-edit" onclick="cerrarMiniModal('modalGastoExtra')">&times;</button>
+    </div>
+
+    <div class="modal-body-edit">
+      <label>Monto del gasto extraordinario:</label>
+      <input type="number" id="montoGastoExtra" class="input-monto-dist" 
+             min="1" step="0.01" placeholder="Ej: 450">
+
+      <button class="btn-extra-action" onclick="guardarGastoExtra()">Guardar Gasto</button>
+    </div>
+  </div>
+</div>
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="../js/plan-detalle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+  
+
   <script>
+    
     /* Hamburguesa */
     const toggle = document.getElementById("menuToggle");
     const menu = document.getElementById("sideMenu");
@@ -168,5 +268,6 @@
       mainContent.classList.remove("push-content");
     });
   </script>
+  <script type="module" src="../js/plan-detalle.js"></script>
 </body>
 </html>

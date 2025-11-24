@@ -1,14 +1,10 @@
-import * as API from './api.js';
+ import * as API from './api.js';
 
 const PALETA_COLORES_DONA = ['#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', '#ffce47', '#47ceff'];
 
 let planActual = null; 
 
-window.addEventListener("DOMContentLoaded", () => {
-  cargarUsuario();
-  cargarDetallesDelPlan();
-  setupModalEdicion();
-});
+
 
 function cargarUsuario() {
   const welcomeMsg = document.getElementById("welcomeMsg");
@@ -47,6 +43,46 @@ async function cargarDetallesDelPlan() {
     if(titulo) titulo.textContent = "Error de conexión";
   }
 }
+function setupEliminarPlan() {
+    const btn = document.getElementById("btnEliminarPlan");
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+
+        const confirm = await Swal.fire({
+            icon: "warning",
+            title: "¿Eliminar plan?",
+            text: "Esta acción no se puede deshacer.",
+            showCancelButton: true,
+            confirmButtonColor: "#e74c3c",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Sí, eliminar",
+            background: "#15192b",
+            color: "#fff"
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        try {
+            await API.eliminarPlan(planActual.id);
+            await Swal.fire({
+                icon: "success",
+                title: "Plan eliminado",
+                background: "#15192b",
+                color: "#fff"
+            });
+            window.location.href = "planes.html";
+        } catch (e) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: e.message || "No se pudo eliminar el plan.",
+                background: "#15192b",
+                color: "#fff"
+            });
+        }
+    });
+}
 
 function actualizarVistaDetalle(plan, analisis) {
     const titulo = document.getElementById("planTitulo");
@@ -57,8 +93,8 @@ function actualizarVistaDetalle(plan, analisis) {
     const progresoResumenEl = document.getElementById("progresoResumen");
     if(progresoResumenEl) {
         progresoResumenEl.innerHTML = `
-          <h3>${formatoMoneda(plan.ingreso_total)}</h3>
-          <p>Ingreso total mensual</p>
+          <h3>${formatoMoneda(plan.ingreso_total)}</h3>  
+          <p>Ingreso total</p>
           <hr>
           <h4>${formatoMoneda(plan.ahorro_deseado)}</h4>
           <p>Meta de Ahorro</p>
@@ -113,6 +149,9 @@ function llenarFormularioEdicion(plan) {
     document.getElementById("editIngreso").value = plan.ingreso_total || 0;
     document.getElementById("editAhorro").value = plan.ahorro_deseado || 0;
 
+    const gastoExtra = parseFloat(plan.total_gastos_extra || 0);
+    document.getElementById("editIngreso").value = (plan.ingreso_total - gastoExtra).toFixed(2);
+
     const container = document.getElementById("containerDistribucion");
     container.innerHTML = "";
     
@@ -151,7 +190,9 @@ function llenarFormularioEdicion(plan) {
 function validarPresupuesto() {
     const ingreso = parseFloat(planActual.ingreso_total) || 0;
     const ahorro = parseFloat(planActual.ahorro_deseado) || 0;
-    const ingresoDisponible = ingreso - ahorro;
+    const gastoExtra = parseFloat(planActual.total_gastos_extra || 0);
+    const ingresoDisponible = ingreso - ahorro - gastoExtra;
+
     
     let sumaGastos = 0;
     document.querySelectorAll(".input-monto-dist").forEach(input => sumaGastos += parseFloat(input.value || 0));
@@ -201,7 +242,9 @@ async function guardarCambiosPlan() {
     try {
         const ingreso = parseFloat(planActual.ingreso_total);
         const ahorro = parseFloat(planActual.ahorro_deseado);
-        const ingresoDisponible = ingreso - ahorro;
+        const gastoExtra = parseFloat(planActual.total_gastos_extra || 0);
+        const ingresoDisponible = ingreso - ahorro - gastoExtra;
+
 
         if (ingresoDisponible <= 0) {
             throw new Error("Error: No hay dinero disponible para distribuir.");
@@ -214,7 +257,9 @@ async function guardarCambiosPlan() {
         // 1. Recolectar montos ingresados
         inputsDist.forEach(input => {
             const cat = input.name.replace("cat_", "");
-            const val = parseFloat(input.value) || 0;
+            const raw = input.value.replace(/,/g, "");   
+            const val = parseFloat(raw) || 0;
+
             montosTemp[cat] = val;
             sumaGastosInput += val;
         });
@@ -241,38 +286,28 @@ async function guardarCambiosPlan() {
              throw new Error("Tus gastos superan el ingreso disponible.");
         }
 
-        // 3. Calcular Porcentajes y REDONDEAR PRIMERO
-        const porcentajesFinales = {};
-        let sumaPorcentajes = 0;
-        
-        Object.keys(montosTemp).forEach(cat => {
-            const monto = montosTemp[cat];
-            // Paso crítico: Redondear a 2 decimales AHORA, no después
-            let pct = (monto / ingresoDisponible) * 100;
-            pct = Math.round(pct * 100) / 100; // Redondeo estricto a 2 decimales
-            
-            porcentajesFinales[cat] = pct;
-            sumaPorcentajes += pct;
-        });
+        // 3. Calcular porcentajes directamente (sin autobalanceo por montos)
+const porcentajesFinales = {};
 
-        // 4. Ajuste fino final (El "cuadre" de los decimales)
-        // Si la suma da 99.99 o 100.01 debido al redondeo previo, ajustamos la diferencia.
-        // Como ya redondeamos, la diferencia será exactamente 0.01 o -0.01 si existe.
-        const diferencia = 100.00 - sumaPorcentajes;
-        
-        if (Math.abs(diferencia) > 0.0001) {
-            // Se la sumamos a la categoría más grande para que sea imperceptible
-            const keys = Object.keys(porcentajesFinales);
-            const catMayor = keys.reduce((a, b) => porcentajesFinales[a] > porcentajesFinales[b] ? a : b);
-            
-            console.log(`Ajuste de precisión: ${diferencia.toFixed(2)}% aplicado a ${catMayor}`);
-            
-            // Sumamos la diferencia y aseguramos el formato
-            let nuevoValor = porcentajesFinales[catMayor] + diferencia;
-            porcentajesFinales[catMayor] = parseFloat(nuevoValor.toFixed(2));
-        }
+Object.keys(montosTemp).forEach(cat => {
+    const pct = (montosTemp[cat] / ingresoDisponible) * 100;
+    porcentajesFinales[cat] = Number(pct.toFixed(2));
+});
 
-        const payload = { porcentajes: porcentajesFinales };
+// 4. Normalización opcional (asegura que sumen 100)
+let suma = Object.values(porcentajesFinales).reduce((a,b)=>a+b,0);
+let diferencia = Number((100 - suma).toFixed(2));
+
+if (Math.abs(diferencia) > 0.01) {
+    // Se la agregamos a la categoría más grande (casi imperceptible)
+    const catMayor = Object.keys(porcentajesFinales)
+        .reduce((a,b)=>porcentajesFinales[a] > porcentajesFinales[b] ? a : b);
+
+    porcentajesFinales[catMayor] = Number((porcentajesFinales[catMayor] + diferencia).toFixed(2));
+}
+
+const payload = { porcentajes: porcentajesFinales };
+
         console.log("Enviando Payload Perfecto:", payload);
 
         // 5. Enviar al Backend
@@ -311,52 +346,50 @@ async function guardarCambiosPlan() {
 function renderizarGraficoDetalle(plan) {
     const canvas = document.getElementById('graficaProgresoDona');
     if (!canvas) return;
-    
+
     const existingChart = Chart.getChart(canvas);
     if (existingChart) existingChart.destroy();
 
     const ctx = canvas.getContext('2d');
+
     const distribucion = plan.distribucion_gastos || {};
-    
-    let valorExtra = 0;
-    if(plan.gasto_extraordinario) {
-         valorExtra = (typeof plan.gasto_extraordinario === 'object') 
-                      ? (plan.gasto_extraordinario.monto || 0) 
-                      : parseFloat(plan.gasto_extraordinario);
-    }
+    const ahorro = parseFloat(plan.ahorro_deseado || 0);
 
-    const labels = [...Object.keys(distribucion), 'Ahorro', 'Gasto Extra'];
-    const data = [...Object.values(distribucion), plan.ahorro_deseado, valorExtra];
+    // No incluimos gasto extra en la gráfica, solo categorías y ahorro
+    const labels = [...Object.keys(distribucion), "Ahorro"];
+    const data = [...Object.values(distribucion).map(Number), ahorro];
 
-    const finalLabels = [];
-    const finalData = [];
-    data.forEach((val, i) => {
-        if(val > 0.01) {
-            finalLabels.push(labels[i]);
-            finalData.push(val);
+    const labelsFinal = [];
+    const dataFinal = [];
+
+    data.forEach((valor, i) => {
+        if (parseFloat(valor) > 0.01) {
+            labelsFinal.push(labels[i]);
+            dataFinal.push(parseFloat(valor));
         }
     });
-  
+
     new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: finalLabels,
-        datasets: [{
-          data: finalData,
-          backgroundColor: PALETA_COLORES_DONA,
-          borderColor: '#0f0f23',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { color: '#fff' } }
+        type: "doughnut",
+        data: {
+            labels: labelsFinal,
+            datasets: [{
+                data: dataFinal,
+                backgroundColor: PALETA_COLORES_DONA,
+                borderColor: "#0f0f23",
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "bottom", labels: { color: "#fff" } }
+            }
         }
-      }
     });
 }
+
 
 function mostrarAnalisis(analisis) {
     const statsContainer = document.getElementById('statsContainer'); 
@@ -396,3 +429,185 @@ function mostrarAnalisis(analisis) {
         if(recomContainer) recomContainer.style.display = 'none';
     }
 }
+
+async function guardarNuevoIngreso() {
+    const monto = parseFloat(document.getElementById("montoNuevoIngreso").value);
+
+    if (isNaN(monto) || monto <= 0) {
+        Swal.fire("Error", "Ingresa un monto válido.", "error");
+        return;
+    }
+
+    try {
+        await API.registrarIngresoExtra(planActual.id, { monto });
+
+        cerrarMiniModal("modalNuevoIngreso");
+
+        Swal.fire({
+            icon: "success",
+            title: "Ingreso registrado",
+            text: "El plan se actualizará automáticamente.",
+            background: "#15192b",
+            color: "#fff"
+        });
+
+        cargarDetallesDelPlan(); // recalcula y actualiza vista
+
+    } catch (error) {
+        Swal.fire("Error", "No se pudo registrar el ingreso.", "error");
+    }
+}
+async function guardarGastoExtra() {
+    const monto = parseFloat(document.getElementById("montoGastoExtra").value);
+
+    if (isNaN(monto) || monto <= 0) {
+        Swal.fire("Error", "Ingresa un monto válido.", "error");
+        return;
+    }
+
+    try {
+        await API.registrarGastoExtra(planActual.id, { monto });
+
+cerrarMiniModal("modalGastoExtra");
+
+// Recargar el plan DESPUÉS del registro
+        planActual = await API.obtenerPlanGestionById(planActual.id);
+
+        Swal.fire({
+            icon: "success",
+            title: "Gasto registrado",
+            text: "El plan se actualizó correctamente.",
+            background: "#15192b",
+            color: "#fff"
+        });
+
+        cargarDetallesDelPlan();
+
+    } catch (error) {
+        Swal.fire("Error", "No se pudo registrar el gasto.", "error");
+    }
+}
+
+function cerrarMiniModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = "none";
+}
+// === LISTENERS PARA ABRIR LOS MODALES ===
+window.addEventListener("DOMContentLoaded", () => {
+  
+  // Inicializaciones principales
+  cargarUsuario();
+  cargarDetallesDelPlan();
+  setupModalEdicion();
+
+  // LISTENER para abrir modal de ingreso
+  const btnIngreso = document.getElementById("btnNuevoIngreso");
+  const modalIngreso = document.getElementById("modalNuevoIngreso");
+
+  if (btnIngreso && modalIngreso) {
+      btnIngreso.addEventListener("click", () => {
+        document.getElementById("modalEditarPlan").style.display = "none";
+          modalIngreso.style.display = "flex";
+      });
+  }
+
+  // LISTENER para abrir modal de gasto extra
+  const btnGastoExtra = document.getElementById("btnGastoExtra");
+  const modalGastoExtra = document.getElementById("modalGastoExtra");
+
+if (btnGastoExtra && modalGastoExtra) {
+    btnGastoExtra.addEventListener("click", () => {
+        document.getElementById("modalEditarPlan").style.display = "none";
+        modalGastoExtra.style.display = "flex";
+    });
+}
+
+
+});
+
+//Exponer funciones al DOM
+window.guardarNuevoIngreso = guardarNuevoIngreso;
+window.guardarGastoExtra = guardarGastoExtra;
+window.cerrarMiniModal = cerrarMiniModal;
+
+
+/* ============================
+   FIX PARA MODALES INVISIBLES
+   ============================ */
+
+function abrirMiniModal(id) {
+    const m = document.getElementById(id);
+    if (!m) return;
+
+    m.style.display = "flex";   // aseguramos que se ve
+    m.style.position = "fixed";
+    m.style.top = "0";
+    m.style.left = "0";
+    m.style.width = "100%";
+    m.style.height = "100%";
+    m.style.zIndex = "9999999"; // más alto que el modal grande
+    m.style.background = "rgba(0,0,0,0.7)";
+}
+
+/* Reemplazar listeners */
+window.addEventListener("DOMContentLoaded", () => {
+
+    cargarUsuario();
+    cargarDetallesDelPlan();
+    setupModalEdicion();
+    setupEliminarPlan();
+
+    document.getElementById("btnNuevoIngreso").onclick = () => {
+        document.getElementById("modalEditarPlan").style.display = "none";
+        abrirMiniModal("modalNuevoIngreso");
+    };
+
+    document.getElementById("btnGastoExtra").onclick = () => {
+        document.getElementById("modalEditarPlan").style.display = "none";
+        abrirMiniModal("modalGastoExtra");
+    };
+});
+
+document.getElementById("btnEliminarPlan").addEventListener("click", async () => {
+
+    const confirm = await Swal.fire({
+        title: "¿Eliminar este plan?",
+        text: "Esta acción es irreversible.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ff4d4d",
+        cancelButtonColor: "#7984ff",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+        await API.eliminarPlan(planActual.id);
+
+        await Swal.fire({
+            icon: "success",
+            title: "Plan eliminado",
+            text: "Tu plan fue eliminado correctamente.",
+            background: "#15192b",
+            color: "#fff",
+            confirmButtonColor: "#7984ff"
+        });
+
+        window.location.href = "planes.html";
+
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "No se pudo eliminar el plan.",
+            background: "#15192b",
+            color: "#fff"
+        });
+    }
+});
+
+
+
+
