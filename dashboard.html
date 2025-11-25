@@ -40,68 +40,65 @@
 
   <main class="dashboard-container">
     
+    <div style="margin-bottom: 20px;">
+      <h2 style="color: #fff;">Resumen Global de Objetivos</h2>
+      <p style="color: #a0a0a0;">Así se distribuyen tus finanzas entre tus planes activos.</p>
+    </div>
+
     <section class="resumen-container">
       <div class="resumen-card">
-        <h3>Total Ingresos</h3>
-        <p id="totalIngresos" class="ingreso">$0.00</p>
+        <h3>Ingreso Mensual Total</h3>
+        <p id="cardIngresoTotal" class="ingreso" style="color: #4dff91;">$0.00</p>
       </div>
+
       <div class="resumen-card">
-        <h3>Total Gastos</h3>
-        <p id="totalGastos" class="gasto">$0.00</p>
+        <h3>Meta de Ahorro Global</h3>
+        <p id="cardMetaTotal" style="color: #7984ff;">$0.00</p>
       </div>
-      <div class="resumen-card saldo">
-        <h3>Saldo Actual</h3>
-        <p id="saldoActual">$0.00</p>
+
+      <div class="resumen-card">
+        <h3>Planes Activos</h3>
+        <p id="cardTotalPlanes" style="color: #ffce47; font-size: 2rem; font-weight: bold;">0</p>
       </div>
     </section>
 
     <div class="dashboard-graficas">
       <section class="grafica-card">
-        <h3>Desglose de Gastos</h3>
+        <h3>Distribución de Presupuesto</h3>
         <div class="chart-wrapper">
-          <canvas id="graficaGastosDona"></canvas>
+          <canvas id="graficaDistribucion"></canvas>
         </div>
       </section>
 
       <section class="grafica-card">
-        <h3>Tendencia Mensual</h3>
+        <h3>Metas por Plan (MXN)</h3>
         <div class="chart-wrapper-barras">
-          <canvas id="graficaTendencia"></canvas>
+          <canvas id="graficaMetas"></canvas>
         </div>
       </section>
     </div>
 
-    <h2>Mis Transacciones</h2>
+    <h2 style="margin-top: 30px;">Estado de mis Planes</h2>
     
-    <div class="filter-container">
-      <label for="tipoFiltro">Filtrar por tipo:</label>
-      <select id="tipoFiltro">
-        <option value="todos">Todos</option>
-        <option value="Ingreso">Ingresos</option>
-        <option value="Gasto">Gastos</option>
-      </select>
-    </div>
-
     <div class="table-container">
       <table id="transactionsTable">
         <thead>
           <tr>
-            <th>Fecha</th>
-            <th>Tipo</th>
-            <th>Monto</th>
-            <th>Categoría</th>
-            <th>Descripción</th>
+            <th>Plan</th>
+            <th>Duración</th>
+            <th>Ingreso Mensual</th>
+            <th>Meta Ahorro</th>
+            <th>Progreso Teórico</th>
           </tr>
         </thead>
-        <tbody id="transactionsBody">
-        </tbody>
+        <tbody id="planesBody">
+          </tbody>
       </table>
-      <div id="noDataMsg" style="display: none; text-align: center; padding: 20px;">
-        No hay transacciones registradas.
+      <div id="noDataMsg" style="display: none; text-align: center; padding: 20px; color: #aaa;">
+        No tienes planes creados aún. <a href="planes.html" style="color: #7984ff;">Crear uno</a>
       </div>
     </div>
   </main>
-
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="../js/dashboard.js"></script>

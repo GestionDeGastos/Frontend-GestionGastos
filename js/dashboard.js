@@ -1,7 +1,8 @@
+/* ============================================================
+   ARCHIVO: js/dashboard.js
+   ============================================================ */
 import { 
-    obtenerReporte, 
-    obtenerGastos, 
-    obtenerIngresos, 
+    obtenerPlanesGestion, 
     obtenerDatosPerfil,
     cerrarSesion,
     estaAutenticado 
@@ -10,246 +11,233 @@ import {
 // --- CONFIGURACIÓN INICIAL ---
 if (!estaAutenticado()) window.location.href = "index.html";
 
-// Instancias de las gráficas para poder destruirlas al recargar
-let chartDona = null;
-let chartBarras = null;
+// Variables para las gráficas
+let chartDistribucion = null;
+let chartMetas = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🚀 Cargando Dashboard...");
-
-    // 1. Cargar nombre del usuario
+    console.log("🚀 Iniciando Dashboard de Planes...");
+    
+    // 1. Cargar nombre de usuario
     cargarUsuario();
-
-    // 2. Configurar Fechas (Por defecto: mes actual)
-    const hoy = new Date();
-    const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1); // 1er día del mes
-    const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0); // Último día del mes
-
-    // Formato YYYY-MM-DD para el backend de Python
-    const strInicio = formatearFechaISO(primerDia);
-    const strFin = formatearFechaISO(ultimoDia);
-
-    // 3. Cargar Datos del Dashboard
-    await cargarDatosDashboard(strInicio, strFin);
-
-    // 4. Configurar Botones y Filtros
-    setupEventListeners();
+    
+    // 2. Cargar y calcular datos de los planes
+    await cargarEstadisticasPlanes();
 });
 
-/**
- * Carga toda la información visual
- */
-async function cargarDatosDashboard(inicio, fin) {
+async function cargarEstadisticasPlanes() {
     try {
-        // A. Obtener TOTALES (Endpoint de Reporte)
-        const reporte = await obtenerReporte(inicio, fin);
-        actualizarTarjetas(reporte);
+        // Obtenemos la lista de planes desde la API
+        const respuesta = await obtenerPlanesGestion();
+        
+        // Aseguramos que sea un array (por si la API devuelve {data: []} o directo [])
+        const planes = Array.isArray(respuesta) ? respuesta : (respuesta.data || []);
 
-        // B. Obtener LISTAS CRUDAS (Para Gráficas y Tabla)
-        // Como el endpoint de reporte no da categorías, traemos los datos y procesamos en JS
-        const [listaIngresos, listaGastos] = await Promise.all([
-            obtenerIngresos(),
-            obtenerGastos()
-        ]);
+        console.log(`📊 Planes cargados: ${planes.length}`);
 
-        // C. Generar Gráficas
-        generarGraficaGastos(listaGastos);
-        generarGraficaTendencia(listaIngresos, listaGastos);
+        // Si no hay planes, mostramos estado vacío
+        if (planes.length === 0) {
+            mostrarEstadoVacio();
+            return;
+        }
 
-        // D. Generar Tabla Combinada
-        generarTablaTransacciones(listaIngresos, listaGastos);
+        // --- CÁLCULOS MATEMÁTICOS ---
+        let totalIngresoMensual = 0;
+        let totalMetaAhorro = 0;
+
+        planes.forEach(plan => {
+            // Sumamos los ingresos configurados en cada plan
+            totalIngresoMensual += parseFloat(plan.ingreso_total) || 0;
+            // Sumamos las metas de ahorro de cada plan
+            totalMetaAhorro += parseFloat(plan.ahorro_deseado) || 0;
+        });
+
+        // --- ACTUALIZAR INTERFAZ ---
+        actualizarTarjetas(totalIngresoMensual, totalMetaAhorro, planes.length);
+        generarGraficaDistribucion(planes);
+        generarGraficaMetas(planes);
+        llenarTablaPlanes(planes);
+
+        // Ocultar mensaje de "sin datos" si estaba visible
+        const noData = document.getElementById("noDataMsg");
+        if(noData) noData.style.display = "none";
 
     } catch (error) {
-        console.error("Error cargando dashboard:", error);
-        // No mostrar alert intrusivo al inicio, mejor log
+        console.error("❌ Error cargando estadísticas:", error);
     }
 }
 
 // ============================================================
-//      LÓGICA DE UI (TARJETAS Y TABLA)
+//      ACTUALIZACIÓN DE UI (Tarjetas y Tabla)
 // ============================================================
 
-function actualizarTarjetas(data) {
-    // Formateador de moneda
+function actualizarTarjetas(ingreso, meta, cantidad) {
     const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 
-    // Los nombres de las keys vienen de report_service.py
-    document.getElementById("totalIngresos").textContent = formatter.format(data.total_ingresos);
-    document.getElementById("totalGastos").textContent = formatter.format(data.total_gastos);
-    document.getElementById("saldoActual").textContent = formatter.format(data.balance);
+    // Tarjeta 1: Total Ingreso Mensual (Suma de todos los planes)
+    const elIngreso = document.getElementById("cardIngresoTotal");
+    if(elIngreso) elIngreso.textContent = formatter.format(ingreso);
+
+    // Tarjeta 2: Meta Global (Suma de todos los ahorros deseados)
+    const elMeta = document.getElementById("cardMetaTotal");
+    if(elMeta) elMeta.textContent = formatter.format(meta);
+
+    // Tarjeta 3: Cantidad de Planes Activos
+    const elTotal = document.getElementById("cardTotalPlanes");
+    if(elTotal) elTotal.textContent = cantidad;
+}
+
+function llenarTablaPlanes(planes) {
+    const tbody = document.getElementById("planesBody");
+    if(!tbody) return;
     
-    // Color dinámico del saldo
-    const saldoEl = document.getElementById("saldoActual");
-    if(data.balance >= 0) {
-        saldoEl.style.color = "#2ecc71"; // Verde
-    } else {
-        saldoEl.style.color = "#e74c3c"; // Rojo
-    }
-}
-
-let transaccionesGlobales = []; // Para poder filtrar sin recargar API
-
-function generarTablaTransacciones(ingresos, gastos) {
-    // 1. Unificar arrays y normalizar datos
-    const ingresosNorm = ingresos.map(i => ({ ...i, tipo: "Ingreso", categoria: "Ingreso" }));
-    const gastosNorm = gastos.map(g => ({ ...g, tipo: "Gasto" })); // Gastos ya traen categoría
-
-    // 2. Unir y Ordenar por fecha (más reciente primero)
-    transaccionesGlobales = [...ingresosNorm, ...gastosNorm].sort((a, b) => {
-        return new Date(b.fecha) - new Date(a.fecha);
-    });
-
-    renderizarTabla(transaccionesGlobales);
-}
-
-function renderizarTabla(lista) {
-    const tbody = document.getElementById("transactionsBody");
-    const noDataMsg = document.getElementById("noDataMsg");
     tbody.innerHTML = "";
-
-    if (lista.length === 0) {
-        noDataMsg.style.display = "block";
-        return;
-    }
-    noDataMsg.style.display = "none";
-
     const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 
-    lista.forEach(item => {
+    planes.forEach(plan => {
         const tr = document.createElement("tr");
         
-        // Estilo visual para tipo
-        const claseTipo = item.tipo === "Ingreso" ? "badge-ingreso" : "badge-gasto";
-        const signo = item.tipo === "Ingreso" ? "+" : "-";
+        const ing = parseFloat(plan.ingreso_total) || 0;
+        const meta = parseFloat(plan.ahorro_deseado) || 0;
+        
+        // Barra de progreso visual (decorativa basada en duración vs meta)
+        // Simplemente mostramos una barra llena para indicar "Activo"
         
         tr.innerHTML = `
-            <td>${item.fecha}</td>
-            <td><span class="${claseTipo}">${item.tipo}</span></td>
-            <td style="font-weight:bold; color: ${item.tipo === 'Ingreso' ? '#2ecc71' : '#e74c3c'}">
-                ${signo} ${formatter.format(item.monto)}
+            <td style="font-weight: bold; color: #fff;">${plan.nombre_plan}</td>
+            <td>${plan.duracion_meses} meses</td>
+            <td style="color: #4dff91;">${formatter.format(ing)}</td>
+            <td style="color: #7984ff;">${formatter.format(meta)}</td>
+            <td>
+                <div style="background: #2a2a40; border-radius: 4px; height: 6px; width: 100%; position: relative;">
+                    <div style="background: #7984ff; height: 100%; width: 100%; border-radius: 4px;"></div>
+                </div>
+                <small style="color: #aaa;">En curso</small>
             </td>
-            <td>${item.categoria || 'General'}</td>
-            <td>${item.descripcion || '-'}</td>
         `;
         tbody.appendChild(tr);
     });
 }
 
+function mostrarEstadoVacio() {
+    const noData = document.getElementById("noDataMsg");
+    if(noData) noData.style.display = "block";
+    actualizarTarjetas(0, 0, 0);
+}
+
 // ============================================================
-//      LÓGICA DE GRÁFICAS (CHART.JS)
+//      GRÁFICAS (CHART.JS)
 // ============================================================
 
-function generarGraficaGastos(gastos) {
-    const ctx = document.getElementById('graficaGastosDona').getContext('2d');
+function generarGraficaDistribucion(planes) {
+    const ctx = document.getElementById('graficaDistribucion');
+    if(!ctx) return; // Protección por si no existe el canvas
 
-    // 1. Agrupar gastos por categoría
-    const categorias = {};
-    gastos.forEach(g => {
-        const cat = g.categoria || "Otros";
-        categorias[cat] = (categorias[cat] || 0) + g.monto;
-    });
+    // Preparamos datos: Nombres de planes y sus Ingresos Mensuales
+    const labels = planes.map(p => p.nombre_plan);
+    const data = planes.map(p => parseFloat(p.ingreso_total) || 0);
 
-    const labels = Object.keys(categorias);
-    const dataValues = Object.values(categorias);
+    if (chartDistribucion) chartDistribucion.destroy();
 
-    // Destruir anterior si existe
-    if (chartDona) chartDona.destroy();
-
-    if (labels.length === 0) {
-        // Gráfica vacía visual
-        labels.push("Sin Datos");
-        dataValues.push(1);
-    }
-
-    chartDona = new Chart(ctx, {
+    chartDistribucion = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
-                data: dataValues,
+                data: data,
                 backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                    '#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', '#ffce47', '#47ceff'
                 ],
-                borderWidth: 1
+                borderWidth: 0,
+                hoverOffset: 4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'right' }
+                legend: { position: 'right', labels: { color: '#fff' } }
             }
         }
     });
 }
 
-function generarGraficaTendencia(ingresos, gastos) {
-    const ctx = document.getElementById('graficaTendencia').getContext('2d');
+function generarGraficaMetas(planes) {
+    const ctx = document.getElementById('graficaMetas');
+    if(!ctx) return;
 
-    // Destruir anterior
-    if (chartBarras) chartBarras.destroy();
+    const labels = planes.map(p => p.nombre_plan);
+    const dataMetas = planes.map(p => parseFloat(p.ahorro_deseado) || 0);
 
-    // Agrupar por Fechas (Últimos 7 registros o días, simplificado para demo)
-    // Para simplificar visualización: Comparativa Total Ingresos vs Gastos
-    const totalI = ingresos.reduce((sum, i) => sum + i.monto, 0);
-    const totalG = gastos.reduce((sum, g) => sum + g.monto, 0);
+    if (chartMetas) chartMetas.destroy();
 
-    chartBarras = new Chart(ctx, {
+    chartMetas = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Ingresos Totales', 'Gastos Totales'],
+            labels: labels,
             datasets: [{
-                label: 'Monto (MXN)',
-                data: [totalI, totalG],
-                backgroundColor: ['#2ecc71', '#e74c3c'],
-                borderRadius: 5
+                label: 'Meta de Ahorro',
+                data: dataMetas,
+                backgroundColor: '#7984ff',
+                borderRadius: 6,
+                barThickness: 30
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { 
+                    callbacks: {
+                        label: function(context) {
+                            return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.raw);
+                        }
+                    }
+                }
+            },
             scales: {
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#2a2a40' },
+                    ticks: { color: '#aaa' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#fff' }
+                }
             }
         }
     });
 }
 
 // ============================================================
-//      UTILIDADES Y EVENTOS
+//      UTILIDADES
 // ============================================================
 
-async function cargarUsuario() {
+function cargarUsuario() {
+    const msg = document.getElementById("welcomeMsg");
+    if (!msg) return;
+
+    // Intentar leer de local storage primero
     try {
-        const perfil = await obtenerDatosPerfil();
-        const msg = document.getElementById("welcomeMsg");
-        if(msg) msg.textContent = `Hola, ${perfil.nombre}`;
-    } catch (e) { console.log("Usuario no cargado"); }
+        const localUser = JSON.parse(localStorage.getItem("usuarioActivo"));
+        if (localUser && localUser.nombre) {
+            msg.textContent = `Hola, ${localUser.nombre}`;
+            return;
+        }
+    } catch (e) {}
+
+    // Si no, pedir a API
+    obtenerDatosPerfil().then(perfil => {
+        if(perfil && perfil.nombre) {
+             msg.textContent = `Hola, ${perfil.nombre}`;
+             localStorage.setItem("usuarioActivo", JSON.stringify(perfil));
+        }
+    }).catch(e => console.warn("No se pudo cargar el perfil"));
 }
 
 function setupEventListeners() {
-    // Filtro de tabla
-    const filtro = document.getElementById("tipoFiltro");
-    filtro.addEventListener("change", (e) => {
-        const valor = e.target.value;
-        if (valor === "todos") {
-            renderizarTabla(transaccionesGlobales);
-        } else {
-            const filtrados = transaccionesGlobales.filter(item => item.tipo === valor);
-            renderizarTabla(filtrados);
-        }
-    });
-
-    // Botón Logout
     const btnLogout = document.getElementById("logoutBtn");
     if(btnLogout) btnLogout.addEventListener("click", cerrarSesion);
-}
-
-function formatearFechaISO(fecha) {
-    const d = new Date(fecha);
-    const month = '' + (d.getMonth() + 1);
-    const day = '' + d.getDate();
-    const year = d.getFullYear();
-
-    return [year, month.padStart(2, '0'), day.padStart(2, '0')].join('-');
 }
