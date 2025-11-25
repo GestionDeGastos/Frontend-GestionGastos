@@ -149,6 +149,8 @@
     border-radius: 20px;
     border: 1px solid #ffce47;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .user-summary {
@@ -233,4 +235,23 @@
 .btn-eliminar:hover {
     background: #ff5555;
     color: white;
+}
+
+
+.card-icon {
+    display: flex;           
+    align-items: center;     
+    gap: 10px;               
+    font-weight: 500;        
+    color: #e0e6ed;          
+}
+
+.folder-img, 
+.grafica-img, 
+.dollar-img {
+    width: 24px;            
+    height: 24px;
+    object-fit: contain;     
+    display: block;          
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); 
 }
