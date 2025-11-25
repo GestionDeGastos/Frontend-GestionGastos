@@ -1,6 +1,6 @@
 import CONFIG from './config.js';
 
-console.log("✅ api.js cargado correctamente");
+console.log("✅ api.js cargado correctamente (Versión Anti-Bloqueo)");
 
 /* ============================================================
     AUTENTICACIÓN
@@ -19,6 +19,20 @@ export function cerrarSesion() {
   window.location.href = "index.html";
 }
 
+// --- FUNCIÓN HELPER PARA MANEJAR ERRORES DE SESIÓN ---
+async function handleResponse(response) {
+    if (response.status === 401) {
+        console.warn("⚠️ Sesión expirada (401). Cerrando sesión...");
+        cerrarSesion(); // Redirige al login inmediatamente
+        throw new Error("Sesión expirada");
+    }
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || `Error ${response.status}: ${response.statusText}`);
+    }
+    return await response.json();
+}
+
 export async function registrarUsuario(nombre, apellido, edad, correo, password, adminKey = null) {
   try {
     const endpoint = adminKey ? "/auth/register/admin" : "/auth/register";
@@ -35,11 +49,7 @@ export async function registrarUsuario(nombre, apellido, edad, correo, password,
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Error en el registro");
-    }
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
     console.error("Error registro:", error);
     throw error;
@@ -54,9 +64,10 @@ export async function loginUsuario(correo, password) {
       body: JSON.stringify({ correo, password }),
     });
 
+    // Aquí no usamos handleResponse porque queremos manejar el token manualmente
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Error login");
+        const error = await response.json();
+        throw new Error(error.detail || "Error login");
     }
 
     const data = await response.json();
@@ -77,6 +88,7 @@ export async function obtenerPerfilUsuario(token) {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (response.status === 401) return null; // Caso especial login
   if (!response.ok) throw new Error("Error perfil");
   return await response.json();
 }
@@ -87,8 +99,7 @@ export async function obtenerDatosPerfil() {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw new Error("Error datos perfil");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function actualizarDatosPerfil(datos) {
@@ -101,8 +112,7 @@ export async function actualizarDatosPerfil(datos) {
     },
     body: JSON.stringify(datos),
   });
-  if (!response.ok) throw new Error("Error actualizar perfil");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function subirFotoPerfil(archivo) {
@@ -115,8 +125,7 @@ export async function subirFotoPerfil(archivo) {
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
   });
-  if (!response.ok) throw new Error("Error foto");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 /* ============================================================
@@ -127,8 +136,7 @@ export async function obtenerIngresos() {
   const response = await fetch(`${CONFIG.API_URL}/ingresos/`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error ingresos");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function obtenerGastos() {
@@ -136,8 +144,7 @@ export async function obtenerGastos() {
   const response = await fetch(`${CONFIG.API_URL}/gastos/`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error gastos");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 /* ============================================================
@@ -153,8 +160,7 @@ export async function crearPlanGestion(plan) {
     },
     body: JSON.stringify(plan),
   });
-  if (!response.ok) throw new Error("Error crear plan");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function obtenerPlanesGestion() {
@@ -162,8 +168,7 @@ export async function obtenerPlanesGestion() {
   const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error obtener planes");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function obtenerPlanGestionById(id) {
@@ -171,8 +176,7 @@ export async function obtenerPlanGestionById(id) {
   const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error obtener plan");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function obtenerAnalisisPlan(id) {
@@ -180,8 +184,7 @@ export async function obtenerAnalisisPlan(id) {
   const response = await fetch(`${CONFIG.API_URL}/api/plan-gestion/${id}/analisis`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error analisis");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function actualizarPlanGestion(id, datos) {
@@ -194,11 +197,7 @@ export async function actualizarPlanGestion(id, datos) {
     },
     body: JSON.stringify(datos),
   });
-  if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.detail || "Error actualizar plan");
-  }
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function eliminarPlan(id) {
@@ -207,8 +206,7 @@ export async function eliminarPlan(id) {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error eliminar plan");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 // --- FUNCIONES DE EXTRAS ---
@@ -222,8 +220,7 @@ export async function registrarIngresoExtra(planId, datos) {
     },
     body: JSON.stringify({ monto: datos.monto }),
   });
-  if (!response.ok) throw new Error("Error ingreso extra");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function registrarGastoExtra(planId, datos) {
@@ -236,12 +233,10 @@ export async function registrarGastoExtra(planId, datos) {
     },
     body: JSON.stringify({ monto: datos.monto }),
   });
-  if (!response.ok) throw new Error("Error gasto extra");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function crearGastoExtraordinarioEspecifico(datos) {
-    // Alias para compatibilidad si se usa en otro lado
     return registrarGastoExtra(datos.plan_id, { monto: datos.monto });
 }
 
@@ -253,17 +248,21 @@ export async function obtenerReporte(inicio, fin) {
   const response = await fetch(`${CONFIG.API_URL}/api/reporte?inicio=${inicio}&fin=${fin}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error reporte");
-  return await response.json();
+  return await handleResponse(response);
 }
 
-export async function obtenerDashboardAdmin() {
+export async function obtenerDashboardAdmin(inicio = null, fin = null) {
   const token = obtenerToken();
-  const response = await fetch(`${CONFIG.API_URL}/api/admin/dashboard`, {
+  let url = `${CONFIG.API_URL}/api/admin/dashboard`;
+  
+  if (inicio && fin) {
+    url += `?fecha_inicio=${inicio}&fecha_fin=${fin}`;
+  }
+
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error admin dashboard");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function obtenerListaUsuariosAdmin() {
@@ -271,8 +270,7 @@ export async function obtenerListaUsuariosAdmin() {
   const response = await fetch(`${CONFIG.API_URL}/api/admin/usuarios`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error lista usuarios");
-  return await response.json();
+  return await handleResponse(response);
 }
 
 export async function obtenerDetalleUsuarioAdmin(id) {
@@ -280,6 +278,14 @@ export async function obtenerDetalleUsuarioAdmin(id) {
   const response = await fetch(`${CONFIG.API_URL}/api/admin/usuario/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!response.ok) throw new Error("Error detalle usuario");
-  return await response.json();
+  return await handleResponse(response);
+}
+
+export async function eliminarUsuarioAdmin(id) {
+  const token = obtenerToken();
+  const response = await fetch(`${CONFIG.API_URL}/api/admin/usuarios/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return await handleResponse(response);
 }

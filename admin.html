@@ -28,46 +28,89 @@
 
         <main class="admin-content">
             
+            <h3 style="margin-top: 0; color: #b1b9ff;">Métricas Generales</h3>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="icon-box blue"><i class='bx bx-user'></i></div>
                     <div>
                         <h3>Usuarios</h3>
-                        <p id="kpiUsuarios">Cargando...</p>
+                        <p id="kpiUsuarios">--</p>
                     </div>
                 </div>
+
                 <div class="stat-card">
                     <div class="icon-box purple"><i class='bx bx-target-lock'></i></div>
                     <div>
-                        <h3>Planes Creados</h3>
-                        <p id="kpiPlanes">Cargando...</p>
+                        <h3>Planes Totales</h3>
+                        <p id="kpiPlanes">--</p>
                     </div>
                 </div>
+
                 <div class="stat-card">
-                    <div class="icon-box green"><i class='bx bx-wallet'></i></div>
+                    <div class="icon-box green"><i class='bx bx-money'></i></div>
                     <div>
-                        <h3>Ahorro Promedio</h3>
-                        <p id="kpiAhorro">Cargando...</p>
+                        <h3>Ingresos Sistema</h3>
+                        <p id="kpiIngresosTotales">--</p>
                     </div>
                 </div>
+
                 <div class="stat-card">
-                    <div class="icon-box orange"><i class='bx bx-error-circle'></i></div>
+                    <div class="icon-box orange"><i class='bx bx-trending-down'></i></div>
+                    <div>
+                        <h3>Gastos Sistema</h3>
+                        <p id="kpiGastosTotales">--</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="icon-box" style="background: rgba(255, 77, 77, 0.2); color: #ff4d4d;"><i class='bx bx-error-circle'></i></div>
                     <div>
                         <h3>Gastos Extra (Total)</h3>
-                        <p id="kpiExtra">Cargando...</p>
+                        <p id="kpiGastosExtra">--</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="icon-box" style="background: rgba(77, 255, 145, 0.2); color: #4dff91;"><i class='bx bx-up-arrow-alt'></i></div>
+                    <div>
+                        <h3>Ingreso Promedio/User</h3>
+                        <p id="kpiPromedioIngreso">--</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="icon-box" style="background: rgba(255, 107, 107, 0.2); color: #ff6b6b;"><i class='bx bx-down-arrow-alt'></i></div>
+                    <div>
+                        <h3>Gasto Promedio/User</h3>
+                        <p id="kpiPromedioGasto">--</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="icon-box" style="background: rgba(121, 132, 255, 0.2); color: #7984ff;"><i class='bx bx-wallet'></i></div>
+                    <div>
+                        <h3>Ahorro Promedio/User</h3>
+                        <p id="kpiPromedioAhorro">--</p>
                     </div>
                 </div>
             </div>
 
             <div class="chart-section">
-                <h3><i class='bx bx-bar-chart-square'></i> Top Categorías de Gasto (Sistema)</h3>
+                <h3><i class='bx bx-pie-chart-alt-2'></i> Top Categorías de Gasto (Global)</h3>
                 <div class="chart-container-main">
                     <canvas id="chartGlobal"></canvas>
                 </div>
             </div>
 
             <div class="table-section">
-                <h3><i class='bx bx-list-ul'></i> Gestión de Usuarios</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3><i class='bx bx-data'></i> Base de Datos de Usuarios</h3>
+                    <div class="search-box">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="buscadorUsuarios" placeholder="Buscar usuario...">
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="admin-table">
                         <thead>
@@ -75,13 +118,11 @@
                                 <th>Nombre</th>
                                 <th>Correo</th>
                                 <th>Ingresos</th>
-                                <th>Ahorro Actual</th>
                                 <th>Planes</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tablaUsuariosBody">
-                            </tbody>
+                        <tbody id="tablaUsuariosBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -97,29 +138,40 @@
             </div>
             <div class="modal-body">
                 
-                <div class="user-summary">
+                <div class="user-summary" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div class="summary-item">
-                        <small>Total Ingresos</small>
+                        <small>Ingresos Totales</small>
                         <strong id="modalIngresos" class="text-green">$0.00</strong>
                     </div>
                     <div class="summary-item">
-                        <small>Total Gastos</small>
+                        <small>Gastos Totales</small>
                         <strong id="modalGastos" class="text-red">$0.00</strong>
-                    </div>
-                    <div class="summary-item">
-                        <small>Ahorro Neto</small>
-                        <strong id="modalAhorro" class="text-blue">$0.00</strong>
                     </div>
                 </div>
 
-                <h4>Distribución de Gastos</h4>
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <span>📂 Planes Creados:</span>
+                        <strong id="modalPlanesDetail" style="color: #fff;">0</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>📊 Nivel de Uso:</span>
+                        <strong id="modalNivelUso">Calculando...</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>💰 Promedio Ingreso/Plan:</span>
+                        <strong id="modalPromedioPlan" style="color: #ffce47; font-size: 1.1em;">$0.00</strong>
+                    </div>
+                </div>
+
+                <h4>Distribución Financiera</h4>
                 <div class="modal-chart-wrapper">
                     <canvas id="chartUsuario"></canvas>
                 </div>
 
                 <div class="extra-info">
-                    <p><strong>Fecha Registro:</strong> <span id="modalFecha"></span></p>
-                    <p><strong>Planes Activos:</strong> <span id="modalPlanes"></span></p>
+                    <p><strong>Correo:</strong> <span id="modalCorreo"></span></p>
+                    <p style="font-size: 0.8em; opacity: 0.6;">ID: <span id="modalId"></span></p>
                 </div>
             </div>
         </div>
