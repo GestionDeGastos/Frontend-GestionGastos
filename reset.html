@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINTRACK - Restablecer Contraseña</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body class="bg-login">
+
+  <div class="recuperar-container">
+
+    <h1>FINTRACK <img src="../png/flecha.png" class="logo-arrow"></h1>
+
+    <div class="recuperar-box">
+
+      <h2>Restablecer Contraseña</h2>
+
+      <form id="resetForm">
+
+        <label>Nueva Contraseña</label>
+        <input id="newPass" class="reset-input" type="password" placeholder="Nueva contraseña" required>
+
+        <label>Confirmar Contraseña</label>
+        <input id="confirmPass" class="reset-input" type="password" placeholder="Confirmar contraseña" required>
+
+        <button type="submit" class="btn">Guardar Nueva Contraseña</button>
+
+      </form>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script type="module" src="../js/reset.js"></script>
+
+</body>
+</html>

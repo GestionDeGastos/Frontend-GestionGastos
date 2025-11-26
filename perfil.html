@@ -19,22 +19,18 @@
     </div>
 </header>
 
-<!-- MENU HAMBURGUESA -->
+<!-- MENÚ HAMBURGUESA -->
 <div id="menuToggle" class="menu-toggle">
     <span></span><span></span><span></span>
 </div>
 
 <!-- MENÚ LATERAL -->
-  <nav id="sideMenu" class="side-menu">
+<nav id="sideMenu" class="side-menu">
     <a href="inicio.html"><i class='bx bx-grid-alt'></i> Inicio</a>
-    
     <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
-    
     <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
-    
     <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
-  </nav>
-
+</nav>
 
 <div id="menuOverlay" class="menu-overlay"></div>
 
@@ -55,9 +51,9 @@
             <input type="file" id="fileFoto" style="display:none" accept="image/*">
         </div>
 
-        <!-- FORM -->
+        <!-- FORMULARIO -->
         <div class="perfil-info">
-            
+
             <div class="perfil-item">
                 <label>Correo</label>
                 <input id="correo" disabled>
@@ -73,20 +69,45 @@
                 <input id="apellido">
             </div>
 
-            <div class="perfil-item">
-                <label>Nueva Contraseña</label>
-                <input type="password" id="password">
-            </div>
-
         </div>
 
+        <!-- BOTONES -->
         <button id="btnGuardar" class="btn-guardar">
             GUARDAR CAMBIOS
+        </button>
+
+        <button id="btnOpenPassword" class="btn-password">
+            Cambiar Contraseña
         </button>
 
     </div>
 </div>
 
+<!-- contraseña -->
+<div id="modalPassword" class="modal-password" style="z-index:999999999999;">
+    <div class="modal-content-password">
+
+        <h2>Cambiar Contraseña</h2>
+
+        <label>Contraseña Actual</label>
+        <input type="password" id="oldPassword">
+
+        <label>Nueva Contraseña</label>
+        <input type="password" id="newPassword">
+
+        <label>Confirmar Contraseña</label>
+        <input type="password" id="confirmPassword">
+
+        <div class="modal-buttons">
+            <button id="btnCancelPassword" class="btn-cancel-pass">Cancelar</button>
+            <button id="btnSavePassword" class="btn-save-pass">Guardar</button>
+        </div>
+
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- JS PRINCIPAL -->
 <script src="../js/perfil.js" type="module"></script>
 
 <script>
@@ -94,12 +115,13 @@ const toggle = document.getElementById("menuToggle");
 const menu = document.getElementById("sideMenu");
 const overlay = document.getElementById("menuOverlay");
 
-toggle.addEventListener("click",()=>{
+toggle.addEventListener("click", () => {
     toggle.classList.toggle("open");
     menu.classList.toggle("open");
     overlay.classList.toggle("open");
 });
-overlay.addEventListener("click",()=>{
+
+overlay.addEventListener("click", () => {
     toggle.classList.remove("open");
     menu.classList.remove("open");
     overlay.classList.remove("open");
