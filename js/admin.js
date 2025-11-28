@@ -105,32 +105,61 @@ async function cargarTablaUsuarios() {
 
 function renderizarFilas(lista) {
     const tbody = document.getElementById("tablaUsuariosBody");
+    if(!tbody) return;
     tbody.innerHTML = "";
-    if(lista.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center">Sin datos</td></tr>`; return; }
     
+    if(lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; opacity:0.6;">No se encontraron resultados</td></tr>`;
+        return;
+    }
+
     const fmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 
     lista.forEach(user => {
         const tr = document.createElement("tr");
+        tr.id = `fila-${user.id}`; 
+        const emailMostrar = user.emailReal || '<span style="opacity:0.7">Cargando...</span>';
+        const planesMostrar = (user.planesReal !== undefined) ? user.planesReal : 0;
+
+        const estiloPlanes = (user.planesReal > 0) ? "font-weight:bold; color:#4dff91;" : "";
+        const estiloEmail = (user.emailReal && user.emailReal !== "Sin email") ? "color:#fff;" : "font-size:0.9em; opacity:0.8;";
+
         tr.innerHTML = `
             <td>${user.nombre}</td>
-            <td id="email-${user.id}" style="opacity:0.7">Cargando...</td>
+            <td id="email-${user.id}" class="td-email" style="${estiloEmail}">${emailMostrar}</td>
+            
             <td style="color:#4dff91">${fmt.format(user.total_ingresos || 0)}</td>
-            <td id="planes-${user.id}">0</td>
+            
+            <td id="planes-${user.id}" class="td-planes" style="${estiloPlanes}">${planesMostrar}</td>
+            
             <td>
-                <button class="btn-ver" onclick="window.verDetalle('${user.id}')"><i class='bx bx-search'></i></button>
-                <button class="btn-eliminar" onclick="window.eliminar('${user.id}')" style="margin-left:5px; color:#ff6b6b; background:none; border:1px solid #ff6b6b; border-radius:5px; cursor:pointer;"><i class='bx bx-trash'></i></button>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-ver" onclick="window.verDetalle('${user.id}')" title="Ver Estadísticas">
+                        <i class='bx bx-search'></i>
+                    </button>
+                    <button class="btn-eliminar" onclick="window.eliminar('${user.id}')" title="Eliminar" style="border: 1px solid #ff5555; color: #ff5555; background: transparent; border-radius: 5px; cursor: pointer;">
+                        <i class='bx bx-trash'></i>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-function filtrarTablaUsuarios(txt) {
-    const term = txt.toLowerCase();
+function filtrarTablaUsuarios(texto) {
+    if (!texto || texto.trim() === "") {
+        renderizarFilas(usuariosGlobales);
+        return;
+    }
+    const textoBajo = texto.trim().toLowerCase();
+
     const filtrados = usuariosGlobales.filter(u => 
-        u.nombre.toLowerCase().includes(term) || (u.emailReal && u.emailReal.toLowerCase().includes(term))
+        (u.nombre && u.nombre.toLowerCase().includes(textoBajo)) || 
+        (u.emailReal && u.emailReal.toLowerCase().includes(textoBajo)) ||
+        (u.email && u.email.toLowerCase().includes(textoBajo))
     );
+
     renderizarFilas(filtrados);
 }
 

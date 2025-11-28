@@ -293,12 +293,34 @@ async function cargarPlanes() {
       const ing = parseFloat(plan.ingreso_total).toLocaleString('es-MX', {style:'currency', currency:'MXN'});
       const aho = parseFloat(plan.ahorro_deseado || 0).toLocaleString('es-MX', {style:'currency', currency:'MXN'});
 
+      // NUEVO HTML CON ICONOS Y GRID
       planCard.innerHTML = `
-        <h3>${plan.nombre_plan}</h3>
-        <p class="plan-monto">Ingreso: ${ing}</p>
-        <p class="plan-ahorro">Ahorro Meta: ${aho}</p>
-        <p class="plan-duracion">Duración: ${plan.duracion_meses} meses</p>
-        <a href="plan-detalle.html?id=${plan.id}" class="btn btn-ver-detalle">Ver Detalle</a>
+        <div class="plan-header">
+            <h3><i class='bx bx-target-lock plan-icon-main'></i> ${plan.nombre_plan}</h3>
+        </div>
+
+        <div class="plan-stats-grid">
+            <div class="stat-item">
+                <span class="stat-label"><i class='bx bx-money icon-ingreso'></i> Ingreso Mensual</span>
+                <span class="stat-value">${ing}</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label"><i class='bx bx-piggy-bank icon-ahorro'></i> Meta Ahorro</span>
+                <span class="stat-value">${aho}</span>
+            </div>
+
+            <div class="stat-item" style="grid-column: span 2; margin-top: 5px;">
+                <span class="stat-label"><i class='bx bx-time-five icon-tiempo'></i> Duración Estimada</span>
+                <span class="stat-value" style="font-size: 1rem; opacity: 0.9;">
+                    ${plan.duracion_meses} meses
+                </span>
+            </div>
+        </div>
+
+        <a href="plan-detalle.html?id=${plan.id}" class="btn-ver-detalle">
+            Ver Detalle <i class='bx bx-right-arrow-alt'></i>
+        </a>
       `;
       planesGrid.appendChild(planCard);
     });
