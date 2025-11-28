@@ -241,8 +241,16 @@ export async function crearGastoExtraordinarioEspecifico(datos) {
 }
 
 /* ============================================================
-    ADMIN Y REPORTES
+    DASHBOARD Y REPORTES
    ============================================================ */
+export async function obtenerDashboardUsuario() {
+  const token = obtenerToken();
+  const response = await fetch(`${CONFIG.API_URL}/dashboard/`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return await handleResponse(response);
+}
+
 export async function obtenerReporte(inicio, fin) {
   const token = obtenerToken();
   const response = await fetch(`${CONFIG.API_URL}/api/reporte?inicio=${inicio}&fin=${fin}`, {

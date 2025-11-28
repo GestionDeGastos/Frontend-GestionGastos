@@ -186,6 +186,13 @@
 .search-box {
     position: relative;
     width: 250px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 300px;
+    padding: auto;
 }
 
 .search-box input {

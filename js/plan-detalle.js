@@ -211,12 +211,21 @@ async function guardarCambiosPlan() {
    ========================================= */
 function abrirMiniModal(id) {
     const m = document.getElementById(id);
-    if (m) m.style.display = "flex";
+    if (m) {
+        const inputs = m.querySelectorAll("input");
+        inputs.forEach(input => input.value = "");
+        
+        m.style.display = "flex";
+    }
 }
 
 function cerrarMiniModal(id) {
     const m = document.getElementById(id);
-    if (m) m.style.display = "none";
+    if (m) {
+        m.style.display = "none";
+        const inputs = m.querySelectorAll("input");
+        inputs.forEach(input => input.value = "");
+    }
 }
 
 async function guardarNuevoIngreso() {

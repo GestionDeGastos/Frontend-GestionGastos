@@ -1,3 +1,6 @@
+/* =========================================
+   ESTILOS GENERALES DE PESTAÑAS Y FORMULARIO
+   ========================================= */
 .plan-tabs-container {
     display: flex;
     gap: 10px;
@@ -88,7 +91,7 @@ select {
     outline: none;
     font-size: 1rem;
     font-family: 'Poppins', sans-serif;
-    box-sizing: border-box; /* Importante */
+    box-sizing: border-box;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -103,7 +106,7 @@ select:focus {
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1); /* Invierte el color del icono (de negro a blanco) */
+    filter: invert(1);
     cursor: pointer;
     opacity: 0.8;
 }
@@ -111,8 +114,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
 }
 
-/* Estilo para el texto "placeholder" de la fecha (ej. mm/dd/yyyy) */
-/* (Tu input::placeholder ya cubre esto, pero por si acaso) */
 input[type="date"]:invalid {
     color: rgba(255, 255, 255, 0.4);
 }
@@ -165,18 +166,22 @@ input[type="date"]:invalid {
     display: none;
 }
 
-/*Ver mis planes*/
+/* =========================================
+   SECCIÓN: VER MIS PLANES (GRID Y TARJETAS NUEVAS)
+   ========================================= */
 #seccion-ver h2 {
     color: #fff;
     text-align: center;
     margin-bottom: 1.5rem;
 }
 
-#lista-planes-container {
+#lista-planes-container, 
+.planes-grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
     align-items: start;
+    margin-top: 30px;
 }
 
 .empty-state {
@@ -188,56 +193,106 @@ input[type="date"]:invalid {
     border-radius: 12px;
 }
 
+/* --- TARJETA MODERNA (Estilo Unificado) --- */
 .plan-card {
-    background: rgba(15, 15, 35, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 1.5rem;
+    background: #15192b; 
+    border: 1px solid rgba(121, 132, 255, 0.15);
+    border-radius: 20px;
+    padding: 25px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .plan-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     border-color: #7984ff;
+    box-shadow: 0 15px 35px rgba(121, 132, 255, 0.15);
 }
 
-.plan-card h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #7984ff;
-    margin-top: 0;
-    margin-bottom: 10px;
+/* Encabezado de la tarjeta */
+.plan-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 15px;
 }
 
-.plan-card p {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 5px;
-}
-
-.plan-card p strong {
+.plan-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
     color: #fff;
-    font-weight: 500;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Detalle del plan */
-.plan-detalle {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 1rem;
-    margin-top: 1rem;
-    border-radius: 8px;
-    display: none; 
+.plan-icon-main {
+    color: #ffce47;
+    font-size: 1.2rem;
 }
-.plan-detalle p {
-    font-size: 0.9rem;
-    color: #ddd;
-}
-.plan-detalle .ingreso { color: #4dff91; }
-.plan-detalle .gasto { color: #ff6b6b; }
 
-/* ESTILOS DEL MODAL */
+/* Grid de Estadísticas Internas */
+.plan-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #a0aec0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Colores de Iconos */
+.icon-ingreso { color: #4dff91; }
+.icon-ahorro { color: #7984ff; }
+.icon-tiempo { color: #bd93f9; }
+
+/* Botón Ver Detalle */
+.btn-ver-detalle {
+    background: linear-gradient(90deg, #7984ff, #5d69ff);
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-ver-detalle:hover {
+    background: linear-gradient(90deg, #8a93ff, #6e7aff);
+    box-shadow: 0 5px 15px rgba(121, 132, 255, 0.4);
+}
+
+/* --- ESTILOS DE MODALES --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -246,13 +301,22 @@ input[type="date"]:invalid {
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
-    display: flex;
+    
+    /* CAMBIO AQUÍ: Oculto por defecto */
+    display: none; 
+    
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    
+    /* Animación de opacidad (opcional, funciona mejor con clases) */
     opacity: 0;
     transition: opacity 0.3s ease;
-    pointer-events: none;
+}
+
+.modal-overlay[style*="display: flex"] {
+    opacity: 1;
+    pointer-events: all;
 }
 
 .modal-overlay:not(.hidden) {
@@ -287,9 +351,7 @@ input[type="date"]:invalid {
     cursor: pointer;
     transition: color 0.3s ease;
 }
-.modal-cerrar:hover {
-    color: #fff;
-}
+.modal-cerrar:hover { color: #fff; }
 
 .modal-header {
     text-align: center;
@@ -328,37 +390,7 @@ input[type="date"]:invalid {
     width: 120px; 
 }
 
-
-@media (max-width: 768px) {
-    .dashboard-header {
-        padding: 15px 20px;
-    }
-    .plan-tabs-container {
-        flex-direction: column;
-    }
-    .form-container {
-        padding: 2rem 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .plan-tab {
-        font-size: 0.9rem;
-    }
-    .form-row {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-    .modal-contenido {
-        padding: 1.5rem;
-        width: 95%;
-    }
-    .modal-header h2 {
-        font-size: 1.3rem;
-    }
-}
-
-/* ===== MODALES PEQUEÑOS (INGRESO EXTRA / GASTO EXTRA) ===== */
+/* Modales Pequeños */
 .modal-small {
     position: fixed !important;
     top: 0;
@@ -371,4 +403,17 @@ input[type="date"]:invalid {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(4px);
+}
+
+@media (max-width: 768px) {
+    .dashboard-header { padding: 15px 20px; }
+    .plan-tabs-container { flex-direction: column; }
+    .form-container { padding: 2rem 1.5rem; }
+}
+
+@media (max-width: 480px) {
+    .plan-tab { font-size: 0.9rem; }
+    .form-row { flex-direction: column; gap: 1.5rem; }
+    .modal-contenido { padding: 1.5rem; width: 95%; }
+    .modal-header h2 { font-size: 1.3rem; }
 }
