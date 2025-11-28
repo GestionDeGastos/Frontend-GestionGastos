@@ -179,7 +179,11 @@ async function guardarCambiosPlan() {
     let suma = 0;
 
     inputs.forEach(i => {
-        const val = parseFloat(i.value) || 0;
+        const val = parseFloat(i.value);
+
+        if (isNaN(val) || val < 0) {
+            return Swal.fire("Error", "Los gastos no pueden ser negativos.", "error");
+        }
         montos[i.name.replace("cat_", "")] = val;
         suma += val;
     });
@@ -218,7 +222,13 @@ function cerrarMiniModal(id) {
 async function guardarNuevoIngreso() {
     const input = document.getElementById("montoNuevoIngreso");
     const monto = parseFloat(input.value);
-    if (!monto || monto <= 0) return Swal.fire("Error", "Monto inválido", "warning");
+   if (isNaN(monto)) {
+    return Swal.fire("Error", "Debes ingresar un número válido.", "error");
+    }
+
+if (monto <= 0) {
+    return Swal.fire("Error", "El monto debe ser mayor a 0.", "error");
+    }
 
     try {
         await API.registrarIngresoExtra(planActual.id, { monto });
@@ -234,7 +244,12 @@ async function guardarNuevoIngreso() {
 async function guardarGastoExtra() {
     const input = document.getElementById("montoGastoExtra");
     const monto = parseFloat(input.value);
-    if (!monto || monto <= 0) return Swal.fire("Error", "Monto inválido", "warning");
+    if (isNaN(monto)) {
+        return Swal.fire("Error", "Debes ingresar un número válido.", "error");
+    }
+    if (monto <= 0) {
+        return Swal.fire("Error", "El gasto debe ser mayor a 0.", "error");
+    }
 
     try {
         await API.registrarGastoExtra(planActual.id, { monto });

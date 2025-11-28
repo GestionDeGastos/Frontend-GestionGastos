@@ -8,6 +8,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.plan-tab');
     const secciones = document.querySelectorAll('.plan-seccion');
 
+    const ingreso = Number(document.getElementById("ingreso-total").value);
+    if (ingreso <= 0 || isNaN(ingreso)) {
+        Swal.fire("Ingreso inválido", "El ingreso mensual debe ser mayor a 0.", "error");
+        return;
+    }
+
+    const ahorroValor = Number(document.getElementById("ahorro-valor").value);
+    const ahorroTipo = document.getElementById("ahorro-tipo").value;
+
+    if (document.getElementById("desea-ahorrar").checked) {
+        if (ahorroTipo === "porcentaje" && (ahorroValor < 0 || ahorroValor > 100)) {
+            Swal.fire("Porcentaje inválido", "El porcentaje debe estar entre 0 y 100.", "error");
+            return;
+        }
+
+        if (ahorroTipo === "monto" && ahorroValor < 0) {
+            Swal.fire("Ahorro inválido", "El monto de ahorro no puede ser negativo.", "error");
+            return;
+        }
+    }
+
     // Elementos del Formulario
     const form = document.getElementById('form-crear-plan');
     const checkboxAhorrar = document.getElementById('desea-ahorrar');

@@ -38,7 +38,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btnAbrirModal) btnAbrirModal.addEventListener("click", abrirModal);
   if (btnCerrarModal) btnCerrarModal.addEventListener("click", cerrarModal);
   if (formCrearPlan) formCrearPlan.addEventListener("submit", crearNuevoPlan);
-  
+  const monto = Number(document.getElementById("planMonto").value);
+  const ahorro = Number(document.getElementById("planAhorro").value);
+  const duracion = Number(document.getElementById("planDuracion").value);
+
+
+
   if (modalOverlay) {
     modalOverlay.addEventListener("click", (e) => {
       if (e.target === modalOverlay) cerrarModal();
@@ -78,7 +83,26 @@ function validarDistribucionCreacion() {
     const ahorro = parseFloat(document.getElementById("planAhorro").value) || 0;
     const infoBox = document.getElementById("validacionCrear");
     const btnSubmit = document.getElementById("btnCrearSubmit");
+    // 🔒 VALIDAR QUE NO HAYA LETRAS NI NÚMEROS NEGATIVOS
+const inputs = document.querySelectorAll(".input-gasto-crear");
 
+for (let input of inputs) {
+    const val = input.value.trim();
+
+    // Letras u otros caracteres
+    if (val !== "" && isNaN(val)) {
+        input.value = "";
+        Swal.fire("Error", "Solo se permiten números en los gastos.", "error");
+        return;
+    }
+
+    // Negativos
+    if (Number(val) < 0) {
+        input.value = "";
+        Swal.fire("Error", "Los gastos no pueden ser negativos.", "error");
+        return;
+    }
+}
     const disponible = ingreso - ahorro;
     
     let sumaGastos = 0;
@@ -126,7 +150,35 @@ function cerrarModal() {
 // ============================================================
 async function crearNuevoPlan(e) {
   e.preventDefault();
-  
+
+  // 🔒 VALIDACIONES ANTES DE PROCESAR NADA
+  const nombre = document.getElementById("planNombre").value.trim();
+  const ingreso = parseFloat(document.getElementById("planMonto").value);
+  const ahorro = parseFloat(document.getElementById("planAhorro").value) || 0;
+  const duracion = parseInt(document.getElementById("planDuracion").value);
+
+  if (!nombre) {
+      return Swal.fire("Error", "El nombre del plan no puede estar vacío.", "error");
+  }
+
+  if (isNaN(ingreso) || ingreso <= 0) {
+      return Swal.fire("Error", "El ingreso mensual debe ser mayor a 0.", "error");
+  }
+
+  if (isNaN(ahorro) || ahorro < 0) {
+      return Swal.fire("Error", "El ahorro no puede ser negativo.", "error");
+  }
+
+  if (ahorro >= ingreso) {
+      return Swal.fire("Error", "El ahorro debe ser menor al ingreso total.", "error");
+  }
+
+  if (isNaN(duracion) || duracion <= 0 || !Number.isInteger(duracion)) {
+      return Swal.fire("Error", "La duración debe ser un número entero mayor a 0.", "error");
+  }
+
+  // Si pasa todas las validaciones, AHORA sí continúa el código 
+
   const btnSubmit = document.getElementById("btnCrearSubmit");
   const txtOriginal = btnSubmit.textContent;
   btnSubmit.disabled = true;
@@ -193,21 +245,32 @@ async function aplicarPersonalizacion(planId, ingreso, ahorro) {
 
         // 1. Calcular porcentajes
         inputs.forEach(input => {
-            const monto = parseFloat(input.value) || 0;
-            const categoria = input.dataset.cat;
+        const raw = input.value.trim();
+
+        // 🔒 VALIDACIÓN DE NÚMEROS
+        if (raw !== "" && isNaN(raw)) {
+            throw new Error("Los gastos deben contener solo números.");
+        }
+
+        const monto = parseFloat(raw) || 0;
+
+        if (monto < 0) {
+            throw new Error("Los gastos no pueden ser negativos.");
+        }
+
+        const categoria = input.dataset.cat;
+
+        if (monto > 0) {
+            let pct = (monto / disponible) * 100;
+            pct = parseFloat(pct.toFixed(4));
+
+            porcentajesCalculados[categoria] = pct;
+            sumaGastos += monto;
+            sumaPorcentajes += pct;
+        }
+    });
+
             
-            if (monto > 0) {
-                // FÓRMULA CORREGIDA: Dividir entre DISPONIBLE, no Ingreso Total
-                let pct = (monto / disponible) * 100;
-                
-                // Redondear a 4 decimales para precisión
-                pct = parseFloat(pct.toFixed(4));
-                
-                porcentajesCalculados[categoria] = pct;
-                sumaGastos += monto;
-                sumaPorcentajes += pct;
-            }
-        });
 
         // 2. Ajustar Sobrante
         const remanenteDinero = disponible - sumaGastos;

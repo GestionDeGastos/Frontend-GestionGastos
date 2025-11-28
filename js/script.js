@@ -46,6 +46,13 @@ function showAlert(icon, title, text) {
 // =============================================================
 document.getElementById("registerForm")?.addEventListener("submit", async e => {
   e.preventDefault();
+  // VALIDAR EDAD POSITIVA
+  const edadInput = document.querySelector('input[placeholder="Edad"]');
+  if (!edadInput.value || edadInput.value <= 0 || !Number.isInteger(Number(edadInput.value))) {
+      Swal.fire("Edad inválida", "La edad debe ser un número entero mayor a 0.", "error");
+    return;
+}
+
   console.log("📝 Registro iniciado");
 
   const form = e.target;
