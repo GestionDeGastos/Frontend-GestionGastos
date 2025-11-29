@@ -6,7 +6,7 @@
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <title>FINTRACK - Detalle del Plan</title>
   
-  <link rel="stylesheet" href="../css/styles.css">
+  <!-- CAMBIO: Apuntamos al único CSS unificado para esta página -->
   <link rel="stylesheet" href="../css/plan-detalle.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
@@ -24,10 +24,13 @@
   <nav id="sideMenu" class="side-menu">
     <a href="inicio.html"><i class='bx bx-grid-alt'></i> Inicio</a>
     <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
-    <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
+    <!-- Icono actualizado -->
+    <a href="planes.html"><i class='bx bx-calendar-check'></i> Planes</a>
     <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
   </nav>
-  <div id="menuOverlay" class="menu-overlay-menu"></div>
+  
+  <!-- ESTE OVERLAY AHORA TIENE EL EFECTO DE DESENFOQUE (BLUR) -->
+  <div id="menuOverlay" class="menu-overlay"></div>
 
   <main class="dashboard-container">
 
@@ -49,10 +52,13 @@
     </div>
 
     <div class="detalle-container">
+      <!-- Tarjeta Izquierda: Gráfica y Acciones -->
       <section class="grafica-card">
         <h3>Distribución de Gastos</h3>
         
-        <div class="progreso-resumen-card" id="progresoResumen"></div>
+        <div class="progreso-resumen-card" id="progresoResumen">
+             <!-- Se llena con JS -->
+        </div>
         
         <div class="acciones-rapidas">
             <button type="button" id="btnNuevoIngreso" class="btn-extra-action btn-ingreso">
@@ -68,6 +74,7 @@
         </div>
       </section>
 
+      <!-- Tarjeta Derecha: Stats y Recomendaciones -->
       <section class="analisis-stats-card">
         <h3>Análisis del Plan</h3>
         <p>Estadísticas y recomendaciones personalizadas.</p>
@@ -81,6 +88,7 @@
     </div>
   </main>
 
+  <!-- MODAL EDITAR PLAN -->
   <div id="modalEditarPlan" class="modal-overlay">
     <div class="modal-content-edit">
       <div class="modal-header-edit">
@@ -126,9 +134,10 @@
     </div>
   </div>
 
+  <!-- MODAL INGRESO EXTRA -->
   <div id="modalNuevoIngreso" class="modal-small">
-    <div class="modal-content-mini border-green">
-      <div class="modal-mini-header border-bottom-green">
+    <div class="modal-content-mini">
+      <div class="modal-mini-header">
         <h3 class="text-green">Registrar Nuevo Ingreso</h3>
         <button class="btn-close-edit" id="btnCloseIngreso">&times;</button>
       </div>
@@ -143,9 +152,10 @@
     </div>
   </div>
 
+  <!-- MODAL GASTO EXTRA -->
   <div id="modalGastoExtra" class="modal-small">
-    <div class="modal-content-mini border-red">
-      <div class="modal-mini-header border-bottom-red">
+    <div class="modal-content-mini">
+      <div class="modal-mini-header">
         <h3 class="text-red">Registrar Gasto Extra</h3>
         <button class="btn-close-edit" id="btnCloseGasto">&times;</button>
       </div>
@@ -164,7 +174,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
   
   <script>
-    /* Lógica Menú Hamburguesa (Simple) */
+    /* Lógica Menú Hamburguesa con Blur en Contenido */
     const toggle = document.getElementById("menuToggle");
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");

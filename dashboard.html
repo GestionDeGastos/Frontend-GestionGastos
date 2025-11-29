@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <title>FINTRACK - Dashboard</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body class="bg-dashboard">
   <header class="dashboard-header">
@@ -29,7 +29,7 @@
     
     <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
     
-    <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
+    <a href="planes.html"><i class='bx bx-calendar-check'></i> Planes</a>
     
     <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
   </nav>
@@ -57,21 +57,21 @@
       </div>
 
       <div class="resumen-card">
-        <h3>Gasto Promedio</h3>
+        <h3>Planes Activos</h3>
         <p id="cardTotalPlanes" style="color: #ffce47; font-size: 2rem; font-weight: bold;">$0.00</p>
       </div>
     </section>
 
     <div class="dashboard-graficas">
       <section class="grafica-card">
-        <h3>Distribución de Gastos por Categoría</h3>
+        <h3>Distribución de Ingresos por Plan</h3>
         <div class="chart-wrapper">
           <canvas id="graficaDistribucion"></canvas>
         </div>
       </section>
 
       <section class="grafica-card">
-        <h3>Gastos por Categoría (MXN)</h3>
+        <h3>Ahorro por Plan </h3>
         <div class="chart-wrapper-barras">
           <canvas id="graficaMetas"></canvas>
         </div>
