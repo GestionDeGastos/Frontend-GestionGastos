@@ -1,8 +1,4 @@
-/* ============================================================
-   ARCHIVO: js/dashboard.js - Dashboard de Usuario Optimizado
-   ============================================================ */
 import { 
-    obtenerDashboardUsuario,
     obtenerPlanesGestion, 
     obtenerDatosPerfil,
     cerrarSesion,
@@ -17,87 +13,76 @@ let chartDistribucion = null;
 let chartMetas = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🚀 Iniciando Dashboard de Usuario Optimizado...");
+    console.log("🚀 Iniciando Dashboard de Planes...");
     
     // 1. Cargar nombre de usuario
     cargarUsuario();
     
-    // 2. Cargar datos desde el backend optimizado
-    await cargarDashboardOptimizado();
-    
-    // 3. Cargar planes para la tabla de detalle
-    await cargarTablaPlanes();
+    // 2. Cargar y calcular datos de los planes
+    await cargarEstadisticasPlanes();
+
+    // 3. ACTIVAR EL BOTÓN DE CERRAR SESIÓN
+    setupEventListeners();
 });
 
-async function cargarDashboardOptimizado() {
+async function cargarEstadisticasPlanes() {
     try {
-        // ✅ USAR ENDPOINT OPTIMIZADO: GET /dashboard/
-        const data = await obtenerDashboardUsuario();
+        // Obtenemos la lista de planes desde la API
+        const respuesta = await obtenerPlanesGestion();
         
-        console.log("📊 Dashboard data:", data);
+        // Aseguramos que sea un array
+        const planes = Array.isArray(respuesta) ? respuesta : (respuesta.data || []);
 
-        // Validar que llegaron los datos
-        if (!data || !data.summary) {
-            console.warn("⚠️ No se recibieron datos del dashboard");
+        console.log(`📊 Planes cargados: ${planes.length}`);
+
+        // Si no hay planes, mostramos estado vacío
+        if (planes.length === 0) {
             mostrarEstadoVacio();
             return;
         }
 
-        const { summary, categorias_principales } = data;
+        // --- CÁLCULOS MATEMÁTICOS ---
+        let totalIngresoMensual = 0;
+        let totalMetaAhorro = 0;
 
-        // --- ACTUALIZAR TARJETAS ---
-        const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+        planes.forEach(plan => {
+            // Sumamos los ingresos configurados en cada plan
+            totalIngresoMensual += parseFloat(plan.ingreso_total) || 0;
+            // Sumamos las metas de ahorro de cada plan
+            totalMetaAhorro += parseFloat(plan.ahorro_deseado) || 0;
+        });
 
-        // Tarjeta 1: Total Ingresos
-        const elIngreso = document.getElementById("cardIngresoTotal");
-        if(elIngreso) elIngreso.textContent = formatter.format(summary.total_ingresos || 0);
+        // --- ACTUALIZAR INTERFAZ ---
+        actualizarTarjetas(totalIngresoMensual, totalMetaAhorro, planes.length);
+        generarGraficaDistribucion(planes);
+        generarGraficaMetas(planes);
+        llenarTablaPlanes(planes);
 
-        // Tarjeta 2: Ahorro Actual
-        const elMeta = document.getElementById("cardMetaTotal");
-        if(elMeta) elMeta.textContent = formatter.format(summary.ahorro_actual || 0);
-
-        // Tarjeta 3: Gasto Promedio (Como indicador de gestión)
-        const elTotal = document.getElementById("cardTotalPlanes");
-        if(elTotal) elTotal.textContent = formatter.format(summary.gasto_promedio || 0);
-
-        // --- GRÁFICAS ---
-        if (categorias_principales && categorias_principales.labels && categorias_principales.values) {
-            generarGraficaDistribucion(categorias_principales.labels, categorias_principales.values);
-            generarGraficaMetas(categorias_principales.labels, categorias_principales.values);
-        }
-
-        // Ocultar mensaje de "sin datos"
+        // Ocultar mensaje de "sin datos" si estaba visible
         const noData = document.getElementById("noDataMsg");
         if(noData) noData.style.display = "none";
 
     } catch (error) {
-        console.error("❌ Error cargando dashboard:", error);
-        mostrarEstadoVacio();
+        console.error("❌ Error cargando estadísticas:", error);
     }
 }
 
-async function cargarTablaPlanes() {
-    try {
-        // Obtenemos la lista de planes para la tabla de detalle
-        const respuesta = await obtenerPlanesGestion();
-        const planes = Array.isArray(respuesta) ? respuesta : (respuesta.data || []);
-
-        console.log(`📋 Planes cargados para tabla: ${planes.length}`);
-
-        if (planes.length === 0) {
-            return; // Ya se mostró estado vacío en cargarDashboardOptimizado
-        }
-
-        llenarTablaPlanes(planes);
-
-    } catch (error) {
-        console.error("❌ Error cargando planes:", error);
-    }
-}
-
-// ============================================================
 //      ACTUALIZACIÓN DE UI (Tarjetas y Tabla)
-// ============================================================
+function actualizarTarjetas(ingreso, meta, cantidad) {
+    const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+    // Tarjeta 1: Total Ingreso Mensual (Suma de todos los planes)
+    const elIngreso = document.getElementById("cardIngresoTotal");
+    if(elIngreso) elIngreso.textContent = formatter.format(ingreso);
+
+    // Tarjeta 2: Meta Global (Suma de todos los ahorros deseados)
+    const elMeta = document.getElementById("cardMetaTotal");
+    if(elMeta) elMeta.textContent = formatter.format(meta);
+
+    // Tarjeta 3: Cantidad de Planes Activos
+    const elTotal = document.getElementById("cardTotalPlanes");
+    if(elTotal) elTotal.textContent = cantidad;
+}
 
 function llenarTablaPlanes(planes) {
     const tbody = document.getElementById("planesBody");
@@ -111,6 +96,9 @@ function llenarTablaPlanes(planes) {
         
         const ing = parseFloat(plan.ingreso_total) || 0;
         const meta = parseFloat(plan.ahorro_deseado) || 0;
+        
+        // Barra de progreso visual (decorativa basada en duración vs meta)
+        // Simplemente mostramos una barra llena para indicar "Activo"
         
         tr.innerHTML = `
             <td style="font-weight: bold; color: #fff;">${plan.nombre_plan}</td>
@@ -131,24 +119,18 @@ function llenarTablaPlanes(planes) {
 function mostrarEstadoVacio() {
     const noData = document.getElementById("noDataMsg");
     if(noData) noData.style.display = "block";
-    
-    // Poner valores en 0
-    const elIngreso = document.getElementById("cardIngresoTotal");
-    const elMeta = document.getElementById("cardMetaTotal");
-    const elTotal = document.getElementById("cardTotalPlanes");
-    
-    if(elIngreso) elIngreso.textContent = "$0.00";
-    if(elMeta) elMeta.textContent = "$0.00";
-    if(elTotal) elTotal.textContent = "$0.00";
+    actualizarTarjetas(0, 0, 0);
 }
 
-// ============================================================
-//      GRÁFICAS (CHART.JS)
-// ============================================================
 
-function generarGraficaDistribucion(labels, values) {
+//      GRÁFICAS
+function generarGraficaDistribucion(planes) {
     const ctx = document.getElementById('graficaDistribucion');
-    if(!ctx) return;
+    if(!ctx) return; // Protección por si no existe el canvas
+
+    // Preparamos datos: Nombres de planes y sus Ingresos Mensuales
+    const labels = planes.map(p => p.nombre_plan);
+    const data = planes.map(p => parseFloat(p.ingreso_total) || 0);
 
     if (chartDistribucion) chartDistribucion.destroy();
 
@@ -157,7 +139,7 @@ function generarGraficaDistribucion(labels, values) {
         data: {
             labels: labels,
             datasets: [{
-                data: values,
+                data: data,
                 backgroundColor: [
                     '#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', '#ffce47', '#47ceff'
                 ],
@@ -169,23 +151,18 @@ function generarGraficaDistribucion(labels, values) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'right', labels: { color: '#fff' } },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
-                            return context.label + ': ' + formatter.format(context.raw);
-                        }
-                    }
-                }
+                legend: { position: 'right', labels: { color: '#fff' } }
             }
         }
     });
 }
 
-function generarGraficaMetas(labels, values) {
+function generarGraficaMetas(planes) {
     const ctx = document.getElementById('graficaMetas');
     if(!ctx) return;
+
+    const labels = planes.map(p => p.nombre_plan);
+    const dataMetas = planes.map(p => parseFloat(p.ahorro_deseado) || 0);
 
     if (chartMetas) chartMetas.destroy();
 
@@ -194,8 +171,8 @@ function generarGraficaMetas(labels, values) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Gastos por Categoría',
-                data: values,
+                label: 'Meta de Ahorro',
+                data: dataMetas,
                 backgroundColor: '#7984ff',
                 borderRadius: 6,
                 barThickness: 30
@@ -218,12 +195,7 @@ function generarGraficaMetas(labels, values) {
                 y: {
                     beginAtZero: true,
                     grid: { color: '#2a2a40' },
-                    ticks: { 
-                        color: '#aaa',
-                        callback: function(value) {
-                            return '$' + value.toLocaleString('es-MX');
-                        }
-                    }
+                    ticks: { color: '#aaa' }
                 },
                 x: {
                     grid: { display: false },
@@ -234,10 +206,8 @@ function generarGraficaMetas(labels, values) {
     });
 }
 
-// ============================================================
-//      UTILIDADES
-// ============================================================
 
+//      UTILIDADES
 function cargarUsuario() {
     const msg = document.getElementById("welcomeMsg");
     if (!msg) return;
@@ -260,6 +230,7 @@ function cargarUsuario() {
     }).catch(e => console.warn("No se pudo cargar el perfil"));
 }
 
-// Setup logout
-const btnLogout = document.getElementById("logoutBtn");
-if(btnLogout) btnLogout.addEventListener("click", cerrarSesion);
+function setupEventListeners() {
+    const btnLogout = document.getElementById("logoutBtn");
+    if(btnLogout) btnLogout.addEventListener("click", cerrarSesion);
+}
