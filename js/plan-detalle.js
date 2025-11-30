@@ -278,6 +278,22 @@ function llenarFormularioEdicion(plan) {
     inputs.forEach(input => {
         input.addEventListener("input", actualizarBarraPresupuesto);
     });
+   // VALIDACIÓN INMEDIATA NEGATIVOS
+inputs.forEach(input => {
+    input.addEventListener("input", () => {
+        const v = input.value;
+
+        if (v.includes("-")) {
+            showAlert("error", "Monto inválido", "No puedes ingresar números negativos.");
+
+            // Limpia después para permitir que Swal se muestre bien
+            setTimeout(() => {
+                input.value = "";
+                actualizarBarraPresupuesto(); 
+            }, 10);
+        }
+    });
+});
     
     // Calcular barra inicial
     actualizarBarraPresupuesto();
@@ -290,10 +306,51 @@ function actualizarBarraPresupuesto() {
     const inputs = document.querySelectorAll(".input-monto-dist");
     let sumaActual = 0;
 
-    inputs.forEach(input => {
-        const val = parseFloat(input.value);
-        if (!isNaN(val)) sumaActual += val;
-    });
+   let error = false;
+
+inputs.forEach(input => {
+    const val = parseFloat(input.value);
+
+    // VALIDACIÓN: LETRAS
+    if (input.value.trim() !== "" && isNaN(val)) {
+        input.value = "";
+        showAlert("error", "Valor inválido", "Ingresa solo números.");
+        error = true;
+        return;
+    }
+
+    // VALIDACIÓN: NEGATIVOS
+    if (input.value.startsWith("-")) {
+        showAlert("error", "Monto inválido", "No puedes ingresar números negativos.");
+        
+        // ❗ Limpia el input DESPUÉS que el modal abre, no antes
+        setTimeout(() => {
+            input.value = "";
+        }, 10);
+
+        error = true;
+        return;
+    }
+
+
+
+    if (!isNaN(val)) sumaActual += val;
+});
+
+// SI HUBO ERROR → DETENER TODO Y BLOQUEAR GUARDAR
+if (error) {
+    const btnGuardar = document.querySelector("#formEditarPlan button[type='submit']");
+    if (btnGuardar) {
+        btnGuardar.disabled = true;
+        btnGuardar.style.opacity = "0.5";
+        btnGuardar.style.cursor = "not-allowed";
+        btnGuardar.textContent = "Corrige los errores";
+    }
+
+    return;  // ESTO DETIENE actualizarBarPresupuesto COMPLETO
+}
+
+
 
     const restante = disponible - sumaActual;
 
@@ -373,8 +430,12 @@ async function guardarCambiosPlan() {
 
     for (const i of inputs) {
         const val = parseFloat(i.value);
-        if (isNaN(val) || val < 0) {
-            showAlert("error", "Error en montos", "Los gastos no pueden ser negativos.");
+        if (i.value.trim() === "" || isNaN(val)) {
+            showAlert("error", "Valor inválido", "Ingresa solo números válidos en todos los campos.");
+            return;
+        }
+        if (val < 0) {
+            showAlert("error", "Monto inválido", "Los gastos no pueden ser negativos.");
             return;
         }
         montos[i.name.replace("cat_", "")] = val;
