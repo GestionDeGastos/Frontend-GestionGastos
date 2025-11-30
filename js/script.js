@@ -111,6 +111,10 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   if (!correo || !password) {
     return showAlert("warning", "Campos vacíos", "Completa todos los campos");
   }
+const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!regexCorreo.test(correo)) {
+    return showAlert("warning", "Correo inválido", "Ingresa un correo válido con formato nombre@correo.com");
+}
 
   try {
     console.log("🚀 Enviando petición...");
@@ -123,9 +127,14 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
       window.location.href = "inicio.html";
     }, 1500);
   } catch (err) {
-    console.error("❌ Error de login:", err.message);
-    showAlert("error", "Error de inicio", err.message);
-  }
+    console.error("❌ Error de login:", err);
+
+    // Forzar mensaje legible
+    const mensaje = err?.message || "Correo o contraseña incorrectos";
+
+    showAlert("error", "Error de inicio", mensaje);
+}
+
 });
 
 // =============================================================

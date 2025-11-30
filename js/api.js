@@ -65,10 +65,18 @@ export async function loginUsuario(correo, password) {
     });
 
     // Aquí no usamos handleResponse porque queremos manejar el token manualmente
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || "Error login");
-    }
+   if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+
+    // Mensaje claro para el usuario
+    let mensaje = "Error al iniciar sesión";
+
+    if (error.detail) mensaje = error.detail;
+    if (error.message) mensaje = error.message;
+
+    throw new Error(mensaje);
+}
+
 
     const data = await response.json();
     localStorage.setItem("authToken", data.access_token);

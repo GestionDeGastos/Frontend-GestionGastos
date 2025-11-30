@@ -92,17 +92,33 @@ function validarDistribucionCreacion() {
     const disponible = ingreso - ahorro;
 
     // Sumar inputs manuales
-    let sumaGastos = 0;
-    const inputs = document.querySelectorAll(".input-gasto-crear");
-    
-    for (let input of inputs) {
-        const val = parseFloat(input.value) || 0;
-        if (val < 0) { // Doble check de negativos
-             btnSubmit.disabled = true;
-             return; 
-        }
-        sumaGastos += val;
+    // Sumar inputs manuales
+let sumaGastos = 0;
+
+// 🔒 VALIDAR QUE NO HAYA CARACTERES INVALIDOS NI NÚMEROS NEGATIVOS
+const inputs = document.querySelectorAll(".input-gasto-crear");
+
+for (let input of inputs) {
+    const val = input.value.trim();
+
+    // Letras u otros caracteres
+    if (val !== "" && isNaN(val)) {
+        input.value = "";
+        Swal.fire("Error", "Solo se permiten números.", "error");
+        return;
     }
+
+    // Negativos
+    if (Number(val) < 0) {
+        input.value = "";
+        Swal.fire("Error", "Los gastos no pueden ser negativos.", "error");
+        return;
+    }
+
+    // Sumar monto válido
+    sumaGastos += Number(val) || 0;
+}
+
 
     const restante = disponible - sumaGastos;
     
@@ -262,15 +278,16 @@ async function aplicarPersonalizacion(planId, ingreso, ahorro) {
 
         // 1. Calcular porcentajes
         inputs.forEach(input => {
-        const raw = input.value.trim();
+        let val = input.value.trim();
 
-        // 🔒 VALIDACIÓN DE NÚMEROS
-        if (raw !== "" && isNaN(raw)) {
-            throw new Error("Los gastos deben contener solo números.");
+        // Letras u otros caracteres
+        if (val !== "" && isNaN(val)) {
+            throw new Error("Los gastos deben ser números válidos.");
         }
 
-        const monto = parseFloat(raw) || 0;
+        const monto = parseFloat(val) || 0;
 
+        // Negativos
         if (monto < 0) {
             throw new Error("Los gastos no pueden ser negativos.");
         }
@@ -286,6 +303,8 @@ async function aplicarPersonalizacion(planId, ingreso, ahorro) {
             sumaPorcentajes += pct;
         }
     });
+
+
 
             
 
