@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>FINTRACK – Perfil</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    
+    <link rel="stylesheet" href="../css/perfil.css">
 </head>
 
 <body class="bg-dashboard">
 
 <header class="dashboard-header">
-    <h1>FINTRACK <img src="../png/flecha.png" class="logo-arrow"></h1>
+    <h1>FINTRACK <img src="../png/flecha.png" class="logo-arrow" alt="Logo"></h1>
 
     <div class="user-info">
         <span id="welcomeMsg">Hola...</span>
@@ -28,23 +29,24 @@
 <nav id="sideMenu" class="side-menu">
     <a href="inicio.html"><i class='bx bx-grid-alt'></i> Inicio</a>
     <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
-    <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
+    <a href="planes.html"><i class='bx bx-calendar-check'></i> Planes</a>
     <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
 </nav>
 
+
 <div id="menuOverlay" class="menu-overlay"></div>
 
-<!-- PERFIL -->
-<div class="perfil-container">
+<main class="perfil-container">
     <div class="perfil-card">
 
         <!-- FOTO -->
         <div class="perfil-foto-wrapper">
-            <img id="fotoPerfil" src="../png/user-default.png" class="perfil-foto">
+            <img id="fotoPerfil" src="../png/user-default.png" class="perfil-foto" alt="Foto de Perfil">
 
             <div class="btn-lapiz" id="btnCambiarFoto">
-                <svg width="42" height="42" fill="white">
-                    <path d="M3 28l2 8 8 2 20-20-10-10L3 28zm28-18l4-4-6-6-4 4 6 6z"/>
+                <svg width="42" height="42" fill="white" viewBox="0 0 24 24">
+                   
+                   <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                 </svg>
             </div>
 
@@ -56,17 +58,17 @@
 
             <div class="perfil-item">
                 <label>Correo</label>
-                <input id="correo" disabled>
+                <input id="correo" type="email" disabled>
             </div>
 
             <div class="perfil-item">
                 <label>Nombre</label>
-                <input id="nombre">
+                <input id="nombre" type="text">
             </div>
 
             <div class="perfil-item">
                 <label>Apellido</label>
-                <input id="apellido">
+                <input id="apellido" type="text">
             </div>
 
         </div>
@@ -81,10 +83,10 @@
         </button>
 
     </div>
-</div>
+</main>
 
-<!-- contraseña -->
-<div id="modalPassword" class="modal-password" style="z-index:999999999999;">
+<!-- MODAL CONTRASEÑA -->
+<div id="modalPassword" class="modal-password">
     <div class="modal-content-password">
 
         <h2>Cambiar Contraseña</h2>
@@ -105,27 +107,32 @@
 
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- JS PRINCIPAL -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="../js/perfil.js" type="module"></script>
 
 <script>
-const toggle = document.getElementById("menuToggle");
-const menu = document.getElementById("sideMenu");
-const overlay = document.getElementById("menuOverlay");
+    // Lógica del menú hamburguesa con el nuevo efecto blur
+    const toggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+    const mainContent = document.querySelector("main"); // Opcional si usas push content
 
-toggle.addEventListener("click", () => {
-    toggle.classList.toggle("open");
-    menu.classList.toggle("open");
-    overlay.classList.toggle("open");
-});
+    if(toggle && menu && overlay){
+        toggle.addEventListener("click", () => {
+            toggle.classList.toggle("open");
+            menu.classList.toggle("open");
+            overlay.classList.toggle("open");
+            if(mainContent) mainContent.classList.toggle("push-content");
+        });
 
-overlay.addEventListener("click", () => {
-    toggle.classList.remove("open");
-    menu.classList.remove("open");
-    overlay.classList.remove("open");
-});
+        overlay.addEventListener("click", () => {
+            toggle.classList.remove("open");
+            menu.classList.remove("open");
+            overlay.classList.remove("open");
+            if(mainContent) mainContent.classList.remove("push-content");
+        });
+    }
 </script>
 
 </body>

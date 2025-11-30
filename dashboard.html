@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <title>FINTRACK - Dashboard</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body class="bg-dashboard">
   <header class="dashboard-header">
@@ -16,7 +16,7 @@
     </div>
   </header>
 
-  <!-- BOTÓN MENÚ (Hamburger Mejorado) -->
+  <!-- BOTÓN MENÚ -->
   <div id="menuToggle" class="menu-toggle">
     <span></span>
     <span></span>
@@ -26,14 +26,10 @@
   <!-- MENÚ LATERAL -->
   <nav id="sideMenu" class="side-menu">
     <a href="inicio.html"><i class='bx bx-grid-alt'></i> Inicio</a>
-    
     <a href="dashboard.html"><i class='bx bx-bar-chart-alt-2'></i> Dashboard</a>
-    
-    <a href="planes.html"><i class='bx bx-target-lock'></i> Planes</a>
-    
+    <a href="planes.html"><i class='bx bx-calendar-check'></i> Planes</a>
     <a href="perfil.html"><i class='bx bx-user'></i> Perfil</a>
   </nav>
-
 
   <!-- OVERLAY OSCURO -->
   <div id="menuOverlay" class="menu-overlay"></div>
@@ -45,6 +41,7 @@
       <p style="color: #a0a0a0;">Así se distribuyen tus finanzas entre tus planes activos.</p>
     </div>
 
+    <!-- TARJETAS DE RESUMEN -->
     <section class="resumen-container">
       <div class="resumen-card">
         <h3>Total de Ingresos</h3>
@@ -57,27 +54,29 @@
       </div>
 
       <div class="resumen-card">
-        <h3>Gasto Promedio</h3>
-        <p id="cardTotalPlanes" style="color: #ffce47; font-size: 2rem; font-weight: bold;">$0.00</p>
+        <h3>Planes Activos</h3>
+        <p id="cardTotalPlanes" style="color: #ffce47; font-size: 2rem; font-weight: bold;">0</p>
       </div>
     </section>
 
+    <!-- GRÁFICAS -->
     <div class="dashboard-graficas">
       <section class="grafica-card">
-        <h3>Distribución de Gastos por Categoría</h3>
+        <h3>Distribución de Ingresos por Plan</h3>
         <div class="chart-wrapper">
           <canvas id="graficaDistribucion"></canvas>
         </div>
       </section>
 
       <section class="grafica-card">
-        <h3>Gastos por Categoría (MXN)</h3>
+        <h3>Ahorro por Plan </h3>
         <div class="chart-wrapper-barras">
           <canvas id="graficaMetas"></canvas>
         </div>
       </section>
     </div>
 
+    <!-- TABLA DE PLANES (Limpia) -->
     <h2 style="margin-top: 30px;">Estado de mis Planes</h2>
     
     <div class="table-container">
@@ -88,39 +87,44 @@
             <th>Duración</th>
             <th>Ingreso Mensual</th>
             <th>Meta Ahorro</th>
-            <th>Progreso Teórico</th>
+            <!-- Se eliminaron las columnas de Extras -->
           </tr>
         </thead>
         <tbody id="planesBody">
-          </tbody>
+          <!-- Se llena con JS -->
+        </tbody>
       </table>
       <div id="noDataMsg" style="display: none; text-align: center; padding: 20px; color: #aaa;">
         No tienes planes creados aún. <a href="planes.html" style="color: #7984ff;">Crear uno</a>
       </div>
     </div>
   </main>
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="../js/dashboard.js"></script>
+  
   <script>
     const toggle = document.getElementById("menuToggle");
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");
     const mainContent = document.querySelector("main");
 
-    toggle.addEventListener("click", () => {
-      const isOpen = toggle.classList.toggle("open");
-      menu.classList.toggle("open");
-      overlay.classList.toggle("open");
-      mainContent.classList.toggle("push-content");
-    });
+    if(toggle && menu && overlay && mainContent) {
+        toggle.addEventListener("click", () => {
+          toggle.classList.toggle("open");
+          menu.classList.toggle("open");
+          overlay.classList.toggle("open");
+          mainContent.classList.toggle("push-content");
+        });
 
-    overlay.addEventListener("click", () => {
-      toggle.classList.remove("open");
-      menu.classList.remove("open");
-      overlay.classList.remove("open");
-      mainContent.classList.remove("push-content");
-    });
+        overlay.addEventListener("click", () => {
+          toggle.classList.remove("open");
+          menu.classList.remove("open");
+          overlay.classList.remove("open");
+          mainContent.classList.remove("push-content");
+        });
+    }
   </script>
 </body>
 </html>
