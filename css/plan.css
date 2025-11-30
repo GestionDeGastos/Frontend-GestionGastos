@@ -417,3 +417,7 @@ input[type="date"]:invalid {
     .modal-contenido { padding: 1.5rem; width: 95%; }
     .modal-header h2 { font-size: 1.3rem; }
 }
+body.no-scroll {
+    overflow: hidden !important;
+    height: 100vh; /* Asegura que no se mueva nada */
+}

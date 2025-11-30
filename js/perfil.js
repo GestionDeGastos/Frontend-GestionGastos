@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (usuario.foto_perfil) {
             imgPerfil.src = `${usuario.foto_perfil}?t=${Date.now()}`;
         }
-
+        localStorage.setItem("usuarioActivo", JSON.stringify(usuario));
     } catch (error) {
         Swal.fire({
             icon: "error",
@@ -115,6 +115,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             try {
                 await actualizarDatosPerfil(datosAActualizar);
+
+                // A) Actualizar etiqueta "Hola, Nombre" en el header
+                const welcomeMsg = document.getElementById("welcomeMsg");
+                if (welcomeMsg && datosAActualizar.nombre) {
+                     welcomeMsg.textContent = `Hola, ${datosAActualizar.nombre}`;
+                }
+
+                // B) Actualizar LocalStorage (para persistencia al navegar a otra página)
+                const usuarioLocal = JSON.parse(localStorage.getItem("usuarioActivo")) || {};
+                // Mezclamos los datos viejos con los nuevos cambios
+                const usuarioActualizado = { ...usuarioLocal, ...datosAActualizar };
+                localStorage.setItem("usuarioActivo", JSON.stringify(usuarioActualizado));
+                
 
                 Swal.fire({
                     icon: "success",

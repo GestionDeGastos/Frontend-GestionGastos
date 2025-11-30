@@ -77,72 +77,89 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ============================================================
 function validarDistribucionCreacion() {
     const check = document.getElementById("checkPersonalizar");
-    if (!check || !check.checked) return;
+    // Si no está el check, habilitamos el botón (porque el cálculo será automático)
+    if (!check || !check.checked) {
+        document.getElementById("btnCrearSubmit").disabled = false;
+        return;
+    }
 
     const ingreso = parseFloat(document.getElementById("planMonto").value) || 0;
     const ahorro = parseFloat(document.getElementById("planAhorro").value) || 0;
     const infoBox = document.getElementById("validacionCrear");
     const btnSubmit = document.getElementById("btnCrearSubmit");
-    // 🔒 VALIDAR QUE NO HAYA LETRAS NI NÚMEROS NEGATIVOS
-const inputs = document.querySelectorAll(".input-gasto-crear");
-
-for (let input of inputs) {
-    const val = input.value.trim();
-
-    // Letras u otros caracteres
-    if (val !== "" && isNaN(val)) {
-        input.value = "";
-        Swal.fire("Error", "Solo se permiten números en los gastos.", "error");
-        return;
-    }
-
-    // Negativos
-    if (Number(val) < 0) {
-        input.value = "";
-        Swal.fire("Error", "Los gastos no pueden ser negativos.", "error");
-        return;
-    }
-}
-    const disponible = ingreso - ahorro;
     
+    // Calcular Disponible
+    const disponible = ingreso - ahorro;
+
+    // Sumar inputs manuales
     let sumaGastos = 0;
-    document.querySelectorAll(".input-gasto-crear").forEach(input => {
-        sumaGastos += parseFloat(input.value) || 0;
-    });
+    const inputs = document.querySelectorAll(".input-gasto-crear");
+    
+    for (let input of inputs) {
+        const val = parseFloat(input.value) || 0;
+        if (val < 0) { // Doble check de negativos
+             btnSubmit.disabled = true;
+             return; 
+        }
+        sumaGastos += val;
+    }
 
     const restante = disponible - sumaGastos;
+    
     infoBox.style.display = "block";
     infoBox.className = "validacion-info";
 
+    // LÓGICA DE BLOQUEO ESTRICTA
     if (disponible < 0) {
         infoBox.innerHTML = `<i class='bx bx-error'></i> Error: Ahorro mayor al ingreso.`;
         infoBox.classList.add("error");
-        btnSubmit.disabled = true;
-    } else if (restante < -1) {
+        btnSubmit.disabled = true; //  BLOQUEADO
+        
+    } else if (restante < -0.01) { // Usamos -0.01 para evitar errores de redondeo decimal
         infoBox.innerHTML = `<i class='bx bx-error-circle'></i> Excedes el disponible por <strong>$${Math.abs(restante).toFixed(2)}</strong>`;
+        infoBox.classList.remove("success");
         infoBox.classList.add("error");
-        btnSubmit.disabled = true;
+        btnSubmit.disabled = true; //  BLOQUEADO POR EXCESO
+        
     } else if (restante > 1) {
         infoBox.innerHTML = `<i class='bx bx-info-circle'></i> Sobran <strong>$${restante.toFixed(2)}</strong> (Irán a 'Otros')`;
         infoBox.classList.remove("error", "success");
-        btnSubmit.disabled = false;
+        // Aquí NO bloqueamos, porque el sobrante se va a "Otros" automáticamente
+        btnSubmit.disabled = false; 
+        
     } else {
         infoBox.innerHTML = `<i class='bx bx-check-circle'></i> Distribución perfecta.`;
+        infoBox.classList.remove("error");
         infoBox.classList.add("success");
-        btnSubmit.disabled = false;
+        btnSubmit.disabled = false; //  HABILITADO
     }
 }
 
 function abrirModal() {
   const modal = document.getElementById("modalCrearPlan");
-  if (modal) modal.style.display = "flex";
+  if (modal) {
+      modal.style.display = "flex";
+      // Agregamos la clase para bloquear el scroll del fondo
+      document.body.classList.add("no-scroll");
+  }
 }
 
 function cerrarModal() {
   const modal = document.getElementById("modalCrearPlan");
-  if (modal) modal.style.display = "none";
+  if (modal) {
+      modal.style.display = "none";
+      // Quitamos la clase para reactivar el scroll del fondo
+      document.body.classList.remove("no-scroll");
+  }
+  
+  // (El resto de tu código de limpieza sigue igual)
   document.getElementById("formCrearPlan").reset();
-  document.getElementById("seccionGastosPersonalizados").style.display = "none";
+  const seccionGastos = document.getElementById("seccionGastosPersonalizados");
+  if(seccionGastos) seccionGastos.style.display = "none";
+  
+  // Limpiar validaciones visuales si existen
+  const infoBox = document.getElementById("validacionCrear");
+  if(infoBox) infoBox.style.display = "none";
 }
 
 // ============================================================

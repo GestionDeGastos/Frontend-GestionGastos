@@ -1,4 +1,4 @@
-/* =================== BASE & FUENTES =================== */
+/*  BASE y FUENTES  */
 html, body {
   margin: 0;
   padding: 0;
@@ -9,7 +9,7 @@ html, body {
   overflow-x: hidden; 
 }
 
-/* =================== FONDO (TÉCNICA DE CAPAS FIX) =================== */
+/*  FONDO  */
 .bg-dashboard {
   background: transparent;
   position: relative;
@@ -60,7 +60,7 @@ html, body {
   margin-bottom: 10px;
 }
 
-/* =================== HEADER =================== */
+/*  HEADER  */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -116,7 +116,7 @@ html, body {
   transform: translateY(-2px);
 }
 
-/* =================== MENÚ LATERAL =================== */
+/*  MENÚ LATERAL  */
 .menu-toggle {
   position: absolute;
   left: 15px;
@@ -219,7 +219,7 @@ html, body {
   transition: 0.35s ease;
 }
 
-/* =================== RESUMEN (TARJETAS) =================== */
+/*   TARJETAS */
 .resumen-container {
   display: flex;
   justify-content: space-between;
@@ -261,7 +261,7 @@ html, body {
   margin: 0;
 }
 
-/* =================== GRÁFICAS =================== */
+/*  GRÁFICAS  */
 .dashboard-graficas {
   display: flex;
   gap: 25px;
@@ -269,16 +269,16 @@ html, body {
   flex-wrap: wrap;
 }
 
-/* Estilo unificado para tarjetas de gráficas (Coordinado con Plan Detalle) */
+/* Estilo unificado para tarjetas de gráficas */
 .grafica-card {
   flex: 1;
   min-width: 300px;
-  background: rgba(15, 15, 35, 0.75); /* Fondo más oscuro y consistente */
+  background: rgba(15, 15, 35, 0.75); 
   border-radius: 22px;
   padding: 25px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.45);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1); /* Borde sutil */
+  border: 1px solid rgba(255,255,255,0.1); 
   transition: 0.35s;
   display: flex;
   flex-direction: column;
@@ -308,17 +308,17 @@ html, body {
   justify-content: center;
 }
 
-/* =================== TABLAS =================== */
+/*  TABLAS  */
 .table-container {
   width: 100%;
   background: rgba(255,255,255,0.04);
-  padding: 0; /* Quitamos padding del container para que la tabla llene todo */
+  padding: 0; 
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,0.12);
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-  overflow: hidden; /* Para respetar border-radius */
-  overflow-x: auto; /* Scroll horizontal si es necesario */
+  overflow: hidden; 
+  overflow-x: auto; 
   margin-top: 20px;
 }
 
