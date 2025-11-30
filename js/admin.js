@@ -205,8 +205,8 @@ function filtrarTablaUsuarios(texto) {
     const textoBajo = texto.trim().toLowerCase();
 
     const filtrados = usuariosGlobales.filter(u => 
-        (u.nombre && u.nombre.toLowerCase().includes(term)) || 
-        (u.email && u.email.toLowerCase().includes(term))
+        (u.nombre && u.nombre.toLowerCase().includes(textoBajo)) || 
+        (u.email && u.email.toLowerCase().includes(textoBajo))
     );
 
     renderizarFilas(filtrados);
