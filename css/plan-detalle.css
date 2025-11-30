@@ -1,4 +1,4 @@
-/* =================== BASE & FUENTES =================== */
+/*  BASE y FUENTES  */
 html, body {
   margin: 0;
   padding: 0;
@@ -9,7 +9,7 @@ html, body {
   overflow-x: hidden; 
 }
 
-/* =================== FONDO (TÉCNICA DE CAPAS FIX) =================== */
+/*  FONDO */
 .bg-dashboard {
   background: transparent;
   position: relative;
@@ -51,11 +51,11 @@ html, body {
   margin: 0 auto;
   padding: 30px 20px 50px 20px;
   position: relative;
-  z-index: 1; /* Asegura que el contenido esté sobre el fondo */
-  transition: filter 0.3s ease; /* Transición suave para el desenfoque */
+  z-index: 1; 
+  transition: filter 0.3s ease; 
 }
 
-/* =================== HEADER =================== */
+/*  HEADER  */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -111,7 +111,7 @@ html, body {
   transform: translateY(-2px);
 }
 
-/* =================== MENÚ LATERAL & EFECTO BLUR =================== */
+/*  MENÚ LATERAL */
 .menu-toggle {
   position: absolute;
   left: 15px;
@@ -193,15 +193,15 @@ html, body {
   text-shadow: 0 0 10px rgba(121, 132, 255, 0.8);
 }
 
-/* OVERLAY CON EFECTO BLUR FUERTE */
+
 .menu-overlay {
   position: fixed;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
-  background: rgba(0,0,0,0.6); /* Un poco más oscuro */
-  backdrop-filter: blur(5px);   /* Aquí está la magia del borroso */
+  background: rgba(0,0,0,0.6); 
+  backdrop-filter: blur(5px);   
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -214,12 +214,12 @@ html, body {
 .push-content {
   transform: translateX(200px);
   transition: 0.35s ease;
-  /* Opcional: Si quieres que el contenido también se desenfoque con CSS puro */
+  
   filter: blur(2px); 
 }
 
 
-/* =================== DETALLE DEL PLAN: LAYOUT =================== */
+/*  DETALLE DEL PLAN */
 
 .detalle-header {
   display: flex;
@@ -476,9 +476,7 @@ html, body {
     line-height: 1.5;
 }
 
-/* =========================================
-   MODALES (EDITAR Y ACCIONES RÁPIDAS)
-   ========================================= */
+/*    MODALES (EDITAR Y ACCIONES RÁPIDAS) */
 
 /* Overlay general para modales */
 .modal-overlay {
@@ -732,3 +730,64 @@ html, body {
     box-sizing: border-box;
 }
 .input-dark:focus { border-color: #7984ff; }
+
+.presupuesto-info {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #ccc;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.monto-destacado {
+    color: #fff;
+    font-weight: 700;
+}
+
+.barra-container {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.barra-fill {
+    height: 100%;
+    width: 0%;
+    background: #4dff91;
+    border-radius: 10px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Estados de la barra */
+.barra-fill.ok { 
+    background: #4dff91; 
+    box-shadow: 0 0 10px rgba(77, 255, 145, 0.5); 
+}
+.barra-fill.warning { 
+    background: #ffce47; 
+    box-shadow: 0 0 10px rgba(255, 206, 71, 0.5); 
+}
+.barra-fill.danger { 
+    background: #ff6b6b; 
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); 
+}
+
+/* Input con error */
+.input-error {
+    border-color: #ff6b6b !important;
+    background: rgba(255, 107, 107, 0.1) !important;
+}
+.swal2-container {
+    z-index: 999999 !important;
+}

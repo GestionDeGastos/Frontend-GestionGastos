@@ -13,77 +13,53 @@ let chartDistribucion = null;
 let chartMetas = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🚀 Iniciando Dashboard de Planes...");
-    
-    // 1. Cargar nombre de usuario
+    console.log("🚀 Iniciando Dashboard (Versión Ligera)...");
     cargarUsuario();
-    
-    // 2. Cargar y calcular datos de los planes
     await cargarEstadisticasPlanes();
-
-    // 3. ACTIVAR EL BOTÓN DE CERRAR SESIÓN
     setupEventListeners();
 });
 
 async function cargarEstadisticasPlanes() {
     try {
-        // Obtenemos la lista de planes desde la API
+        // Solo necesitamos la lista básica de planes
         const respuesta = await obtenerPlanesGestion();
         
-        // Aseguramos que sea un array
+        // Manejo robusto si la respuesta viene directa o en .data
         const planes = Array.isArray(respuesta) ? respuesta : (respuesta.data || []);
 
         console.log(`📊 Planes cargados: ${planes.length}`);
 
-        // Si no hay planes, mostramos estado vacío
         if (planes.length === 0) {
             mostrarEstadoVacio();
             return;
         }
 
-        // --- CÁLCULOS MATEMÁTICOS ---
+        // --- CÁLCULOS GLOBALES ---
         let totalIngresoMensual = 0;
         let totalMetaAhorro = 0;
 
         planes.forEach(plan => {
-            // Sumamos los ingresos configurados en cada plan
             totalIngresoMensual += parseFloat(plan.ingreso_total) || 0;
-            // Sumamos las metas de ahorro de cada plan
             totalMetaAhorro += parseFloat(plan.ahorro_deseado) || 0;
         });
 
-        // --- ACTUALIZAR INTERFAZ ---
+        // --- ACTUALIZAR UI ---
         actualizarTarjetas(totalIngresoMensual, totalMetaAhorro, planes.length);
         generarGraficaDistribucion(planes);
         generarGraficaMetas(planes);
         llenarTablaPlanes(planes);
 
-        // Ocultar mensaje de "sin datos" si estaba visible
+        // Ocultar mensaje de vacío
         const noData = document.getElementById("noDataMsg");
         if(noData) noData.style.display = "none";
 
     } catch (error) {
         console.error("❌ Error cargando estadísticas:", error);
+        mostrarEstadoVacio();
     }
 }
 
-//      ACTUALIZACIÓN DE UI (Tarjetas y Tabla)
-function actualizarTarjetas(ingreso, meta, cantidad) {
-    const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
-
-    // Tarjeta 1: Total Ingreso Mensual (Suma de todos los planes)
-    const elIngreso = document.getElementById("cardIngresoTotal");
-    if(elIngreso) elIngreso.textContent = formatter.format(ingreso);
-
-    // Tarjeta 2: Meta Global (Suma de todos los ahorros deseados)
-    const elMeta = document.getElementById("cardMetaTotal");
-    if(elMeta) elMeta.textContent = formatter.format(meta);
-
-    // Tarjeta 3: Cantidad de Planes Activos
-    const elTotal = document.getElementById("cardTotalPlanes");
-    if(elTotal) elTotal.textContent = cantidad;
-}
-
+//      TABLA LIMPIA (Solo 4 columnas, sin extras)
 function llenarTablaPlanes(planes) {
     const tbody = document.getElementById("planesBody");
     if(!tbody) return;
@@ -96,24 +72,29 @@ function llenarTablaPlanes(planes) {
         
         const ing = parseFloat(plan.ingreso_total) || 0;
         const meta = parseFloat(plan.ahorro_deseado) || 0;
-        
-        // Barra de progreso visual (decorativa basada en duración vs meta)
-        // Simplemente mostramos una barra llena para indicar "Activo"
-        
+
         tr.innerHTML = `
             <td style="font-weight: bold; color: #fff;">${plan.nombre_plan}</td>
             <td>${plan.duracion_meses} meses</td>
             <td style="color: #4dff91;">${formatter.format(ing)}</td>
             <td style="color: #7984ff;">${formatter.format(meta)}</td>
-            <td>
-                <div style="background: #2a2a40; border-radius: 4px; height: 6px; width: 100%; position: relative;">
-                    <div style="background: #7984ff; height: 100%; width: 100%; border-radius: 4px;"></div>
-                </div>
-                <small style="color: #aaa;">En curso</small>
-            </td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+//      TARJETAS DE RESUMEN
+function actualizarTarjetas(ingreso, meta, cantidad) {
+    const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+    const elIngreso = document.getElementById("cardIngresoTotal");
+    if(elIngreso) elIngreso.textContent = formatter.format(ingreso);
+
+    const elMeta = document.getElementById("cardMetaTotal");
+    if(elMeta) elMeta.textContent = formatter.format(meta);
+
+    const elTotal = document.getElementById("cardTotalPlanes");
+    if(elTotal) elTotal.textContent = cantidad;
 }
 
 function mostrarEstadoVacio() {
@@ -122,13 +103,11 @@ function mostrarEstadoVacio() {
     actualizarTarjetas(0, 0, 0);
 }
 
-
 //      GRÁFICAS
 function generarGraficaDistribucion(planes) {
     const ctx = document.getElementById('graficaDistribucion');
-    if(!ctx) return; // Protección por si no existe el canvas
+    if(!ctx) return; 
 
-    // Preparamos datos: Nombres de planes y sus Ingresos Mensuales
     const labels = planes.map(p => p.nombre_plan);
     const data = planes.map(p => parseFloat(p.ingreso_total) || 0);
 
@@ -140,9 +119,7 @@ function generarGraficaDistribucion(planes) {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: [
-                    '#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', '#ffce47', '#47ceff'
-                ],
+                backgroundColor: ['#7984ff', '#b1b9ff', '#4dff91', '#ff6b6b', '#ffce47', '#47ceff'],
                 borderWidth: 0,
                 hoverOffset: 4
             }]
@@ -206,13 +183,11 @@ function generarGraficaMetas(planes) {
     });
 }
 
-
-//      UTILIDADES
+//      UTILIDADES USUARIO
 function cargarUsuario() {
     const msg = document.getElementById("welcomeMsg");
     if (!msg) return;
 
-    // Intentar leer de local storage primero
     try {
         const localUser = JSON.parse(localStorage.getItem("usuarioActivo"));
         if (localUser && localUser.nombre) {
@@ -221,7 +196,6 @@ function cargarUsuario() {
         }
     } catch (e) {}
 
-    // Si no, pedir a API
     obtenerDatosPerfil().then(perfil => {
         if(perfil && perfil.nombre) {
              msg.textContent = `Hola, ${perfil.nombre}`;

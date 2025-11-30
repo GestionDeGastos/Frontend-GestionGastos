@@ -117,14 +117,22 @@
                     <input type="number" id="editAhorro" class="input-locked" readonly>
                 </div>
             </div>
-
+            
             <h4 class="edit-section-title">Ajustar Presupuesto</h4>
             <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">
-                Distribuye tu <strong>Ingreso Disponible</strong> entre las categorías.
+                Distribuye tu <strong>Presupuesto Disponible</strong> entre las categorías.
             </p>
             
             <div id="containerDistribucion" class="distribucion-container"></div>
-
+            <div class="presupuesto-info">
+              <div class="info-text">
+                  <span>Presupuesto Disponible (Gastos):</span>
+                  <span id="txtPresupuesto" class="monto-destacado">$0.00 de $0.00</span>
+              </div>
+              <div class="barra-container">
+                  <div id="barraPresupuesto" class="barra-fill"></div>
+              </div>
+          </div>
             <div class="modal-footer">
                 <button type="button" id="btnCancelarEdit" class="btn-cancelar">Cancelar</button>
                 <button type="submit" id="btnGuardarCambios" class="btn-guardar-cambios">Guardar Cambios</button>
